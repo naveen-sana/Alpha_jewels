@@ -1,0 +1,133 @@
+
+package com.jewellery.service;
+import com.jewellery.dto.ForgotPasswordRequest;
+import com.jewellery.dto.ResetPasswordRequest;
+import com.jewellery.dto.UserSummary;
+import com.jewellery.entity.Role;
+import java.util.Map;
+import java.util.Random;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.jewellery.dto.ChangePasswordRequest;
+import com.jewellery.dto.LoginRequest;
+import com.jewellery.entity.User;
+import com.jewellery.repository.UserRepository;
+
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+
+@Service
+public class UserService {
+	private static final long OTP_VALIDITY_MS = 10 * 60 * 1000;
+	private final Map<String, OtpEntry> otpStorage = new ConcurrentHashMap<>();
+	
+	@Autowired
+	private JavaMailSender mailSender;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
+    public User registerUser(User user) {
+		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+			throw new IllegalArgumentException("Email is already registered");
+		}
+		user.setRole(Role.USER);
+    	user.setPassword(passwordEncoder.encode(user.getPassword()));
+    	return userRepository.save(user);
+    }
+
+    public String loginUser(LoginRequest request) {
+
+        Optional<User> user = userRepository.findByEmail(request.getEmail());
+
+        if (user.isPresent() &&
+        	    passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+		    if (user.get().getRole() == null) {
+		    	user.get().setRole(Role.USER);
+		    	userRepository.save(user.get());
+		    }
+		    return jwtService.generateToken(user.get().getEmail(), user.get().getRole(), user.get().getFullName());
+        	}
+        
+
+        return "Invalid Email or Password";
+    }
+        public String
+        changePassword(ChangePasswordRequest request) {
+
+            Optional<User> user = userRepository.findByEmail(request.getEmail());
+
+            if (user.isPresent() &&
+                passwordEncoder.matches(request.getOldPassword(), user.get().getPassword())) {
+
+                user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user.get());
+
+                return "Password Changed Successfully";
+            }
+
+            return "Invalid Email or Old Password";
+        }
+        public String forgotPassword(ForgotPasswordRequest request) {
+
+            Optional<User> user = userRepository.findByEmail(request.getEmail());
+
+            if (user.isEmpty()) {
+                return "Email not found";
+            }
+
+            String otp = String.format("%06d", new Random().nextInt(999999));
+
+            otpStorage.put(request.getEmail(), new OtpEntry(otp, System.currentTimeMillis() + OTP_VALIDITY_MS));
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(request.getEmail());
+            message.setSubject("Alpha Jewels - Password Reset OTP");
+            message.setText("Your OTP is: " + otp + "\n\nIt is valid for 10 minutes.");
+
+            mailSender.send(message);
+
+            return "OTP sent successfully";
+            
+            
+            
+        }
+
+        public String resetPassword(ResetPasswordRequest request) {
+            OtpEntry entry = otpStorage.get(request.getEmail());
+            if (entry == null || entry.expiresAt() < System.currentTimeMillis() || !entry.otp().equals(request.getOtp())) {
+                return "Invalid or expired OTP";
+            }
+
+            Optional<User> user = userRepository.findByEmail(request.getEmail());
+            if (user.isEmpty()) {
+                return "Email not found";
+            }
+
+            user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user.get());
+            otpStorage.remove(request.getEmail());
+            return "Password reset successfully";
+        }
+
+        public List<UserSummary> getAllUsers() {
+            return userRepository.findAll().stream()
+                    .map(user -> new UserSummary(user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.getRole()))
+                    .toList();
+        }
+
+        private record OtpEntry(String otp, long expiresAt) { }
+        
+    }
+
