@@ -34,7 +34,9 @@ export const AuthProvider = ({ children }) => {
 
     if (storedToken && payload && !payload.isExpired) {
       setTokenState(storedToken)
-      setUser((prev) => prev || { email: payload.email, role: payload.role, fullName: payload.name })
+      const name = payload.name || payload.email || getStoredUser()?.fullName || ''
+      setStoredUser(name)
+      setUser({ email: payload.email, role: payload.role, fullName: name })
     } else if (storedToken) {
       clearAuthStorage()
       setTokenState(null)
@@ -47,7 +49,8 @@ export const AuthProvider = ({ children }) => {
   const persistSession = useCallback((jwt, userData) => {
     setToken(jwt)
     setTokenState(jwt)
-    setStoredUser(userData)
+    const userName = userData?.fullName || userData?.name || userData?.email || ''
+    setStoredUser(userName)
     setUser(userData)
   }, [])
 

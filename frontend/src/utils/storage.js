@@ -14,15 +14,22 @@ export const getStoredUser = () => {
   const raw = localStorage.getItem(STORAGE_KEYS.USER)
   if (!raw) return null
   try {
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    if (typeof parsed === 'object' && parsed !== null) {
+      const userName = parsed.fullName || parsed.name || parsed.email || ''
+      localStorage.setItem(STORAGE_KEYS.USER, userName)
+      return { fullName: userName }
+    }
+    return { fullName: parsed }
   } catch {
-    return null
+    return { fullName: raw }
   }
 }
 
 export const setStoredUser = (user) => {
   if (user) {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user))
+    const userName = typeof user === 'string' ? user : (user.fullName || user.name || user.email || '')
+    localStorage.setItem(STORAGE_KEYS.USER, userName)
   } else {
     localStorage.removeItem(STORAGE_KEYS.USER)
   }
