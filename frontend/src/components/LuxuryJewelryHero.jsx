@@ -36,48 +36,58 @@ const LuxuryJewelryHero = () => {
         style={{
           backgroundImage: `url('${currentHero.url}')`,
           backgroundSize: 'cover',
-          backgroundPosition: 'right 20% center',
-          filter: 'brightness(1.02) contrast(1.05)',
+          backgroundPosition: 'right 15% center',
+          filter: 'brightness(1.04) contrast(1.05)',
         }}
       >
-        {/* Left Dark Gradient Overlay so text is 100% legible while right portrait is 100% crystal clear */}
+        {/* Left Dark Vignette Gradient Overlay so text is 100% legible while right portrait is 100% crystal clear */}
         <div 
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{
             background: `
-              linear-gradient(90deg, rgba(5, 5, 8, 0.95) 0%, rgba(5, 5, 8, 0.75) 42%, rgba(5, 5, 8, 0.15) 75%, rgba(5, 5, 8, 0) 100%),
-              linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 100%)
+              linear-gradient(90deg, rgba(5, 5, 8, 0.96) 0%, rgba(5, 5, 8, 0.80) 45%, rgba(5, 5, 8, 0.20) 75%, rgba(5, 5, 8, 0) 100%),
+              linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.55) 100%)
             `,
           }}
         />
       </div>
 
-      {/* Main Section: Left-aligned content to never overlap face or jewelry */}
+      {/* Main Section: Left-aligned luxury framed card */}
       <main className="position-relative z-3 container py-5">
         <div className="row align-items-center">
-          <div className="col-lg-6 col-md-8 text-start">
+          <div className="col-lg-6 col-md-8 text-start ps-4 ps-md-5" style={{ borderLeft: '3px solid #d4af37' }}>
             
-            {/* Brand Header */}
+            {/* Category Tag */}
             <div className="mb-3">
-              <span className="badge bg-gold-subtle text-gold fw-bold text-uppercase px-3 py-1.5 rounded-pill mb-3 border border-gold-soft" style={{ letterSpacing: '0.25em', fontSize: '0.75rem' }}>
+              <span className="badge bg-gold-subtle text-gold fw-bold text-uppercase px-3 py-1.5 rounded-pill mb-2 border border-gold-soft" style={{ letterSpacing: '0.25em', fontSize: '0.75rem' }}>
                 HAUTE JOAILLERIE
               </span>
-              <h1 className="aurum-brand-title font-serif display-3 fw-bold text-gold-metallic tracking-ultra mb-2" style={{ letterSpacing: '0.15em', textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
+              
+              {/* Brand Title: Single line responsive serif typography */}
+              <h1 
+                className="aurum-brand-title font-serif fw-bold text-gold-metallic tracking-wider mb-2 text-nowrap" 
+                style={{ 
+                  fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', 
+                  letterSpacing: '0.12em', 
+                  textShadow: '0 4px 20px rgba(0,0,0,0.9)' 
+                }}
+              >
                 ALPHA JEWELS
               </h1>
-              <p className="aurum-brand-subtitle font-sans text-gold-light opacity-90 tracking-widest text-uppercase mb-0" style={{ letterSpacing: '0.25em', fontSize: '0.85rem' }}>
+              
+              <p className="aurum-brand-subtitle font-sans text-gold-light opacity-90 tracking-widest text-uppercase mb-0" style={{ letterSpacing: '0.22em', fontSize: '0.8rem' }}>
                 EXQUISITE CRAFTSMANSHIP · SINCE 1928
               </p>
             </div>
 
-            {/* Main Slogan */}
+            {/* Main Headline */}
             <div className="my-4">
-              <h2 className="aurum-headline font-serif display-5 fw-normal text-white tracking-wide lh-sm" style={{ letterSpacing: '0.08em', textShadow: '0 4px 15px rgba(0,0,0,0.7)' }}>
+              <h2 className="aurum-headline font-serif fw-normal text-white tracking-wide lh-sm" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', letterSpacing: '0.06em', textShadow: '0 4px 15px rgba(0,0,0,0.8)' }}>
                 TIMELESS ELEGANCE, <br />
                 <span className="text-gold-metallic fw-normal">UNRIVALED CRAFTSMANSHIP</span>
               </h2>
-              <p className="text-white-50 mt-3 fs-6" style={{ maxWidth: '480px', lineHeight: '1.7' }}>
-                Discover our signature 22K gold chokers, hand-set diamonds, and royal heritage bridal masterpieces.
+              <p className="text-white-50 mt-3 fs-6" style={{ maxWidth: '460px', lineHeight: '1.75' }}>
+                Discover our bespoke 22K gold chokers, hand-set solitaire diamonds, and royal heritage bridal masterpieces.
               </p>
             </div>
 
@@ -85,7 +95,7 @@ const LuxuryJewelryHero = () => {
             <div className="d-flex align-items-center gap-3 mt-4 pt-2">
               <Link 
                 to="/shop" 
-                className="btn aurum-btn-outline px-5 py-3 rounded-3 text-black font-sans fw-bold text-uppercase tracking-widest shadow-2xl transition-all"
+                className="btn aurum-btn-outline px-5 py-3 rounded-3 text-black font-sans fw-bold text-uppercase tracking-widest shadow-2xl transition-all d-inline-flex align-items-center gap-2"
                 style={{
                   background: 'linear-gradient(135deg, #d4af37 0%, #f7e089 50%, #b8860b 100%)',
                   border: 'none',
@@ -94,7 +104,8 @@ const LuxuryJewelryHero = () => {
                   fontSize: '0.95rem',
                 }}
               >
-                EXPLORE THE COLLECTION
+                <Sparkles size={18} className="text-black" />
+                <span>EXPLORE THE COLLECTION</span>
               </Link>
             </div>
 
