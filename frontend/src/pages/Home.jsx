@@ -17,31 +17,6 @@ const Home = () => {
       {/* Top Hero Section: Luxury Model Gold Necklace Background Banner */}
       <LuxuryJewelryHero />
 
-
-      {/* Interactive Slow-Motion Jewelry Motion Reel Section */}
-      <section className="jewelry-video-section py-5">
-        <div className="container py-4">
-          <div className="text-center mb-4">
-            <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill border border-gold bg-white shadow-sm mb-2">
-              <Eye size={16} className="text-gold-dark" />
-              <span className="text-gold-dark text-uppercase tracking-widest small fw-bold">4K Ultra HD Craftsmanship</span>
-            </div>
-            <h2 className="display-4 font-serif text-black mb-2">
-              Jewelry Craftsmanship in <span className="text-gold-dark font-italic">Slow Motion</span>
-            </h2>
-            <p className="text-muted max-width-md mx-auto fs-5" style={{ maxWidth: '680px' }}>
-              Control slow motion playback speed (0.25x - 1.0x) and experience the sparkling fire of solitaire diamonds and pure 22K gold.
-            </p>
-          </div>
-
-          <div className="row justify-content-center">
-            <div className="col-lg-10">
-              <JewelryMotionReel />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Large Featured Collections Grid (Attractive, Big Jewelry Images) */}
       <section className="section-padding py-5.5">
         <div className="container">

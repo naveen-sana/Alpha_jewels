@@ -37,16 +37,15 @@ const LuxuryJewelryHero = () => {
           backgroundImage: `url('${currentHero.url}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
-          filter: 'brightness(0.68) contrast(1.15)',
+          filter: 'brightness(0.95) contrast(1.05)',
         }}
       >
-        {/* Dark Silk & Radial Spotlight Gradient Overlay */}
+        {/* Subtle Gradient Overlay for Text Readability without darkening image */}
         <div 
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{
             background: `
-              radial-gradient(circle at 50% 50%, rgba(15, 15, 20, 0.40) 0%, rgba(5, 5, 8, 0.92) 80%),
-              linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.25) 50%, rgba(0, 0, 0, 0.95) 100%)
+              linear-gradient(180deg, rgba(0, 0, 0, 0.40) 0%, rgba(0, 0, 0, 0.10) 40%, rgba(0, 0, 0, 0.50) 100%)
             `,
           }}
         />
