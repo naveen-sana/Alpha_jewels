@@ -85,7 +85,7 @@ const LuxuryGlassmorphismHero = () => {
       <div 
         className="luxury-hero-bg position-absolute top-0 start-0 w-100 h-100"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=2000&auto=format&fit=crop')`,
+          backgroundImage: `url('/images/hero_gold_necklace_model.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center right',
           filter: 'brightness(0.72) contrast(1.1)',

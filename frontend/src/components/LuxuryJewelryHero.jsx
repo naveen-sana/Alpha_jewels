@@ -1,19 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Camera, ArrowRight } from 'lucide-react';
+
+const modelHeroImages = [
+  {
+    id: 1,
+    name: 'Regal Emerald & 22k Gold Choker',
+    url: '/images/hero_gold_necklace_model.png',
+    tag: 'Haute Joaillerie 22K',
+  },
+  {
+    id: 2,
+    name: 'Royal Heritage Gold Bridal Necklace',
+    url: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=2400&auto=format&fit=crop',
+    tag: 'Royal Heritage Edition',
+  },
+  {
+    id: 3,
+    name: 'Solitaire Diamond & Gold Collar',
+    url: 'https://images.unsplash.com/photo-1611591475281-8d2813298c4d?q=80&w=2400&auto=format&fit=crop',
+    tag: 'Contemporary Luxury',
+  },
+];
 
 const LuxuryJewelryHero = () => {
+  const [activeModel, setActiveModel] = useState(0);
+  const currentHero = modelHeroImages[activeModel];
+
   return (
     <div className="aurum-hero-container position-relative overflow-hidden w-100 min-vh-100 d-flex flex-column justify-content-between text-white bg-black">
       
-      {/* Background Image: Black Silk & Royal Diamond/Gold Necklace */}
+      {/* Background Image: Woman Model Wearing Gold Necklace */}
       <div 
-        className="aurum-hero-bg position-absolute top-0 start-0 w-100 h-100"
+        className="aurum-hero-bg position-absolute top-0 start-0 w-100 h-100 transition-all duration-700"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=2400&auto=format&fit=crop')`,
+          backgroundImage: `url('${currentHero.url}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
-          filter: 'brightness(0.70) contrast(1.15)',
+          filter: 'brightness(0.68) contrast(1.15)',
         }}
       >
         {/* Dark Silk & Radial Spotlight Gradient Overlay */}
@@ -21,7 +45,7 @@ const LuxuryJewelryHero = () => {
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{
             background: `
-              radial-gradient(circle at 50% 50%, rgba(15, 15, 20, 0.45) 0%, rgba(5, 5, 8, 0.90) 80%),
+              radial-gradient(circle at 50% 50%, rgba(15, 15, 20, 0.40) 0%, rgba(5, 5, 8, 0.92) 80%),
               linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.25) 50%, rgba(0, 0, 0, 0.95) 100%)
             `,
           }}
