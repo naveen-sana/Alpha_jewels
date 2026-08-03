@@ -51,6 +51,15 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (productId, quantity = 1) => {
     setCartError(null);
+    if (!isAuthenticated) {
+      const msg = 'Please log in to add products to your cart.';
+      setCartError(msg);
+      if (showToast) showToast(msg, 'warning');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+      return;
+    }
     try {
       const response = await apiClient.post('/api/cart/add', { productId, quantity });
       await fetchCart();
@@ -59,7 +68,7 @@ export const CartProvider = ({ children }) => {
       }
       return response.data;
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Failed to add item to cart.';
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || (err.response?.status === 403 || err.response?.status === 401 ? 'Please log in to add items to cart.' : 'Failed to add item to cart.');
       setCartError(errorMsg);
       if (showToast) {
         showToast(errorMsg, 'error');
