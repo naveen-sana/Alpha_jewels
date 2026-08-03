@@ -18,9 +18,9 @@ export const decodeJwtPayload = (token) => {
       email: payload.sub || '',
       role: payload.role || 'USER',
       name: payload.name || '',
-      issuedAt: payload.iat ? new Date(payload.iat) : null,
-      expiresAt: payload.exp ? new Date(payload.exp) : null,
-      isExpired: payload.exp ? Date.now() >= payload.exp : false,
+      issuedAt: payload.iat ? new Date(payload.iat * 1000) : null,
+      expiresAt: payload.exp ? new Date(payload.exp * 1000) : null,
+      isExpired: payload.exp ? Date.now() >= (payload.exp * 1000) : false,
     }
   } catch {
     return null
