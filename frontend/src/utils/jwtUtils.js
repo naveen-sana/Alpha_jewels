@@ -14,13 +14,16 @@ export const decodeJwtPayload = (token) => {
     const json = atob(padded)
     const payload = JSON.parse(json)
 
+    const expMs = payload.exp ? (payload.exp > 1e11 ? payload.exp : payload.exp * 1000) : null
+    const iatMs = payload.iat ? (payload.iat > 1e11 ? payload.iat : payload.iat * 1000) : null
+
     return {
       email: payload.sub || '',
       role: payload.role || 'USER',
       name: payload.name || '',
-      issuedAt: payload.iat ? new Date(payload.iat * 1000) : null,
-      expiresAt: payload.exp ? new Date(payload.exp * 1000) : null,
-      isExpired: payload.exp ? Date.now() >= (payload.exp * 1000) : false,
+      issuedAt: iatMs ? new Date(iatMs) : null,
+      expiresAt: expMs ? new Date(expMs) : null,
+      isExpired: expMs ? Date.now() >= expMs : false,
     }
   } catch {
     return null

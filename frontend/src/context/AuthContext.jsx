@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setTokenState] = useState(() => getToken())
   const [loading, setLoading] = useState(true)
 
-  const isAuthenticated = Boolean(token)
+  const isAuthenticated = Boolean(token && user)
 
   useEffect(() => {
     const storedToken = getToken()
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
       const name = payload.name || payload.email || getStoredUser()?.fullName || ''
       setStoredUser(name)
       setUser({ email: payload.email, role: payload.role, fullName: name })
-    } else if (storedToken) {
+    } else {
       clearAuthStorage()
       setTokenState(null)
       setUser(null)
