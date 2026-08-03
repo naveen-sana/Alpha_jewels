@@ -46,7 +46,12 @@ const Shop = () => {
       setTimeout(() => setAddingId(null), 800);
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Stock limit exceeded or failed to add product.');
+      const rawMsg = err.message || '';
+      if (rawMsg.includes('POST') || rawMsg.includes('supported') || rawMsg.includes('401') || rawMsg.includes('403') || rawMsg.includes('Unauthorized')) {
+        setError('Please log in to add products to your cart.');
+      } else {
+        setError(rawMsg || 'Failed to add product to cart.');
+      }
       setAddingId(null);
     }
   };

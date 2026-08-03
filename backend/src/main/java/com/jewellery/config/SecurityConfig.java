@@ -47,6 +47,11 @@ public class SecurityConfig {
 	            .anyRequest().authenticated()
 	        )
 	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	        .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+	            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+	            response.setContentType("application/json");
+	            response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Please log in to perform this action.\"}");
+	        }))
 	        .formLogin(form -> form.disable())
 	        .httpBasic(basic -> basic.disable())
 	        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
