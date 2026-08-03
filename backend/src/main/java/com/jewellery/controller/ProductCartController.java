@@ -327,20 +327,38 @@ public class ProductCartController {
     }
 
     private Long getUserIdByEmail(String email) {
-        String sql = "SELECT id FROM ecommerce_db.user WHERE email = ?";
-        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email);
-        if (result.isEmpty()) {
+        if (email == null) return null;
+        try {
+            String sql = "SELECT id FROM ecommerce_db.user WHERE LOWER(email) = LOWER(?)";
+            List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
+            if (result.isEmpty()) {
+                sql = "SELECT id FROM ecommerce_db.users WHERE LOWER(email) = LOWER(?)";
+                result = jdbcTemplate.queryForList(sql, email.trim());
+            }
+            if (result.isEmpty()) {
+                return null;
+            }
+            return ((Number) result.get(0).get("id")).longValue();
+        } catch (Exception e) {
             return null;
         }
-        return ((Number) result.get(0).get("id")).longValue();
     }
 
     private Map<String, Object> getUserInfoByEmail(String email) {
-        String sql = "SELECT id, full_name, role FROM ecommerce_db.user WHERE email = ?";
-        List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email);
-        if (result.isEmpty()) {
+        if (email == null) return null;
+        try {
+            String sql = "SELECT id, full_name, role FROM ecommerce_db.user WHERE LOWER(email) = LOWER(?)";
+            List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
+            if (result.isEmpty()) {
+                sql = "SELECT id, full_name, role FROM ecommerce_db.users WHERE LOWER(email) = LOWER(?)";
+                result = jdbcTemplate.queryForList(sql, email.trim());
+            }
+            if (result.isEmpty()) {
+                return null;
+            }
+            return result.get(0);
+        } catch (Exception e) {
             return null;
         }
-        return result.get(0);
     }
 }

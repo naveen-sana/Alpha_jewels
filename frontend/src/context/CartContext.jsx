@@ -68,10 +68,15 @@ export const CartProvider = ({ children }) => {
       }
       return response.data;
     } catch (err) {
-      let errorMsg = err.response?.data?.message || err.response?.data?.error;
-      if (!errorMsg || errorMsg.includes('POST') || errorMsg.includes('supported') || err.response?.status === 401 || err.response?.status === 403) {
+      let rawData = err.response?.data;
+      let errorMsg = typeof rawData === 'string' ? rawData : (rawData?.message || rawData?.error || err.message);
+
+      if (err.response?.status === 401 || err.response?.status === 403) {
         errorMsg = 'Please log in to add products to your cart.';
+      } else if (!errorMsg || errorMsg.includes('POST') || errorMsg.includes('supported')) {
+        errorMsg = 'Failed to add product to cart. Please try again.';
       }
+
       setCartError(errorMsg);
       if (showToast) {
         showToast(errorMsg, 'error');
