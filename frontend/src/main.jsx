@@ -9,6 +9,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import { CartProvider } from './context/CartContext.jsx'
 import { WishlistProvider } from './context/WishlistContext.jsx'
 import { ToastProvider } from './context/ToastContext.jsx'
+import { OrderProvider } from './context/OrderContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -17,7 +18,9 @@ createRoot(document.getElementById('root')).render(
         <ToastProvider>
           <CartProvider>
             <WishlistProvider>
-              <App />
+              <OrderProvider>
+                <App />
+              </OrderProvider>
             </WishlistProvider>
           </CartProvider>
         </ToastProvider>
@@ -25,3 +28,4 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </StrictMode>
 )
+

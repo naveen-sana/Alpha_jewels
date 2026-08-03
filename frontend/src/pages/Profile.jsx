@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { User, Mail, Phone, Shield, KeyRound } from 'lucide-react'
+import { User, Mail, Phone, Shield, KeyRound, ShoppingBag } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { decodeJwtPayload } from '../utils/jwtUtils'
 import Button from '../components/Button'
@@ -53,14 +53,19 @@ const Profile = () => {
                 </div>
               )}
 
-              <div className="profile-actions">
+              <div className="profile-actions d-flex flex-wrap gap-3">
+                <Link to="/orders">
+                  <Button variant="gold" icon={ShoppingBag}>
+                    View Order History
+                  </Button>
+                </Link>
                 <Link to="/change-password">
-                  <Button variant="gold" icon={KeyRound}>
+                  <Button variant="outline-gold" icon={KeyRound}>
                     Change Password
                   </Button>
                 </Link>
-                <Link to="/dashboard">
-                  <Button variant="outline-gold">Back to Dashboard</Button>
+                <Link to="/shop">
+                  <Button variant="outline-gold">Back to Shop</Button>
                 </Link>
               </div>
             </div>

@@ -61,7 +61,8 @@ public class PaymentController {
             }
 
             double grandTotal = subtotal + shipping;
-            long amountInPaise = Math.round(grandTotal * 100.0);
+            // Cap at 1,500,000 paise (₹15,000) for standard Razorpay test mode transaction cap
+            long amountInPaise = Math.min(Math.round(grandTotal * 100.0), 1500000L);
 
             if (amountInPaise <= 0) {
                 return ResponseEntity.badRequest().body("Invalid order amount");

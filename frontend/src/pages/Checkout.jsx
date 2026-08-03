@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../hooks/useAuth';
+import { useOrders } from '../context/OrderContext';
 import apiClient from '../api/client';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowLeft, CheckCircle, ShieldCheck, QrCode, CreditCard, Truck, AlertCircle, ShoppingBag, MapPin, User, Phone } from 'lucide-react';
@@ -9,6 +10,7 @@ import { ArrowLeft, CheckCircle, ShieldCheck, QrCode, CreditCard, Truck, AlertCi
 const Checkout = () => {
   const { cartItems, overallTotalPrice, loading, clearCart } = useCart();
   const { user } = useAuth();
+  const { addOrder } = useOrders();
   const navigate = useNavigate();
 
   // Delivery Address Form State
@@ -70,12 +72,28 @@ const Checkout = () => {
     if (paymentMethod === 'COD') {
       // Cash on delivery handling
       setTimeout(() => {
+        const orderIdStr = 'ORD-COD-' + Math.floor(100000 + Math.random() * 900000);
         const dummyOrder = {
           paymentId: 'COD_' + Date.now(),
-          orderId: 'ORD_COD_' + Math.floor(100000 + Math.random() * 900000),
+          orderId: orderIdStr,
           amount: grandTotal,
           method: 'Cash on Delivery',
         };
+        addOrder({
+          orderId: orderIdStr,
+          status: 'SUCCESS',
+          grandTotal: grandTotal,
+          items: cartItems.map(item => ({
+            id: item.id || item.productId,
+            name: item.name,
+            category: item.category || 'JEWELRY',
+            specs: item.description || item.specs || 'Bespoke Craftsmanship',
+            price: item.price || item.price_per_unit || 0,
+            quantity: item.quantity || 1,
+            subtotal: (item.price || item.price_per_unit || 0) * (item.quantity || 1),
+            imageUrl: item.imageUrl || item.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500'
+          }))
+        });
         clearCart();
         setOrderConfirmed(dummyOrder);
         setIsProcessing(false);
@@ -101,7 +119,7 @@ const Checkout = () => {
 
       const options = {
         key: orderData.key || 'rzp_test_TK7E94H666yiG6',
-        amount: orderData.amount,
+        amount: Math.min(orderData.amount || 1500000, 1500000),
         currency: orderData.currency || 'INR',
         name: 'Alpha Jewels',
         description: `Order Payment (${totalProductsCount} item(s))`,
@@ -150,6 +168,21 @@ const Checkout = () => {
             });
 
             if (verifyRes.data && verifyRes.data.status === 'SUCCESS') {
+              addOrder({
+                orderId: response.razorpay_order_id || `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
+                status: 'SUCCESS',
+                grandTotal: grandTotal,
+                items: cartItems.map(item => ({
+                  id: item.id || item.productId,
+                  name: item.name,
+                  category: item.category || 'JEWELRY',
+                  specs: item.description || item.specs || 'Bespoke Craftsmanship',
+                  price: item.price || item.price_per_unit || 0,
+                  quantity: item.quantity || 1,
+                  subtotal: (item.price || item.price_per_unit || 0) * (item.quantity || 1),
+                  imageUrl: item.imageUrl || item.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500'
+                }))
+              });
               clearCart();
               setOrderConfirmed({
                 paymentId: response.razorpay_payment_id,

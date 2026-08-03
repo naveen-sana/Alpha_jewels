@@ -13,6 +13,7 @@ import VerifyOtp from "../pages/VerifyOtp"
 import Shop from '../pages/Shop'
 import Cart from '../pages/Cart'
 import Checkout from '../pages/Checkout'
+import OrderHistory from '../pages/OrderHistory'
 
 const AppRoutes = () => {
   return (
@@ -23,35 +24,82 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
-      <Route
-        path="/shop"
-        element={
-          <ProtectedRoute>
-            <Shop />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <ProtectedRoute>
-            <Cart />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/UserCartPage"
-        element={
-          <ProtectedRoute>
-            <Cart />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/shop" element={<Shop />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/UserCartPage" element={<Cart />} />
+
+      {/* Protected Checkout */}
       <Route
         path="/checkout"
         element={
           <ProtectedRoute>
             <Checkout />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected Order History Routes - Accessible ONLY After Login */}
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/Orders"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/order-history"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/Order-History"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orderhistory"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/OrderHistory"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-orders"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/MyOrders"
+        element={
+          <ProtectedRoute>
+            <OrderHistory />
           </ProtectedRoute>
         }
       />

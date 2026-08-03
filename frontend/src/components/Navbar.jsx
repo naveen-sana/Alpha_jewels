@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { Gem, ShoppingCart, User, LogOut, Trash2, Heart, Search, X, ShoppingBag } from 'lucide-react'
+import { Gem, ShoppingCart, User, LogOut, Trash2, Heart, Search, X, ShoppingBag, ChevronDown } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -14,6 +14,7 @@ const Navbar = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [showCartDropdown, setShowCartDropdown] = useState(false)
   const [showWishlistDropdown, setShowWishlistDropdown] = useState(false)
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
 
   // Hide top global navbar on Home page to display pure Aurum / Alpha Jewels hero banner
@@ -258,18 +259,93 @@ const Navbar = () => {
                   )}
                 </div>
 
-                {/* Profile Avatar & Name (e.g. shaik Sabjan) */}
-                <div className="user-profile-badge d-flex align-items-center gap-2 flex-shrink-0">
-                  <div className="avatar-circle-gold">
-                    <User size={16} className="text-black" />
-                  </div>
-                  <span className="profile-username-text text-white text-nowrap">{user?.fullName || 'User'}</span>
+                {/* User Profile Dropdown Badge matching Reference Image 2 */}
+                <div className="user-profile-dropdown-container position-relative">
+                  <button
+                    onClick={() => {
+                      setShowProfileDropdown(!showProfileDropdown)
+                      setShowCartDropdown(false)
+                      setShowWishlistDropdown(false)
+                    }}
+                    className="user-profile-badge-btn d-flex align-items-center gap-2 flex-shrink-0 bg-transparent border-0 text-white cursor-pointer py-1 px-2.5 rounded-3 hover-bg-dark-trans"
+                    aria-label="User Profile Menu"
+                  >
+                    <div 
+                      className="avatar-circle-blue d-flex align-items-center justify-content-center fw-bold text-white rounded-circle shadow-sm"
+                      style={{ 
+                        width: '34px', 
+                        height: '34px', 
+                        background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                        fontSize: '15px'
+                      }}
+                    >
+                      {(user?.fullName || user?.email || 'V').charAt(0).toUpperCase()}
+                    </div>
+                    <span className="profile-username-text text-white fw-semibold text-nowrap fs-6">
+                      {user?.fullName || user?.email?.split('@')[0] || 'vrashabha13'}
+                    </span>
+                    <ChevronDown 
+                      size={16} 
+                      className={`text-white-50 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} 
+                    />
+                  </button>
+
+                  {/* Profile Dropdown Popup matching Reference Image 2 */}
+                  {showProfileDropdown && (
+                    <div 
+                      className="user-profile-dropdown-menu shadow-2xl rounded-4 position-absolute end-0 mt-2 p-3 border animate-fade-in z-index-dropdown"
+                      style={{ 
+                        width: '260px', 
+                        background: '#ffffff', 
+                        borderColor: '#e2e8f0',
+                        boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.15)'
+                      }}
+                    >
+                      {/* Header inside dropdown */}
+                      <div className="profile-dropdown-header pb-2 mb-2 border-bottom">
+                        <h6 className="fw-bold text-dark mb-0 font-mono text-truncate">
+                          {user?.fullName || user?.email?.split('@')[0] || 'vrashabha13'}
+                        </h6>
+                        <small className="text-muted text-truncate d-block" style={{ fontSize: '0.8rem' }}>
+                          {user?.email || 'vrashabhanilajagi1@gmail.com'}
+                        </small>
+                      </div>
+
+                      {/* Options list */}
+                      <div className="d-flex flex-column gap-1">
+                        <Link 
+                          to="/profile" 
+                          className="dropdown-item-link d-flex align-items-center gap-2.5 px-3 py-2 rounded-3 text-dark font-medium text-decoration-none hover-bg-light"
+                          onClick={() => setShowProfileDropdown(false)}
+                        >
+                          <User size={18} className="text-secondary" />
+                          <span>Profile</span>
+                        </Link>
+
+                        <Link 
+                          to="/orders" 
+                          className="dropdown-item-link d-flex align-items-center gap-2.5 px-3 py-2 rounded-3 text-dark font-medium text-decoration-none hover-bg-light"
+                          onClick={() => setShowProfileDropdown(false)}
+                        >
+                          <ShoppingBag size={18} className="text-secondary" />
+                          <span>Orders</span>
+                        </Link>
+
+                        <button 
+                          onClick={() => {
+                            setShowProfileDropdown(false)
+                            handleLogout()
+                          }}
+                          className="dropdown-item-link w-100 border-0 bg-transparent text-start d-flex align-items-center gap-2.5 px-3 py-2 rounded-3 text-dark font-medium hover-bg-light"
+                        >
+                          <LogOut size={18} className="text-secondary" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Logout Button */}
-                <button onClick={handleLogout} className="header-logout-btn" title="Sign Out">
-                  <LogOut size={20} className="text-gold" />
-                </button>
               </>
             ) : (
               <div className="d-flex align-items-center gap-3 flex-nowrap">
