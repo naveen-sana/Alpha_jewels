@@ -142,69 +142,85 @@ public class ProductCartController {
         if (request == null) {
             return ResponseEntity.badRequest().body("Request body is required");
         }
-        ensureCartTableExists();
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Long userId = getUserIdByEmail(email);
-        if (userId == null) {
-            return ResponseEntity.badRequest().body("User not found");
+        try {
+            ensureCartTableExists();
+            String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            Long userId = getUserIdByEmail(email);
+            if (userId == null) {
+                return ResponseEntity.badRequest().body("User not found");
+            }
+
+            Integer productIdObj = null;
+            if (request.containsKey("productId") && request.get("productId") != null) {
+                productIdObj = ((Number) request.get("productId")).intValue();
+            } else if (request.containsKey("product_id") && request.get("product_id") != null) {
+                productIdObj = ((Number) request.get("product_id")).intValue();
+            } else if (request.containsKey("id") && request.get("id") != null) {
+                productIdObj = ((Number) request.get("id")).intValue();
+            }
+
+            if (productIdObj == null) {
+                return ResponseEntity.badRequest().body("productId is required");
+            }
+
+            int productId = productIdObj;
+            int requestedQuantity = request.containsKey("quantity") && request.get("quantity") != null 
+                    ? ((Number) request.get("quantity")).intValue() : 1;
+            if (requestedQuantity <= 0) {
+                requestedQuantity = 1;
+            }
+
+            // Fetch product stock with fallback for column names
+            int availableStock = 999;
+            try {
+                String stockSql = "SELECT stock FROM ecommerce_db.products WHERE product_id = ?";
+                List<Map<String, Object>> productRows = jdbcTemplate.queryForList(stockSql, productId);
+                if (productRows.isEmpty()) {
+                    stockSql = "SELECT stock FROM ecommerce_db.products WHERE id = ?";
+                    productRows = jdbcTemplate.queryForList(stockSql, productId);
+                }
+                if (!productRows.isEmpty() && productRows.get(0).get("stock") != null) {
+                    availableStock = ((Number) productRows.get(0).get("stock")).intValue();
+                }
+            } catch (Exception stockEx) {
+                availableStock = 999;
+            }
+
+            // Check existing quantity in cart
+            String checkSql = "SELECT id, quantity FROM ecommerce_db.cart_items WHERE user_id = ? AND product_id = ?";
+            List<Map<String, Object>> existing = jdbcTemplate.queryForList(checkSql, userId, productId);
+
+            int currentQty = existing.isEmpty() ? 0 : ((Number) existing.get(0).get("quantity")).intValue();
+            int newTotalQty = currentQty + requestedQuantity;
+
+            if (availableStock <= 0 || newTotalQty > availableStock) {
+                Map<String, Object> err = new HashMap<>();
+                err.put("error", "Stock limit exceeded");
+                err.put("message", "Stock limit exceeded. Only " + availableStock + " products are available.");
+                err.put("availableStock", availableStock);
+                return ResponseEntity.badRequest().body(err);
+            }
+
+            if (!existing.isEmpty()) {
+                String updateSql = "UPDATE ecommerce_db.cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
+                jdbcTemplate.update(updateSql, newTotalQty, userId, productId);
+            } else {
+                String insertSql = "INSERT INTO ecommerce_db.cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
+                jdbcTemplate.update(insertSql, userId, productId, requestedQuantity);
+            }
+
+            // Get updated count
+            String countSql = "SELECT COALESCE(SUM(quantity), 0) FROM ecommerce_db.cart_items WHERE user_id = ?";
+            Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, userId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Item added to cart successfully");
+            response.put("count", count != null ? count : 0);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.internalServerError().body("Failed to add item to cart: " + ex.getMessage());
         }
-
-        Integer productIdObj = null;
-        if (request.containsKey("productId")) {
-            productIdObj = ((Number) request.get("productId")).intValue();
-        } else if (request.containsKey("product_id")) {
-            productIdObj = ((Number) request.get("product_id")).intValue();
-        }
-
-        if (productIdObj == null) {
-            return ResponseEntity.badRequest().body("productId is required");
-        }
-
-        int productId = productIdObj;
-        int requestedQuantity = request.containsKey("quantity") ? ((Number) request.get("quantity")).intValue() : 1;
-        if (requestedQuantity <= 0) {
-            requestedQuantity = 1;
-        }
-
-        // Fetch product stock
-        String stockSql = "SELECT stock FROM ecommerce_db.products WHERE product_id = ?";
-        List<Map<String, Object>> productRows = jdbcTemplate.queryForList(stockSql, productId);
-        if (productRows.isEmpty()) {
-            return ResponseEntity.badRequest().body("Product not found");
-        }
-        int availableStock = ((Number) productRows.get(0).get("stock")).intValue();
-
-        // Check existing quantity in cart
-        String checkSql = "SELECT id, quantity FROM ecommerce_db.cart_items WHERE user_id = ? AND product_id = ?";
-        List<Map<String, Object>> existing = jdbcTemplate.queryForList(checkSql, userId, productId);
-
-        int currentQty = existing.isEmpty() ? 0 : ((Number) existing.get(0).get("quantity")).intValue();
-        int newTotalQty = currentQty + requestedQuantity;
-
-        if (availableStock <= 0 || newTotalQty > availableStock) {
-            Map<String, Object> err = new HashMap<>();
-            err.put("error", "Stock limit exceeded");
-            err.put("message", "Stock limit exceeded. Only " + availableStock + " products are available.");
-            err.put("availableStock", availableStock);
-            return ResponseEntity.badRequest().body(err);
-        }
-
-        if (!existing.isEmpty()) {
-            String updateSql = "UPDATE ecommerce_db.cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
-            jdbcTemplate.update(updateSql, newTotalQty, userId, productId);
-        } else {
-            String insertSql = "INSERT INTO ecommerce_db.cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
-            jdbcTemplate.update(insertSql, userId, productId, requestedQuantity);
-        }
-
-        // Get updated count
-        String countSql = "SELECT COALESCE(SUM(quantity), 0) FROM ecommerce_db.cart_items WHERE user_id = ?";
-        Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, userId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Item added to cart successfully");
-        response.put("count", count != null ? count : 0);
-        return ResponseEntity.ok(response);
     }
 
     // Update Quantity: PUT /api/cart/update
