@@ -11,6 +11,8 @@ import Profile from '../pages/Profile'
 import NotFound from '../pages/NotFound'
 import VerifyOtp from "../pages/VerifyOtp"
 import Shop from '../pages/Shop'
+import Cart from '../pages/Cart'
+import Checkout from '../pages/Checkout'
 
 const AppRoutes = () => {
   return (
@@ -26,6 +28,30 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Shop />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cart"
+        element={
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/UserCartPage"
+        element={
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/checkout"
+        element={
+          <ProtectedRoute>
+            <Checkout />
           </ProtectedRoute>
         }
       />

@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { Gem, ShoppingCart, User, LogOut, Trash2, Heart, Search, X, ShoppingBag } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 
 const Navbar = () => {
+  const location = useLocation()
   const { isAuthenticated, user, logout } = useAuth()
   const { cartItems, cartCount, removeFromCart, addToCart } = useCart()
   const { wishlistItems, wishlistCount, toggleWishlist } = useWishlist()
@@ -15,8 +16,14 @@ const Navbar = () => {
   const [showWishlistDropdown, setShowWishlistDropdown] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
 
+  // Hide top global navbar on Home page to display pure Aurum / Alpha Jewels hero banner
+  if (location.pathname === '/') {
+    return null
+  }
+
   const activeCategory = searchParams.get('category') || 'Diamond'
   const searchQuery = searchParams.get('search') || ''
+
 
   const handleLogout = async () => {
     await logout()
@@ -231,13 +238,20 @@ const Navbar = () => {
                         )}
                       </div>
                       {cartItems.length > 0 && (
-                        <div className="cart-dropdown-footer py-2 text-center">
+                        <div className="cart-dropdown-footer py-2 px-3 text-center border-top">
                           <div className="d-flex justify-content-between mb-2 small fw-semibold text-black">
                             <span>Total Price:</span>
                             <span>
-                              ₹{cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                              ₹{cartItems.reduce((acc, item) => acc + ((item.price || item.price_per_unit || 0) * (item.quantity || 1)), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </span>
                           </div>
+                          <Link 
+                            to="/cart" 
+                            className="btn btn-dark w-100 btn-sm rounded-2 py-2 fw-semibold text-white text-decoration-none d-block"
+                            onClick={() => setShowCartDropdown(false)}
+                          >
+                            View Full Cart & Checkout
+                          </Link>
                         </div>
                       )}
                     </div>

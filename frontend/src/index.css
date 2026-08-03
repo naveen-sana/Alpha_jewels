@@ -237,40 +237,97 @@ a:hover {
   font-weight: 500;
 }
 
-/* Auth pages */
+/* Auth pages - Exact Luxury Glassmorphism & Model Background Theme */
 .auth-page {
-  padding: 3rem 0 4rem;
-  min-height: calc(100vh - 200px);
+  padding: 4rem 0 5rem;
+  min-height: calc(100vh - 120px);
   display: flex;
   align-items: center;
+  background-image: linear-gradient(to right, rgba(5, 5, 7, 0.85) 0%, rgba(5, 5, 7, 0.4) 50%, rgba(5, 5, 7, 0.1) 100%), 
+                    url('https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1800');
+  background-size: cover;
+  background-position: center right;
+  background-attachment: fixed;
+  position: relative;
 }
 
 .auth-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 2.5rem;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(212, 175, 55, 0.12);
+  background: rgba(18, 18, 22, 0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #ffffff;
+  position: relative;
+  z-index: 2;
 }
 
 .auth-card-header h1 {
-  font-size: 2rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.6rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
+  color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
 .auth-card-header p {
-  color: var(--text-muted);
-  margin-bottom: 1.75rem;
+  color: var(--gold-light);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+.auth-card .form-label {
+  color: var(--gold-light);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-size: 0.9rem;
+}
+
+.auth-card .luxury-input {
+  background: rgba(10, 10, 14, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 0.9rem 1.2rem;
+}
+
+.auth-card .luxury-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  background: rgba(15, 15, 20, 0.9);
+}
+
+.auth-card .form-check-label {
+  color: #c5cad8;
+  font-size: 0.88rem;
+}
+
+.auth-card .forgot-link {
+  color: var(--gold);
+  font-size: 0.88rem;
+}
+
+.auth-card .forgot-link:hover {
+  color: var(--gold-light);
+  text-decoration: underline;
 }
 
 .auth-footer-text {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  font-size: 0.92rem;
+  color: #a0a5b5;
 }
 
 .auth-footer-text a {
   font-weight: 600;
+  color: var(--gold);
+}
+
+.auth-footer-text a:hover {
+  color: var(--gold-light);
 }
 
 /* OTP verification */
@@ -1249,27 +1306,30 @@ a:hover {
   border: 1px solid rgba(212, 175, 55, 0.15) !important;
 }
 
-/* Product Cards */
+/* Product Cards - Premium Fine Jewelry Boutique Style */
 .product-luxury-card {
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid #e5e5e5;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
   height: 100%;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 10px 30px rgba(18, 18, 18, 0.06);
 }
 
 .product-luxury-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(-8px);
+  border-color: var(--gold);
+  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.18);
 }
 
 .product-image-wrapper {
   position: relative;
   padding-top: 100%;
-  background: #fdfdfd;
+  background: #fcfcfc;
+  overflow: hidden;
 }
 
 .product-display-image {
@@ -1279,35 +1339,67 @@ a:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-luxury-card:hover .product-display-image {
+  transform: scale(1.08);
 }
 
 .wishlist-btn-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #ffffff;
-  border: none;
-  width: 32px;
-  height: 32px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #888;
+  color: var(--gold-dark);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: color 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  z-index: 2;
 }
 
 .wishlist-btn-badge:hover {
-  color: #ff3b30;
+  background: var(--gold);
+  color: #ffffff;
+  transform: scale(1.1);
 }
 
 .product-details-content {
-  padding: 16px;
+  padding: 20px 18px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  color: var(--black);
+}
+
+.product-name-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.product-desc-text {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.product-price-tag {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--black);
 }
 
 .product-name-title {
@@ -1384,7 +1476,529 @@ a:hover {
   transition: background-color 0.2s;
 }
 
-.btn-outline-gold:hover {
-  background: rgba(212, 175, 55, 0.08);
+/* Shop Page - Fine Jewelry Boutique Catalogue */
+.shop-container {
+  background: radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.12) 0%, #0d0e12 60%, #050507 100%);
+  min-height: calc(100vh - 120px);
+}
+
+.empty-shop-state {
+  color: #ffffff;
+}
+
+.empty-shop-state h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2rem;
   color: var(--gold);
 }
+
+/* ==========================================================================
+   CART PAGE STYLES (UserCartPage matching SalesKart / Alpha Jewels reference)
+   ========================================================================== */
+.cart-page-bg {
+  background-color: #eef4fa;
+  min-height: calc(100vh - 120px);
+}
+
+.cart-item-thumbnail {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.hover-gold:hover {
+  color: var(--gold-dark) !important;
+}
+
+.hover-danger:hover {
+  color: #dc3545 !important;
+  background-color: rgba(220, 53, 69, 0.08);
+  border-radius: 8px;
+}
+
+.hover-opacity:hover {
+  opacity: 0.92;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ==========================================================================
+   SAMANTHA BRAND AMBASSADOR HERO BANNER STYLES
+   ========================================================================== */
+.samantha-ad-section {
+  background: linear-gradient(135deg, #0b0c10 0%, #1a1c23 50%, #000000 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.border-gold-glowing {
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+}
+
+.text-light-gold {
+  color: #e5cf87;
+}
+
+.bg-gold-transparent {
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.hover-scale-smooth {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-scale-smooth:hover {
+  transform: scale(1.04);
+}
+
+.samantha-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.1) 60%);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   HERO & SLOW-MOTION CINEMATIC JEWELRY SHOWCASE (ROYAL CHAMPAGNE & GOLD)
+   ========================================================================== */
+.hero-video-wrapper {
+  position: relative;
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 20%, #ffffff 0%, var(--cream) 60%, var(--cream-dark) 100%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.hero-video-element {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: 1;
+  opacity: 0.35;
+  filter: contrast(1.1) brightness(1.05);
+}
+
+.hero-video-overlay-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, rgba(245, 240, 232, 0.8) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-content-container {
+  position: relative;
+  z-index: 3;
+}
+
+/* SLOW MOTION JEWELRY SHOWCASE VIDEO & 3D MOTION REEL SECTION */
+.jewelry-video-section {
+  background: linear-gradient(180deg, var(--cream) 0%, #ffffff 50%, var(--cream) 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.jewelry-video-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid var(--gold);
+  box-shadow: 0 20px 50px rgba(18, 18, 18, 0.12), 0 0 24px rgba(212, 175, 55, 0.2);
+  background: #121212;
+}
+
+.slowmotion-video-player {
+  width: 100%;
+  height: 480px;
+  object-fit: cover;
+  display: block;
+}
+
+.video-play-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--gold);
+  padding: 8px 18px;
+  border-radius: 999px;
+  color: var(--black);
+  font-weight: 600;
+  font-size: 0.85rem;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 3D Slow Motion Rotation Keyframes */
+@keyframes slowmoRotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.03);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* ==========================================================================
+   ULTRA-REALISTIC CINEMATIC GOLD NECKLACE COMMERCIAL HERO ANIMATIONS
+   ========================================================================== */
+@keyframes necklaceSlowmoGlimmer {
+  0% {
+    transform: scale(1) rotate(0deg) translateY(0px);
+  }
+  33% {
+    transform: scale(1.05) rotate(2.5deg) translateY(-12px);
+  }
+  66% {
+    transform: scale(1.02) rotate(-2deg) translateY(8px);
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translateY(0px);
+  }
+}
+
+.necklace-slowmo-glimmer {
+  animation: necklaceSlowmoGlimmer 16s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+/* Floating Golden Dust Particles */
+.gold-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 16px var(--gold), 0 0 30px var(--gold-light);
+  animation: goldParticleFloat 4s ease-in-out infinite alternate;
+}
+
+.particle-1 { top: 15%; left: 20%; animation-delay: 0s; }
+.particle-2 { top: 70%; right: 25%; animation-delay: 1.2s; }
+.particle-3 { top: 35%; right: 15%; animation-delay: 2.1s; }
+.particle-4 { bottom: 20%; left: 30%; animation-delay: 0.8s; }
+.particle-5 { top: 50%; left: 10%; animation-delay: 2.8s; }
+
+@keyframes goldParticleFloat {
+  0% { opacity: 0.2; transform: translateY(0) scale(0.6); }
+  50% { opacity: 0.9; transform: translateY(-20px) scale(1.3); }
+  100% { opacity: 0.3; transform: translateY(-40px) scale(0.8); }
+}
+
+/* Cinematic Lens Flare Sweep */
+@keyframes flareSweep {
+  0% {
+    opacity: 0;
+    transform: translate(-100%, -100%) rotate(45deg);
+  }
+  20% {
+    opacity: 0.7;
+  }
+  40% {
+    opacity: 0;
+    transform: translate(100%, 100%) rotate(45deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(100%, 100%) rotate(45deg);
+  }
+}
+
+.lens-flare-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    135deg,
+    transparent 45%,
+    rgba(255, 230, 150, 0.4) 50%,
+    rgba(212, 175, 55, 0.6) 52%,
+    transparent 57%
+  );
+  pointer-events: none;
+  animation: flareSweep 8s ease-in-out infinite;
+}
+
+.rotating-slowmo {
+  animation: slowmoRotate 28s linear infinite;
+  transform-origin: center center;
+}
+
+.sparkle-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px var(--gold-light);
+  animation: sparkleGlow 2s ease-in-out infinite alternate;
+}
+
+.sparkle-1 { top: 10%; left: 15%; animation-delay: 0s; }
+.sparkle-2 { bottom: 15%; right: 10%; animation-delay: 0.7s; }
+.sparkle-3 { top: 50%; right: 5%; animation-delay: 1.4s; }
+
+@keyframes sparkleGlow {
+  0% { opacity: 0.2; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.4); }
+}
+
+/* ==========================================================================
+   LUXURY GLASSMORPHISM HERO STYLES (MATCHING REFERENCE UI)
+   ========================================================================== */
+
+.glass-card-luxury {
+  background: rgba(20, 20, 24, 0.48) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(212, 175, 55, 0.38) !important;
+  box-shadow: 
+    0 30px 90px rgba(0, 0, 0, 0.75),
+    inset 0 0 30px rgba(212, 175, 55, 0.08),
+    0 0 1px rgba(255, 255, 255, 0.2);
+  transition: all 0.4s ease;
+}
+
+.glass-card-luxury:hover {
+  border-color: rgba(212, 175, 55, 0.55) !important;
+  box-shadow: 
+    0 35px 100px rgba(0, 0, 0, 0.85),
+    inset 0 0 35px rgba(212, 175, 55, 0.12),
+    0 0 20px rgba(212, 175, 55, 0.15);
+}
+
+.glass-gold-glow {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.8) 50%, transparent 100%);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #fff4d1 0%, #e8c860 40%, #d4af37 75%, #b8941f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+.text-gold-light {
+  color: #e8c860 !important;
+}
+
+.glass-input {
+  background: rgba(14, 14, 18, 0.65) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  color: #ffffff !important;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.glass-input:focus {
+  border-color: #d4af37 !important;
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.35) !important;
+  background: rgba(20, 20, 26, 0.85) !important;
+  outline: none !important;
+}
+
+.btn-gold-gradient {
+  background: linear-gradient(180deg, #f3d477 0%, #d4af37 45%, #b88d22 100%) !important;
+  border: 1px solid #f0cf65 !important;
+  color: #0d0d0d !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-gold-gradient:hover {
+  background: linear-gradient(180deg, #fae08c 0%, #e3bd48 45%, #c59920 100%) !important;
+  box-shadow: 0 12px 32px rgba(212, 175, 55, 0.5) !important;
+  transform: translateY(-2px);
+  color: #000000 !important;
+}
+
+.btn-luxury-review {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-luxury-review:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+}
+
+.nav-link-luxury {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.nav-link-luxury:hover {
+  color: #e8c860 !important;
+  text-shadow: 0 0 10px rgba(232, 200, 96, 0.4);
+}
+
+.bg-black-transparent {
+  background: rgba(8, 8, 10, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.border-gold-faint {
+  border-color: rgba(212, 175, 55, 0.2) !important;
+}
+
+.border-gold-soft {
+  border-color: rgba(212, 175, 55, 0.4) !important;
+}
+
+.hover-underline:hover {
+  text-decoration: underline;
+}
+
+.btn-outline-gold {
+  background: rgba(18, 18, 22, 0.4) !important;
+  border: 1px solid rgba(212, 175, 55, 0.6) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-outline-gold:hover {
+  background: rgba(212, 175, 55, 0.15) !important;
+  border-color: #d4af37 !important;
+  color: #e8c860 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
+}
+
+.bg-black-50 {
+  background: rgba(10, 10, 14, 0.65) !important;
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.extra-small {
+  font-size: 0.78rem;
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+/* ==========================================================================
+   AURUM / ALPHA JEWELS HERO BANNER STYLES (MATCHING REFERENCE UI)
+   ========================================================================== */
+
+.tracking-ultra {
+  letter-spacing: 0.25em !important;
+}
+
+.text-gold-metallic {
+  background: linear-gradient(180deg, #fceec5 0%, #e6ca65 40%, #c9a033 75%, #a67c1e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.6));
+}
+
+.text-white-gold {
+  color: #f7f3e8 !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.text-gold-muted {
+  color: #c4ad75 !important;
+}
+
+.aurum-btn-outline {
+  background: rgba(10, 10, 14, 0.75) !important;
+  border: 1px solid rgba(212, 175, 55, 0.85) !important;
+  color: #fceec5 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2em !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+
+.aurum-btn-outline:hover {
+  background: rgba(212, 175, 55, 0.2) !important;
+  border-color: #f0d575 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.45);
+  transform: translateY(-2px);
+}
+
+.aurum-link-underline {
+  border-bottom: 1px solid rgba(230, 202, 101, 0.6);
+  padding-bottom: 2px;
+  transition: all 0.3s ease;
+}
+
+.aurum-link-underline:hover {
+  color: #ffffff !important;
+  border-bottom-color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.aurum-nav-link {
+  transition: all 0.3s ease;
+}
+
+.aurum-nav-link:hover,
+.aurum-nav-link.active {
+  color: #e6ca65 !important;
+  text-shadow: 0 0 8px rgba(230, 202, 101, 0.4);
+}
+
+
+
+.hover-underline:hover {
+  text-decoration: underline;
+}
+
+
+
+
+
+

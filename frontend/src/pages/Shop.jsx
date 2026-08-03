@@ -40,12 +40,13 @@ const Shop = () => {
 
   const handleAddToCart = async (productId) => {
     setAddingId(productId);
+    setError('');
     try {
       await addToCart(productId, 1);
-      // Brief visual feedback
       setTimeout(() => setAddingId(null), 800);
     } catch (err) {
       console.error(err);
+      setError(err.message || 'Stock limit exceeded or failed to add product.');
       setAddingId(null);
     }
   };
@@ -65,12 +66,12 @@ const Shop = () => {
         )}
 
         {!loading && error && (
-          <div className="alert alert-danger text-center max-width-md mx-auto" role="alert">
+          <div className="alert alert-warning text-center max-width-md mx-auto mb-4" role="alert">
             {error}
           </div>
         )}
 
-        {!loading && !error && filteredProducts.length === 0 && (
+        {!loading && !filteredProducts.length && (
           <div className="text-center py-5 empty-shop-state">
             <h3>No Products Found</h3>
             <p className="text-muted">
@@ -81,10 +82,12 @@ const Shop = () => {
           </div>
         )}
 
-        {!loading && !error && filteredProducts.length > 0 && (
+        {!loading && filteredProducts.length > 0 && (
           <div className="row g-4 justify-content-center">
             {filteredProducts.map((product) => {
               const isWishlisted = isInWishlist(product.id);
+              const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+
               return (
                 <div className="col-sm-6 col-md-4 col-lg-3" key={product.id}>
                   <div className="product-luxury-card">
@@ -119,10 +122,10 @@ const Shop = () => {
                         <button
                           className={`add-to-cart-action-btn ${addingId === product.id ? 'added' : ''}`}
                           onClick={() => handleAddToCart(product.id)}
-                          disabled={addingId === product.id}
+                          disabled={addingId === product.id || isOutOfStock}
                         >
                           <ShoppingCart size={14} className="me-1" />
-                          {addingId === product.id ? 'Added!' : 'Add to Cart'}
+                          {isOutOfStock ? 'Out of Stock' : addingId === product.id ? 'Added!' : 'Add to Cart'}
                         </button>
                       </div>
                     </div>

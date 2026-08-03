@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from './ToastContext';
 
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -41,8 +43,16 @@ export const WishlistProvider = ({ children }) => {
     const productId = typeof productOrId === 'object' ? (productOrId.id || productOrId.productId) : productOrId;
     if (!productId) return;
     try {
-      await apiClient.post('/api/wishlist', { productId });
+      const isAlreadyIn = isInWishlist(productId);
+      const res = await apiClient.post('/api/wishlist', { productId });
       await fetchWishlist();
+      if (showToast) {
+        if (isAlreadyIn) {
+          showToast('Product removed from wishlist', 'wishlist');
+        } else {
+          showToast('Product added to wishlist successfully!', 'wishlist');
+        }
+      }
     } catch (err) {
       console.error('Error toggling wishlist in database:', err);
     }

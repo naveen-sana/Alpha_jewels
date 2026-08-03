@@ -61,8 +61,9 @@ public class WishlistController {
     }
 
     // Toggle product in user's wishlist (Add if absent, Remove if present)
-    @PostMapping
+    @PostMapping({"", "/", "/toggle", "/add"})
     public ResponseEntity<?> toggleWishlist(@RequestBody Map<String, Object> request) {
+
         ensureWishlistTableExists();
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         System.out.println(">>> TOGGLE WISHLIST CALLED for email: " + email + ", request: " + request);

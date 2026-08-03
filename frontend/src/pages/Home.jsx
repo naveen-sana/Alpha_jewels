@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
-import { Sparkles, Shield, Truck, Award, ArrowRight } from 'lucide-react'
+import { Sparkles, Shield, Truck, Award, ArrowRight, Eye } from 'lucide-react'
 import Button from '../components/Button'
+import JewelryMotionReel from '../components/JewelryMotionReel'
+import LuxuryJewelryHero from '../components/LuxuryJewelryHero'
 
 const features = [
   { icon: Sparkles, title: 'Handcrafted Excellence', text: 'Every piece is meticulously crafted by master artisans.' },
@@ -12,22 +14,30 @@ const features = [
 const Home = () => {
   return (
     <div className="home-page bg-cream-soft">
-      {/* Hero Section Banner - Huge, Luxury Aesthetic */}
-      <section className="hero-section luxury-hero-fullscreen">
-        <div className="hero-overlay" />
-        <div className="container hero-content text-center text-md-start">
-          <span className="hero-badge animate-fade-up">Exclusive Haute Joaillerie</span>
-          <h1 className="hero-title animate-fade-up delay-1 font-serif">
-            Discover Timeless <br />
-            <span className="text-gold">Elegance & Gold</span>
-          </h1>
-          <p className="hero-subtitle animate-fade-up delay-2">
-            Explore our curated catalog of diamond solitaire rings, heritage gold necklaces, and modern platinum bands. Crafted for moments that last forever.
-          </p>
-          <div className="animate-fade-up delay-3 mt-4">
-            <Link to="/register" className="btn btn-gold btn-lg px-5 py-3 text-black fw-bold shadow-lg">
-              Explore Our Collection <ArrowRight size={18} className="ms-2" />
-            </Link>
+      {/* Top Hero Section: Luxury Model Gold Necklace Background Banner */}
+      <LuxuryJewelryHero />
+
+
+      {/* Interactive Slow-Motion Jewelry Motion Reel Section */}
+      <section className="jewelry-video-section py-5">
+        <div className="container py-4">
+          <div className="text-center mb-4">
+            <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill border border-gold bg-white shadow-sm mb-2">
+              <Eye size={16} className="text-gold-dark" />
+              <span className="text-gold-dark text-uppercase tracking-widest small fw-bold">4K Ultra HD Craftsmanship</span>
+            </div>
+            <h2 className="display-4 font-serif text-black mb-2">
+              Jewelry Craftsmanship in <span className="text-gold-dark font-italic">Slow Motion</span>
+            </h2>
+            <p className="text-muted max-width-md mx-auto fs-5" style={{ maxWidth: '680px' }}>
+              Control slow motion playback speed (0.25x - 1.0x) and experience the sparkling fire of solitaire diamonds and pure 22K gold.
+            </p>
+          </div>
+
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <JewelryMotionReel />
+            </div>
           </div>
         </div>
       </section>
@@ -36,8 +46,8 @@ const Home = () => {
       <section className="section-padding py-5.5">
         <div className="container">
           <div className="text-center mb-5 mt-4">
-            <span className="text-gold font-serif fs-5 fw-semibold letter-spacing-1">THE CATALOGUE</span>
-            <h2 className="section-title fs-1 mt-2">Curated Collections</h2>
+            <span className="text-gold-dark font-serif fs-5 fw-semibold letter-spacing-1">THE CATALOGUE</span>
+            <h2 className="section-title fs-1 mt-2 text-black">Curated Collections</h2>
             <p className="section-subtitle text-muted max-width-md mx-auto">
               Explore our four iconic categories, each defined by unparalleled craftsmanship and precious materials.
             </p>
@@ -57,7 +67,7 @@ const Home = () => {
                   <span className="collection-meta">Solitaires & Rings</span>
                   <h3 className="collection-title">The Diamond Suite</h3>
                   <p className="collection-desc">Dazzling diamonds selected for maximum fire, clarity, and brilliance.</p>
-                  <Link to="/register" className="collection-link-arrow">
+                  <Link to="/shop?category=Diamond" className="collection-link-arrow">
                     Discover Collection <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -77,7 +87,7 @@ const Home = () => {
                   <span className="collection-meta">22K Heritage Artistry</span>
                   <h3 className="collection-title">Royal Gold</h3>
                   <p className="collection-desc">Pure gold crafted with heritage-rich filigree, temples, and antique finishes.</p>
-                  <Link to="/register" className="collection-link-arrow">
+                  <Link to="/shop?category=Gold" className="collection-link-arrow">
                     Discover Collection <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -97,7 +107,7 @@ const Home = () => {
                   <span className="collection-meta">Contemporary & Rare</span>
                   <h3 className="collection-title">Platinum Class</h3>
                   <p className="collection-desc">Modern, understated elegance designed for daily luxury and eternal bonds.</p>
-                  <Link to="/register" className="collection-link-arrow">
+                  <Link to="/shop?category=Platinum" className="collection-link-arrow">
                     Discover Collection <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -117,7 +127,7 @@ const Home = () => {
                   <span className="collection-meta">Sterling Craft</span>
                   <h3 className="collection-title">Fine Silver</h3>
                   <p className="collection-desc">Delicate, hand-finished silver pieces capturing clean light and charm.</p>
-                  <Link to="/register" className="collection-link-arrow">
+                  <Link to="/shop?category=Silver" className="collection-link-arrow">
                     Discover Collection <ArrowRight size={16} />
                   </Link>
                 </div>
@@ -127,23 +137,23 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Why Choose Alpha Section */}
-      <section className="section-padding bg-black text-white">
+      {/* Why Choose Alpha Section (Light Champagne Theme) */}
+      <section className="section-padding bg-cream-soft border-top border-bottom border-gold-soft text-black">
         <div className="container">
           <div className="text-center mb-5">
-            <h2 className="section-title text-gold">Why Choose Alpha</h2>
+            <h2 className="section-title text-gold-dark">Why Choose Alpha</h2>
             <p className="section-subtitle text-muted">Luxury you can trust, beauty you can wear</p>
           </div>
 
           <div className="row g-4">
             {features.map(({ icon: Icon, title, text }) => (
               <div className="col-md-6 col-lg-3" key={title}>
-                <div className="feature-card h-100 bg-luxury-dark border-gold-soft">
-                  <div className="feature-icon">
-                    <Icon size={28} />
+                <div className="feature-card h-100 bg-white border-gold-soft shadow-sm rounded-4 p-4 text-center">
+                  <div className="feature-icon mb-3 p-3 bg-cream rounded-circle d-inline-block">
+                    <Icon size={28} className="text-gold-dark" />
                   </div>
-                  <h5 className="text-white">{title}</h5>
-                  <p className="text-muted">{text}</p>
+                  <h5 className="text-black fw-bold font-serif mb-2">{title}</h5>
+                  <p className="text-muted small mb-0">{text}</p>
                 </div>
               </div>
             ))}
@@ -152,13 +162,13 @@ const Home = () => {
       </section>
 
       {/* Starting Call To Action */}
-      <section className="cta-section section-padding text-center">
+      <section className="cta-section section-padding text-center bg-white">
         <div className="container">
-          <h2 className="section-title mb-3 font-serif">Begin Your Journey</h2>
+          <h2 className="section-title mb-3 font-serif text-black">Begin Your Journey</h2>
           <p className="section-subtitle mb-4 text-muted">
             Join Alpha Jewels today and unlock exclusive collections, customization, and member benefits.
           </p>
-          <Link to="/register">
+          <Link to="/shop">
             <Button variant="gold" className="px-5 py-3 text-black fw-bold">Get Started</Button>
           </Link>
         </div>
