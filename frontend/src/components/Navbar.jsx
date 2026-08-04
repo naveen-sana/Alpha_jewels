@@ -17,8 +17,8 @@ const Navbar = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
 
-  // Hide top global navbar on Home page to display pure Aurum / Alpha Jewels hero banner
-  if (location.pathname === '/') {
+  // Hide top global navbar on Home page and Admin pages
+  if (location.pathname === '/' || location.pathname.toLowerCase().startsWith('/admin')) {
     return null
   }
 

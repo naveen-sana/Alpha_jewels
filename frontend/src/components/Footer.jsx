@@ -1,8 +1,13 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Gem, Mail, Phone, MapPin } from 'lucide-react'
 
 const Footer = () => {
   const year = new Date().getFullYear()
+  const location = useLocation()
+
+  if (location.pathname.toLowerCase().startsWith('/admin')) {
+    return null
+  }
 
   return (
     <footer className="luxury-footer mt-auto">

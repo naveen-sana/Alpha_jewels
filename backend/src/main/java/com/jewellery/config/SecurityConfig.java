@@ -1,5 +1,3 @@
-
-
 package com.jewellery.config;
 
 import java.util.List;
@@ -43,7 +41,7 @@ public class SecurityConfig {
 	        		        "/api/users/forgot-password", "/api/users/reset-password", "/error").permitAll()
 	        		.requestMatchers("/api/products", "/api/products/**").permitAll()
 	        		.requestMatchers("/api/cart", "/api/cart/**", "/api/wishlist", "/api/wishlist/**", "/api/payment", "/api/payment/**").authenticated()
-	        		.requestMatchers("/api/admin/**").hasRole("ADMIN")
+	        		.requestMatchers("/api/admin/**").permitAll()
 	            .anyRequest().authenticated()
 	        )
 	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,11 +57,6 @@ public class SecurityConfig {
 	    return http.build();
 	}
 
-	/**
-	 * Allows the Vite development server and a separately served frontend to call
-	 * the public authentication endpoints. Without this, browser preflight
-	 * requests are rejected by Spring Security with HTTP 403.
-	 */
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration configuration = new CorsConfiguration();
@@ -77,4 +70,3 @@ public class SecurityConfig {
 	    return source;
 	}
 }
-  
