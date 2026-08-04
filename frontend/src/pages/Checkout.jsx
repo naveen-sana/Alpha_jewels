@@ -71,33 +71,39 @@ const Checkout = () => {
 
     if (paymentMethod === 'COD') {
       // Cash on delivery handling
-      setTimeout(() => {
+      try {
         const orderIdStr = 'ORD-COD-' + Math.floor(100000 + Math.random() * 900000);
-        const dummyOrder = {
+        const formattedItems = cartItems.map(item => ({
+          id: item.id || item.productId,
+          name: item.name,
+          category: item.category || 'JEWELRY',
+          specs: item.description || item.specs || 'Bespoke Craftsmanship',
+          price: item.price || item.price_per_unit || 0,
+          quantity: item.quantity || 1,
+          subtotal: (item.price || item.price_per_unit || 0) * (item.quantity || 1),
+          imageUrl: item.imageUrl || item.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500'
+        }));
+
+        await addOrder({
+          orderId: orderIdStr,
+          status: 'SUCCESS',
+          grandTotal: grandTotal,
+          items: formattedItems
+        });
+
+        clearCart();
+        setOrderConfirmed({
           paymentId: 'COD_' + Date.now(),
           orderId: orderIdStr,
           amount: grandTotal,
           method: 'Cash on Delivery',
-        };
-        addOrder({
-          orderId: orderIdStr,
-          status: 'SUCCESS',
-          grandTotal: grandTotal,
-          items: cartItems.map(item => ({
-            id: item.id || item.productId,
-            name: item.name,
-            category: item.category || 'JEWELRY',
-            specs: item.description || item.specs || 'Bespoke Craftsmanship',
-            price: item.price || item.price_per_unit || 0,
-            quantity: item.quantity || 1,
-            subtotal: (item.price || item.price_per_unit || 0) * (item.quantity || 1),
-            imageUrl: item.imageUrl || item.image || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500'
-          }))
         });
-        clearCart();
-        setOrderConfirmed(dummyOrder);
+      } catch (err) {
+        console.error('COD order creation failed:', err);
+        setErrorMsg('Failed to process Cash on Delivery order.');
+      } finally {
         setIsProcessing(false);
-      }, 1200);
+      }
       return;
     }
 
@@ -112,14 +118,15 @@ const Checkout = () => {
 
       // Create Order on Backend
       const orderResponse = await apiClient.post('/api/payment/create-order', {
-        shipping: deliveryCharges
+        shipping: deliveryCharges,
+        grandTotal: grandTotal
       });
 
       const orderData = orderResponse.data;
 
       const options = {
         key: orderData.key || 'rzp_test_TK7E94H666yiG6',
-        amount: Math.min(orderData.amount || 1500000, 1500000),
+        amount: orderData.amount || Math.round(grandTotal * 100),
         currency: orderData.currency || 'INR',
         name: 'Alpha Jewels',
         description: `Order Payment (${totalProductsCount} item(s))`,
@@ -165,6 +172,7 @@ const Checkout = () => {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
+              grandTotal: grandTotal
             });
 
             if (verifyRes.data && verifyRes.data.status === 'SUCCESS') {

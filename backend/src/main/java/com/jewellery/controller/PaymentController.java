@@ -24,6 +24,28 @@ public class PaymentController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private void ensureOrderTablesExist() {
+        String createOrdersSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.orders (" +
+                "order_id VARCHAR(100) PRIMARY KEY, " +
+                "user_id BIGINT NOT NULL, " +
+                "total_amount DECIMAL(12, 2) NOT NULL, " +
+                "status VARCHAR(50) NOT NULL DEFAULT 'SUCCESS', " +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" +
+                ")";
+        jdbcTemplate.execute(createOrdersSql);
+
+        String createOrderItemsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.order_items (" +
+                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                "order_id VARCHAR(100) NOT NULL, " +
+                "product_id BIGINT NOT NULL, " +
+                "quantity INT NOT NULL DEFAULT 1, " +
+                "price_per_unit DECIMAL(12, 2) NOT NULL, " +
+                "total_price DECIMAL(12, 2) NOT NULL" +
+                ")";
+        jdbcTemplate.execute(createOrderItemsSql);
+    }
+
     @PostMapping("/create-order")
     public ResponseEntity<?> createOrder(@RequestBody(required = false) Map<String, Object> request) {
         try {
@@ -36,33 +58,34 @@ public class PaymentController {
             Long userId = ((Number) userInfo.get("id")).longValue();
             String fullName = (String) userInfo.get("full_name");
 
-            // Calculate total from active cart
-            String sql = "SELECT ci.quantity, p.price " +
-                         "FROM ecommerce_db.cart_items ci " +
-                         "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
-                         "WHERE ci.user_id = ?";
+            double grandTotal = 0.0;
+            if (request != null && request.containsKey("grandTotal") && request.get("grandTotal") != null) {
+                grandTotal = ((Number) request.get("grandTotal")).doubleValue();
+            } else {
+                // Calculate total from active cart
+                String sql = "SELECT ci.quantity, p.price " +
+                             "FROM ecommerce_db.cart_items ci " +
+                             "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
+                             "WHERE ci.user_id = ?";
 
-            List<Map<String, Object>> items = jdbcTemplate.queryForList(sql, userId);
+                List<Map<String, Object>> items = jdbcTemplate.queryForList(sql, userId);
 
-            if (items.isEmpty()) {
-                return ResponseEntity.badRequest().body("Your cart is empty");
+                double subtotal = 0.0;
+                for (Map<String, Object> item : items) {
+                    int qty = ((Number) item.get("quantity")).intValue();
+                    double price = ((Number) item.get("price")).doubleValue();
+                    subtotal += (price * qty);
+                }
+
+                double shipping = 0.0;
+                if (request != null && request.containsKey("shipping")) {
+                    shipping = ((Number) request.get("shipping")).doubleValue();
+                }
+
+                grandTotal = subtotal + shipping;
             }
 
-            double subtotal = 0.0;
-            for (Map<String, Object> item : items) {
-                int qty = ((Number) item.get("quantity")).intValue();
-                double price = ((Number) item.get("price")).doubleValue();
-                subtotal += (price * qty);
-            }
-
-            double shipping = 0.0;
-            if (request != null && request.containsKey("shipping")) {
-                shipping = ((Number) request.get("shipping")).doubleValue();
-            }
-
-            double grandTotal = subtotal + shipping;
-            // Cap at 1,500,000 paise (₹15,000) for standard Razorpay test mode transaction cap
-            long amountInPaise = Math.min(Math.round(grandTotal * 100.0), 1500000L);
+            long amountInPaise = Math.round(grandTotal * 100.0);
 
             if (amountInPaise <= 0) {
                 return ResponseEntity.badRequest().body("Invalid order amount");
@@ -84,7 +107,6 @@ public class PaymentController {
             response.put("key", RAZORPAY_KEY_ID);
             response.put("userEmail", email);
             response.put("userName", fullName != null ? fullName : email);
-            response.put("subtotal", subtotal);
             response.put("grandTotal", grandTotal);
 
             return ResponseEntity.ok(response);
@@ -99,7 +121,7 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyPayment(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> verifyPayment(@RequestBody Map<String, Object> payload) {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
             Long userId = getUserIdByEmail(email);
@@ -107,9 +129,9 @@ public class PaymentController {
                 return ResponseEntity.badRequest().body("User not found");
             }
 
-            String razorpayOrderId = payload.get("razorpay_order_id");
-            String razorpayPaymentId = payload.get("razorpay_payment_id");
-            String razorpaySignature = payload.get("razorpay_signature");
+            String razorpayOrderId = (String) payload.get("razorpay_order_id");
+            String razorpayPaymentId = (String) payload.get("razorpay_payment_id");
+            String razorpaySignature = (String) payload.get("razorpay_signature");
 
             if (razorpayOrderId == null || razorpayPaymentId == null || razorpaySignature == null) {
                 return ResponseEntity.badRequest().body("Missing payment verification parameters");
@@ -123,6 +145,45 @@ public class PaymentController {
             boolean isSignatureValid = Utils.verifyPaymentSignature(attributes, RAZORPAY_KEY_SECRET);
 
             if (isSignatureValid) {
+                ensureOrderTablesExist();
+
+                // Fetch cart items to calculate order total and create order items
+                String fetchCartSql = "SELECT ci.product_id, ci.quantity, p.price " +
+                                      "FROM ecommerce_db.cart_items ci " +
+                                      "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
+                                      "WHERE ci.user_id = ?";
+                List<Map<String, Object>> cartItems = jdbcTemplate.queryForList(fetchCartSql, userId);
+
+                double grandTotal = 0.0;
+                for (Map<String, Object> item : cartItems) {
+                    int qty = ((Number) item.get("quantity")).intValue();
+                    double price = ((Number) item.get("price")).doubleValue();
+                    grandTotal += (price * qty);
+                }
+
+                if (grandTotal <= 0 && payload.containsKey("grandTotal") && payload.get("grandTotal") != null) {
+                    try {
+                        grandTotal = ((Number) payload.get("grandTotal")).doubleValue();
+                    } catch (Exception ignored) {}
+                }
+
+                // Insert into orders table with actual full grand total
+                String insertOrderSql = "INSERT INTO ecommerce_db.orders (order_id, user_id, total_amount, status, created_at, updated_at) " +
+                                        "VALUES (?, ?, ?, 'SUCCESS', NOW(), NOW()) " +
+                                        "ON DUPLICATE KEY UPDATE total_amount=?, status=?, updated_at=NOW()";
+                jdbcTemplate.update(insertOrderSql, razorpayOrderId, userId, grandTotal, grandTotal, "SUCCESS");
+
+                // Insert each cart item into order_items table
+                String insertOrderItemSql = "INSERT INTO ecommerce_db.order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
+                                            "VALUES (?, ?, ?, ?, ?)";
+                for (Map<String, Object> item : cartItems) {
+                    Long productId = ((Number) item.get("product_id")).longValue();
+                    int qty = ((Number) item.get("quantity")).intValue();
+                    double price = ((Number) item.get("price")).doubleValue();
+                    double lineTotal = price * qty;
+                    jdbcTemplate.update(insertOrderItemSql, razorpayOrderId, productId, qty, price, lineTotal);
+                }
+
                 // Clear user cart on successful order placement
                 String clearCartSql = "DELETE FROM ecommerce_db.cart_items WHERE user_id = ?";
                 jdbcTemplate.update(clearCartSql, userId);
