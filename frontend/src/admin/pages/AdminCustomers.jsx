@@ -5,14 +5,6 @@ import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
 
-const defaultCustomers = [
-  { id: 1, name: 'Nandini Ramachandra', email: 'nandini.ramachandra14@gmail.com', phone: '+91 98765 43210', ordersCount: 4, totalSpent: 575000, status: 'ACTIVE', role: 'CUSTOMER' },
-  { id: 2, name: 'Shaik Sabjan', email: 'sabjan@alphajewels.com', phone: '+91 91234 56789', ordersCount: 3, totalSpent: 850000, status: 'ACTIVE', role: 'ADMIN' },
-  { id: 3, name: 'Aishwarya Rai', email: 'aishwarya@luxury.com', phone: '+91 99887 76655', ordersCount: 2, totalSpent: 415000, status: 'ACTIVE', role: 'VIP' },
-  { id: 4, name: 'Vikramaditya Rao', email: 'vikram@royal.com', phone: '+91 98111 22334', ordersCount: 5, totalSpent: 1200000, status: 'ACTIVE', role: 'VIP' },
-  { id: 5, name: 'Priya Sharma', email: 'priya.sharma@gmail.com', phone: '+91 97444 55667', ordersCount: 1, totalSpent: 125000, status: 'ACTIVE', role: 'CUSTOMER' },
-]
-
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,14 +30,11 @@ const AdminCustomers = () => {
     try {
       const response = await adminApi.get('/api/admin/users', config)
       const userList = response.data || []
-      if (userList.length === 0) {
-        setCustomers(defaultCustomers)
-      } else {
-        setCustomers(userList)
-      }
+      setCustomers(Array.isArray(userList) ? userList : [])
     } catch (err) {
       console.error(err)
-      setCustomers(defaultCustomers)
+      addToast('Error fetching customer records from database', 'error')
+      setCustomers([])
     } finally {
       setLoading(false)
     }
@@ -78,11 +67,12 @@ const AdminCustomers = () => {
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
       await adminApi.delete(`/api/admin/users/${deleteTarget.id}`, config)
-      addToast(`Customer account deleted from MySQL`, 'success')
+      addToast(`Customer account "${deleteTarget.name || deleteTarget.email}" deleted successfully from database`, 'success')
       setDeleteTarget(null)
       fetchCustomers()
     } catch (err) {
-      addToast('Failed to delete customer', 'error')
+      console.error('Backend delete request failed:', err)
+      addToast('Error deleting customer account from database', 'error')
     } finally {
       setIsDeleting(false)
     }

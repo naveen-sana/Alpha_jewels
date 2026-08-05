@@ -72,59 +72,92 @@ const AppRoutes = () => {
       {/* LUXURY ADMIN PORTAL ROUTES                 */}
       {/* ========================================== */}
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/login/" element={<AdminLogin />} />
       <Route path="/admin/Login" element={<AdminLogin />} />
+      <Route path="/admin/Login/" element={<AdminLogin />} />
       <Route path="/Admin/login" element={<AdminLogin />} />
+      <Route path="/Admin/login/" element={<AdminLogin />} />
       <Route path="/Admin/Login" element={<AdminLogin />} />
+      <Route path="/Admin/Login/" element={<AdminLogin />} />
+      <Route path="/ADMIN/LOGIN" element={<AdminLogin />} />
+      <Route path="/ADMIN/LOGIN/" element={<AdminLogin />} />
+      <Route path="/adminlogin" element={<AdminLogin />} />
+      <Route path="/adminlogin/" element={<AdminLogin />} />
+      <Route path="/admin-login" element={<AdminLogin />} />
+      <Route path="/admin-login/" element={<AdminLogin />} />
+      <Route path="/admin/signin" element={<AdminLogin />} />
+      <Route path="/admin/signin/" element={<AdminLogin />} />
+      <Route path="/admin/auth" element={<AdminLogin />} />
+      <Route path="/admin/auth/" element={<AdminLogin />} />
 
       <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/admin/" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/Admin" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/Admin/" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="/ADMIN" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/ADMIN/" element={<Navigate to="/admin/dashboard" replace />} />
 
       <Route path="/admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+      <Route path="/admin/dashboard/" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
       <Route path="/Admin/dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+      <Route path="/Admin/dashboard/" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
       <Route path="/admin/Dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
       <Route path="/Admin/Dashboard" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
 
       <Route path="/admin/products" element={<AdminProtectedRoute><AdminProducts /></AdminProtectedRoute>} />
+      <Route path="/admin/products/" element={<AdminProtectedRoute><AdminProducts /></AdminProtectedRoute>} />
       <Route path="/Admin/products" element={<AdminProtectedRoute><AdminProducts /></AdminProtectedRoute>} />
       <Route path="/admin/Products" element={<AdminProtectedRoute><AdminProducts /></AdminProtectedRoute>} />
       <Route path="/Admin/Products" element={<AdminProtectedRoute><AdminProducts /></AdminProtectedRoute>} />
 
       <Route path="/admin/categories" element={<AdminProtectedRoute><AdminCategories /></AdminProtectedRoute>} />
+      <Route path="/admin/categories/" element={<AdminProtectedRoute><AdminCategories /></AdminProtectedRoute>} />
       <Route path="/Admin/categories" element={<AdminProtectedRoute><AdminCategories /></AdminProtectedRoute>} />
       <Route path="/admin/Categories" element={<AdminProtectedRoute><AdminCategories /></AdminProtectedRoute>} />
 
       <Route path="/admin/orders" element={<AdminProtectedRoute><AdminOrders /></AdminProtectedRoute>} />
+      <Route path="/admin/orders/" element={<AdminProtectedRoute><AdminOrders /></AdminProtectedRoute>} />
       <Route path="/Admin/orders" element={<AdminProtectedRoute><AdminOrders /></AdminProtectedRoute>} />
       <Route path="/admin/Orders" element={<AdminProtectedRoute><AdminOrders /></AdminProtectedRoute>} />
 
       <Route path="/admin/customers" element={<AdminProtectedRoute><AdminCustomers /></AdminProtectedRoute>} />
+      <Route path="/admin/customers/" element={<AdminProtectedRoute><AdminCustomers /></AdminProtectedRoute>} />
       <Route path="/Admin/customers" element={<AdminProtectedRoute><AdminCustomers /></AdminProtectedRoute>} />
       <Route path="/admin/Customers" element={<AdminProtectedRoute><AdminCustomers /></AdminProtectedRoute>} />
 
       <Route path="/admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
+      <Route path="/admin/users/" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
       <Route path="/Admin/users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
       <Route path="/admin/Users" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
 
       <Route path="/admin/analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
+      <Route path="/admin/analytics/" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
       <Route path="/Admin/analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
       <Route path="/admin/Analytics" element={<AdminProtectedRoute><AdminAnalytics /></AdminProtectedRoute>} />
 
       <Route path="/admin/reports" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
+      <Route path="/admin/reports/" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
       <Route path="/Admin/reports" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
       <Route path="/admin/Reports" element={<AdminProtectedRoute><AdminReports /></AdminProtectedRoute>} />
 
       <Route path="/admin/reviews" element={<AdminProtectedRoute><AdminReviews /></AdminProtectedRoute>} />
+      <Route path="/admin/reviews/" element={<AdminProtectedRoute><AdminReviews /></AdminProtectedRoute>} />
       <Route path="/Admin/reviews" element={<AdminProtectedRoute><AdminReviews /></AdminProtectedRoute>} />
       <Route path="/admin/Reviews" element={<AdminProtectedRoute><AdminReviews /></AdminProtectedRoute>} />
 
       <Route path="/admin/coupons" element={<AdminProtectedRoute><AdminCoupons /></AdminProtectedRoute>} />
+      <Route path="/admin/coupons/" element={<AdminProtectedRoute><AdminCoupons /></AdminProtectedRoute>} />
       <Route path="/Admin/coupons" element={<AdminProtectedRoute><AdminCoupons /></AdminProtectedRoute>} />
       <Route path="/admin/Coupons" element={<AdminProtectedRoute><AdminCoupons /></AdminProtectedRoute>} />
 
       <Route path="/admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
+      <Route path="/admin/settings/" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
       <Route path="/Admin/settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
       <Route path="/admin/Settings" element={<AdminProtectedRoute><AdminSettings /></AdminProtectedRoute>} />
+
+      {/* Admin Catch-All Wildcard */}
+      <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/Admin/*" element={<Navigate to="/admin/dashboard" replace />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -5,15 +5,6 @@ import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
 
-const defaultCategories = [
-  { id: 1, name: 'Rings', description: 'Solitaire, Cocktail, Diamond & Band Rings', productCount: 14, status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
-  { id: 2, name: 'Necklaces', description: 'Royal Chokers, Pendants, Kundan & Chains', productCount: 22, status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80' },
-  { id: 3, name: 'Earrings', description: 'Studs, Jhumkas, Chandbalis & Drop Earrings', productCount: 18, status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80' },
-  { id: 4, name: 'Bracelets', description: 'Diamond Tennis Bracelets & Gold Cuffs', productCount: 9, status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1611591475143-be232935f478?auto=format&fit=crop&w=600&q=80' },
-  { id: 5, name: 'Bangles', description: 'Traditional 22K Gold & Bridal Kada Sets', productCount: 12, status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80' },
-  { id: 6, name: 'Collections', description: 'Haute Joaillerie & High Jewelry Sets', productCount: 7, status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
-]
-
 const AdminCategories = () => {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -45,14 +36,11 @@ const AdminCategories = () => {
     try {
       const response = await adminApi.get('/api/admin/categories', config)
       const data = response.data || []
-      if (data.length === 0) {
-        setCategories(defaultCategories)
-      } else {
-        setCategories(data)
-      }
+      setCategories(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error(err)
-      setCategories(defaultCategories)
+      addToast('Error fetching categories from database', 'error')
+      setCategories([])
     } finally {
       setLoading(false)
     }
@@ -118,11 +106,12 @@ const AdminCategories = () => {
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
       await adminApi.delete(`/api/admin/categories/${deleteTarget.id}`, config)
-      addToast(`Category "${deleteTarget.name}" deleted from MySQL`, 'success')
+      addToast(`Category "${deleteTarget.name}" deleted successfully`, 'success')
       setDeleteTarget(null)
       fetchCategories()
     } catch (err) {
-      addToast('Failed to delete category', 'error')
+      console.error('Backend delete request failed:', err)
+      addToast('Error deleting category from database', 'error')
     } finally {
       setIsDeleting(false)
     }
@@ -156,6 +145,10 @@ const AdminCategories = () => {
             <span className="spinner-border spinner-border-sm me-2 text-gold"></span>
             Loading categories from database...
           </div>
+        ) : categories.length === 0 ? (
+          <div className="col-12 text-center py-5 text-muted">
+            No categories available in the database.
+          </div>
         ) : (
           categories.map((cat) => (
             <div key={cat.id || cat.name} className="col-12 col-sm-6 col-lg-4">
@@ -167,6 +160,10 @@ const AdminCategories = () => {
                       alt={cat.name}
                       className="rounded-3 object-fit-cover"
                       style={{ width: '54px', height: '54px' }}
+                      onError={(e) => {
+                        e.target.onerror = null
+                        e.target.src = 'https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=200&q=80'
+                      }}
                     />
                     <span className={`badge-status ${(cat.status || 'ACTIVE').toLowerCase()}`}>
                       {cat.status || 'ACTIVE'}
@@ -209,7 +206,7 @@ const AdminCategories = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmitCategory}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label className="form-label fs-7 fw-semibold">Category Name *</label>
                 <input

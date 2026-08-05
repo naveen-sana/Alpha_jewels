@@ -5,13 +5,6 @@ import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
 
-const defaultUsers = [
-  { id: 1, name: 'Shaik Sabjan', email: 'sabjan@alphajewels.com', phone: '+91 91234 56789', role: 'ADMIN', status: 'ACTIVE' },
-  { id: 2, name: 'Nandini Ramachandra', email: 'nandini.ramachandra14@gmail.com', phone: '+91 98765 43210', role: 'MANAGER', status: 'ACTIVE' },
-  { id: 3, name: 'Aishwarya Rai', email: 'aishwarya@luxury.com', phone: '+91 99887 76655', role: 'STAFF', status: 'ACTIVE' },
-  { id: 4, name: 'Vikramaditya Rao', email: 'vikram@royal.com', phone: '+91 98111 22334', role: 'STAFF', status: 'ACTIVE' },
-]
-
 const AdminUsers = () => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -37,14 +30,11 @@ const AdminUsers = () => {
     try {
       const response = await adminApi.get('/api/admin/users', config)
       const userList = response.data || []
-      if (userList.length === 0) {
-        setUsers(defaultUsers)
-      } else {
-        setUsers(userList)
-      }
+      setUsers(Array.isArray(userList) ? userList : [])
     } catch (err) {
       console.error(err)
-      setUsers(defaultUsers)
+      addToast('Error fetching user accounts from database', 'error')
+      setUsers([])
     } finally {
       setLoading(false)
     }
@@ -88,11 +78,13 @@ const AdminUsers = () => {
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
       await adminApi.delete(`/api/admin/users/${deleteTarget.id}`, config)
-      addToast(`User account deleted from MySQL`, 'success')
+      addToast(`User account "${deleteTarget.name || deleteTarget.email}" deleted successfully from database`, 'success')
       setDeleteTarget(null)
       fetchUsers()
     } catch (err) {
-      addToast('Failed to delete user account', 'error')
+      console.error('Backend delete request failed:', err)
+      const detail = err.response?.data?.message || err.response?.data?.error || err.message || 'Error deleting user from database'
+      addToast(typeof detail === 'string' ? detail : 'Error deleting user from database', 'error')
     } finally {
       setIsDeleting(false)
     }

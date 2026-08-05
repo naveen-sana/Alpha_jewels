@@ -248,6 +248,14 @@ body.admin-mode {
   background: rgba(248, 250, 252, 0.8);
 }
 
+/* Modal Sizing Utilities */
+.max-w-xs { max-width: 340px !important; width: 92% !important; }
+.max-w-sm { max-width: 440px !important; width: 92% !important; }
+.max-w-md { max-width: 520px !important; width: 92% !important; }
+.max-w-lg { max-width: 640px !important; width: 92% !important; }
+.max-w-xl { max-width: 760px !important; width: 92% !important; }
+.max-w-2xl { max-width: 880px !important; width: 92% !important; }
+
 /* Delete Confirmation Modal Overlay */
 .delete-modal-overlay {
   position: fixed;

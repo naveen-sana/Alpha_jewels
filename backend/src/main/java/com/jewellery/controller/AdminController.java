@@ -32,16 +32,33 @@ public class AdminController {
                     ")";
             jdbcTemplate.execute(createCategoriesSql);
 
+            // Add missing columns if table pre-existed with older schema
+            try { jdbcTemplate.execute("ALTER TABLE ecommerce_db.categories ADD COLUMN description TEXT"); } catch (Exception ignored) {}
+            try { jdbcTemplate.execute("ALTER TABLE ecommerce_db.categories ADD COLUMN image_url VARCHAR(500)"); } catch (Exception ignored) {}
+            try { jdbcTemplate.execute("ALTER TABLE ecommerce_db.categories ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"); } catch (Exception ignored) {}
+
             // Seed default categories if empty
             Integer catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.categories", Integer.class);
             if (catCount == null || catCount == 0) {
-                String[] defaultCats = {"Rings", "Necklaces", "Earrings", "Bracelets", "Bangles", "Chains", "Pendants", "Anklets", "Collections"};
-                for (String cat : defaultCats) {
+                String[][] defaultCats = {
+                        {"Rings", "Solitaire, Cocktail, Diamond & Band Rings", "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80"},
+                        {"Necklaces", "Royal Chokers, Pendants, Kundan & Chains", "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80"},
+                        {"Earrings", "Studs, Jhumkas, Chandbalis & Drop Earrings", "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=300&q=80"},
+                        {"Bracelets", "Diamond Tennis Bracelets & Gold Cuffs", "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=300&q=80"},
+                        {"Bangles", "Traditional 22K Gold & Bridal Kada Sets", "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=300&q=80"},
+                        {"Collections", "Haute Joaillerie & High Jewelry Sets", "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=300&q=80"}
+                };
+                for (String[] cat : defaultCats) {
                     try {
-                        jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description, status) VALUES (?, ?, 'ACTIVE')",
-                                cat, cat + " luxury jewellery collection");
+                        jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description, image_url, status) VALUES (?, ?, ?, 'ACTIVE')",
+                                cat[0], cat[1], cat[2]);
                     } catch (Exception ignored) {}
                 }
+            } else {
+                // Update missing image_urls
+                try {
+                    jdbcTemplate.update("UPDATE ecommerce_db.categories SET image_url='https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=300&q=80' WHERE image_url IS NULL OR image_url=''");
+                } catch (Exception ignored) {}
             }
 
             // Products table
@@ -90,6 +107,40 @@ public class AdminController {
                     "is_thumbnail BOOLEAN DEFAULT TRUE" +
                     ")";
             jdbcTemplate.execute(createImagesSql);
+
+            try { jdbcTemplate.execute("ALTER TABLE ecommerce_db.productimages ADD COLUMN is_thumbnail BOOLEAN DEFAULT TRUE"); } catch (Exception ignored) {}
+            try { jdbcTemplate.execute("ALTER TABLE ecommerce_db.productimages MODIFY image_url TEXT"); } catch (Exception ignored) {}
+
+            // Seed default products if empty
+            Integer prodCount = 0;
+            try {
+                prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.products", Integer.class);
+            } catch (Exception ignored) {}
+
+            if (prodCount == null || prodCount == 0) {
+                try {
+                    String insertProd = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, weight, metal_type, gold_purity, diamond_details, stone_details, certificate_number, sku, status) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')";
+                    
+                    jdbcTemplate.update(insertProd, "Royal Solitaire Diamond Ring", 1, "Exquisite 22K gold ring with VVS solitaire diamond", 125000.00, 5.0, 15, "Gold", "22K", "VVS1 / D Color", "Natural Solitaire Diamond", "GIA-902144", "SKU-RING-01");
+                    Integer p1 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p1 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p1, "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80");
+
+                    jdbcTemplate.update(insertProd, "Imperial Emerald Gold Choker", 2, "Handcrafted royal Kundan and Emerald gold choker necklace", 450000.00, 10.0, 8, "Gold", "22K", "VS1 / G Color", "Zambia Emerald", "IGI-883920", "SKU-NECK-02");
+                    Integer p2 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p2 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p2, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80");
+
+                    jdbcTemplate.update(insertProd, "Princess Cut Diamond Studs", 3, "Elegant platinum studs featuring princess cut diamonds", 85000.00, 0.0, 20, "Platinum", "950", "VS2 / F Color", "Natural Diamond", "GIA-112349", "SKU-EAR-03");
+                    Integer p3 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p3 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p3, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80");
+
+                    jdbcTemplate.update(insertProd, "Heritage Kundan Bridal Set", 9, "Grand 24K traditional Kundan bridal necklace set with pearls", 850000.00, 12.0, 4, "Gold", "24K", "Uncut Polki", "Uncut Diamond & Rubies", "SGL-449120", "SKU-SET-04");
+                    Integer p4 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p4 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p4, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
             // Orders table
             String createOrdersSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.orders (" +
@@ -317,23 +368,35 @@ public class AdminController {
         }
     }
 
+    private double toDouble(Object val, double defaultVal) {
+        if (val == null) return defaultVal;
+        if (val instanceof Number n) return n.doubleValue();
+        try { return Double.parseDouble(val.toString().trim()); } catch (Exception e) { return defaultVal; }
+    }
+
+    private int toInt(Object val, int defaultVal) {
+        if (val == null) return defaultVal;
+        if (val instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(val.toString().trim()); } catch (Exception e) { return defaultVal; }
+    }
+
     @PostMapping("/products")
     public ResponseEntity<?> addProduct(@RequestBody Map<String, Object> body) {
         ensureTablesExist();
         try {
             String name = (String) body.get("name");
             String description = (String) body.get("description");
-            double price = body.get("price") != null ? ((Number) body.get("price")).doubleValue() : 0.0;
-            double discount = body.get("discount") != null ? ((Number) body.get("discount")).doubleValue() : 0.0;
-            int stock = body.get("stock") != null ? ((Number) body.get("stock")).intValue() : 10;
+            double price = toDouble(body.get("price"), 0.0);
+            double discount = toDouble(body.get("discount"), 0.0);
+            int stock = toInt(body.get("stock"), 10);
 
-            String weight = body.containsKey("weight") ? (String) body.get("weight") : "10g";
-            String metalType = body.containsKey("metalType") ? (String) body.get("metalType") : "Gold";
-            String goldPurity = body.containsKey("goldPurity") ? (String) body.get("goldPurity") : "22K";
-            String diamondDetails = body.containsKey("diamondDetails") ? (String) body.get("diamondDetails") : "VS1 / G-H Color";
-            String stoneDetails = body.containsKey("stoneDetails") ? (String) body.get("stoneDetails") : "Natural Diamond";
-            String certificateNumber = body.containsKey("certificateNumber") ? (String) body.get("certificateNumber") : "CERT-" + System.currentTimeMillis();
-            String sku = body.containsKey("sku") ? (String) body.get("sku") : "SKU-" + System.currentTimeMillis();
+            String weight = body.get("weight") != null && !((String) body.get("weight")).trim().isEmpty() ? (String) body.get("weight") : "10g";
+            String metalType = body.get("metalType") != null && !((String) body.get("metalType")).trim().isEmpty() ? (String) body.get("metalType") : "Gold";
+            String goldPurity = body.get("goldPurity") != null && !((String) body.get("goldPurity")).trim().isEmpty() ? (String) body.get("goldPurity") : "22K";
+            String diamondDetails = body.get("diamondDetails") != null && !((String) body.get("diamondDetails")).trim().isEmpty() ? (String) body.get("diamondDetails") : "VS1 / G-H Color";
+            String stoneDetails = body.get("stoneDetails") != null && !((String) body.get("stoneDetails")).trim().isEmpty() ? (String) body.get("stoneDetails") : "Natural Diamond";
+            String certificateNumber = body.get("certificateNumber") != null && !((String) body.get("certificateNumber")).trim().isEmpty() ? (String) body.get("certificateNumber") : "CERT-" + System.currentTimeMillis();
+            String sku = body.get("sku") != null && !((String) body.get("sku")).trim().isEmpty() ? (String) body.get("sku") : "SKU-" + System.currentTimeMillis();
             String status = body.containsKey("status") ? (String) body.get("status") : "ACTIVE";
             String imageUrl = body.containsKey("imageUrl") ? (String) body.get("imageUrl") : "https://images.unsplash.com/photo-1605100804763-247f67b3557e";
 
@@ -357,14 +420,26 @@ public class AdminController {
 
             String insertProductSql = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, weight, metal_type, gold_purity, diamond_details, stone_details, certificate_number, sku, status) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            jdbcTemplate.update(insertProductSql, name, categoryId, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status);
+            try {
+                jdbcTemplate.update(insertProductSql, name, categoryId, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status);
+            } catch (Exception ex) {
+                // If duplicate SKU error, generate unique fallback SKU
+                sku = "SKU-" + System.currentTimeMillis();
+                jdbcTemplate.update(insertProductSql, name, categoryId, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status);
+            }
 
             // Fetch created product_id
             Integer productId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
 
             if (productId != null && imageUrl != null && !imageUrl.trim().isEmpty()) {
-                String insertImgSql = "INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)";
-                jdbcTemplate.update(insertImgSql, productId, imageUrl.trim());
+                try {
+                    jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", productId);
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url) VALUES (?, ?)", productId, imageUrl.trim());
+                } catch (Exception ex) {
+                    try {
+                        jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, 1)", productId, imageUrl.trim());
+                    } catch (Exception ignored) {}
+                }
             }
 
             Map<String, Object> resp = new HashMap<>();
@@ -373,7 +448,7 @@ public class AdminController {
             return ResponseEntity.ok(resp);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Failed to add product: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage(), "message", "Failed to add product: " + e.getMessage()));
         }
     }
 
@@ -383,40 +458,54 @@ public class AdminController {
         try {
             String name = (String) body.get("name");
             String description = (String) body.get("description");
-            double price = body.get("price") != null ? ((Number) body.get("price")).doubleValue() : 0.0;
-            double discount = body.get("discount") != null ? ((Number) body.get("discount")).doubleValue() : 0.0;
-            int stock = body.get("stock") != null ? ((Number) body.get("stock")).intValue() : 10;
-            String weight = (String) body.get("weight");
-            String metalType = (String) body.get("metalType");
-            String goldPurity = (String) body.get("goldPurity");
-            String diamondDetails = (String) body.get("diamondDetails");
-            String stoneDetails = (String) body.get("stoneDetails");
-            String certificateNumber = (String) body.get("certificateNumber");
-            String sku = (String) body.get("sku");
+            double price = toDouble(body.get("price"), 0.0);
+            double discount = toDouble(body.get("discount"), 0.0);
+            int stock = toInt(body.get("stock"), 10);
+            String weight = body.get("weight") != null && !((String) body.get("weight")).trim().isEmpty() ? (String) body.get("weight") : "10g";
+            String metalType = body.get("metalType") != null && !((String) body.get("metalType")).trim().isEmpty() ? (String) body.get("metalType") : "Gold";
+            String goldPurity = body.get("goldPurity") != null && !((String) body.get("goldPurity")).trim().isEmpty() ? (String) body.get("goldPurity") : "22K";
+            String diamondDetails = body.get("diamondDetails") != null && !((String) body.get("diamondDetails")).trim().isEmpty() ? (String) body.get("diamondDetails") : "VS1 / G-H Color";
+            String stoneDetails = body.get("stoneDetails") != null && !((String) body.get("stoneDetails")).trim().isEmpty() ? (String) body.get("stoneDetails") : "Natural Diamond";
+            String certificateNumber = body.get("certificateNumber") != null && !((String) body.get("certificateNumber")).trim().isEmpty() ? (String) body.get("certificateNumber") : "CERT-" + id;
+            String sku = body.get("sku") != null && !((String) body.get("sku")).trim().isEmpty() ? (String) body.get("sku") : "SKU-" + id;
             String status = body.containsKey("status") ? (String) body.get("status") : "ACTIVE";
 
             String updateSql = "UPDATE ecommerce_db.products SET name=?, description=?, price=?, discount=?, stock=?, " +
                     "weight=?, metal_type=?, gold_purity=?, diamond_details=?, stone_details=?, certificate_number=?, sku=?, status=? " +
                     "WHERE product_id=?";
-            jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
+            try {
+                jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
+            } catch (Exception ex) {
+                // If duplicate SKU error, generate unique fallback SKU
+                sku = "SKU-" + id + "-" + System.currentTimeMillis();
+                jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
+            }
 
             if (body.containsKey("imageUrl")) {
                 String imageUrl = (String) body.get("imageUrl");
-                jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
-                jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl);
+                if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                    try {
+                        jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
+                        jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url) VALUES (?, ?)", id, imageUrl.trim());
+                    } catch (Exception ex) {
+                        try {
+                            jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, 1)", id, imageUrl.trim());
+                        } catch (Exception ignored) {}
+                    }
+                }
             }
 
             return ResponseEntity.ok(Map.of("message", "Product updated successfully"));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Failed to update product: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage(), "message", "Failed to update product: " + e.getMessage()));
         }
     }
 
     @PatchMapping("/products/{id}/stock")
     public ResponseEntity<?> updateProductStock(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
-            int stock = ((Number) body.get("stock")).intValue();
+            int stock = toInt(body.get("stock"), 0);
             jdbcTemplate.update("UPDATE ecommerce_db.products SET stock=? WHERE product_id=?", stock, id);
             return ResponseEntity.ok(Map.of("message", "Stock updated successfully"));
         } catch (Exception e) {
@@ -427,7 +516,7 @@ public class AdminController {
     @PatchMapping("/products/{id}/price")
     public ResponseEntity<?> updateProductPrice(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
-            double price = ((Number) body.get("price")).doubleValue();
+            double price = toDouble(body.get("price"), 0.0);
             jdbcTemplate.update("UPDATE ecommerce_db.products SET price=? WHERE product_id=?", price, id);
             return ResponseEntity.ok(Map.of("message", "Price updated successfully"));
         } catch (Exception e) {
@@ -463,15 +552,25 @@ public class AdminController {
     // 3. CATEGORY MANAGEMENT CRUD
     // ==========================================
     @GetMapping("/categories")
-    public ResponseEntity<List<Map<String, Object>>> getCategories() {
+    public ResponseEntity<?> getCategories() {
         ensureTablesExist();
-        String sql = "SELECT c.category_id as id, c.category_name as name, c.description, c.image_url as imageUrl, " +
-                "c.status, COUNT(p.product_id) as productCount " +
-                "FROM ecommerce_db.categories c " +
-                "LEFT JOIN ecommerce_db.products p ON c.category_id = p.category_id " +
-                "GROUP BY c.category_id, c.category_name, c.description, c.image_url, c.status";
-        List<Map<String, Object>> cats = jdbcTemplate.queryForList(sql);
-        return ResponseEntity.ok(cats);
+        try {
+            String sql = "SELECT c.category_id as id, c.category_name as name, c.description, c.image_url as imageUrl, " +
+                    "c.status, COUNT(p.product_id) as productCount " +
+                    "FROM ecommerce_db.categories c " +
+                    "LEFT JOIN ecommerce_db.products p ON c.category_id = p.category_id " +
+                    "GROUP BY c.category_id";
+            List<Map<String, Object>> cats = jdbcTemplate.queryForList(sql);
+            return ResponseEntity.ok(cats);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                String fallbackSql = "SELECT category_id as id, category_name as name, description, image_url as imageUrl, status FROM ecommerce_db.categories";
+                return ResponseEntity.ok(jdbcTemplate.queryForList(fallbackSql));
+            } catch (Exception ex) {
+                return ResponseEntity.ok(new ArrayList<>());
+            }
+        }
     }
 
     @PostMapping("/categories")
@@ -661,10 +760,26 @@ public class AdminController {
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUserAdmin(@PathVariable Long id) {
         try {
-            jdbcTemplate.update("DELETE FROM ecommerce_db.user WHERE id=?", id);
+            jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=0");
+            try {
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE user_id=?", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE cart_id IN (SELECT cart_id FROM ecommerce_db.cart WHERE user_id=?)", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.cart WHERE user_id=?", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist_items WHERE user_id=?", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist_items WHERE wishlist_id IN (SELECT wishlist_id FROM ecommerce_db.wishlist WHERE user_id=?)", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist WHERE user_id=?", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.reviews WHERE user_id=?", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.order_items WHERE order_id IN (SELECT order_id FROM ecommerce_db.orders WHERE user_id=?)", id); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("DELETE FROM ecommerce_db.orders WHERE user_id=?", id); } catch (Exception ignored) {}
+
+                jdbcTemplate.update("DELETE FROM ecommerce_db.user WHERE id=?", id);
+            } finally {
+                jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1");
+            }
             return ResponseEntity.ok(Map.of("message", "User account deleted successfully"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error deleting user: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage(), "message", "Error deleting user: " + e.getMessage()));
         }
     }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Mail, Lock, CheckCircle, Sparkles } from 'lucide-react'
+import { Mail, Lock, CheckCircle, Sparkles, ShieldCheck } from 'lucide-react'
 import Input from '../components/Input'
 import Button from '../components/Button'
 import { useAuth } from '../hooks/useAuth'
@@ -240,6 +240,12 @@ const Login = () => {
                   Don't have an account?{' '}
                   <Link to="/register" className="text-gold fw-bold ms-1">
                     Sign Up
+                  </Link>
+                </div>
+
+                <div className="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                  <Link to="/admin/login" className="text-gold text-decoration-none hover-text-white fw-semibold fs-7 d-inline-flex align-items-center gap-2">
+                    <ShieldCheck size={16} /> Enterprise Admin Portal Sign In →
                   </Link>
                 </div>
               </form>

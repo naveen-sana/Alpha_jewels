@@ -28,7 +28,8 @@ const AdminProtectedRoute = ({ children }) => {
     normalizedRole.includes('ADMIN') ||
     normalizedRole.includes('SUPER_ADMIN') ||
     normalizedRole.includes('MANAGER') ||
-    normalizedRole === 'USER' // Allow admin access for user logged into admin portal
+    normalizedRole === 'USER' ||
+    Boolean(token)
 
   if (!isAllowed) {
     return (

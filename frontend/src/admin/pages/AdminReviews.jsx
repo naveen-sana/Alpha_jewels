@@ -24,15 +24,11 @@ const AdminReviews = () => {
     try {
       const response = await adminApi.get('/api/admin/reviews', config)
       const data = response.data || []
-      setReviews(data.length ? data : [
-        { id: 1, customerName: 'Priya Sharma', rating: 5, comment: 'Exquisite craftsmanship! The diamond clarity is flawless.', status: 'APPROVED', date: '2026-08-01' },
-        { id: 2, customerName: 'Vikram Malhotra', rating: 5, comment: 'Punctual delivery and beautiful royal luxury box packaging.', status: 'APPROVED', date: '2026-08-03' },
-      ])
+      setReviews(Array.isArray(data) ? data : [])
     } catch (err) {
-      setReviews([
-        { id: 1, customerName: 'Priya Sharma', rating: 5, comment: 'Exquisite craftsmanship! The diamond clarity is flawless.', status: 'APPROVED', date: '2026-08-01' },
-        { id: 2, customerName: 'Vikram Malhotra', rating: 5, comment: 'Punctual delivery and beautiful royal luxury box packaging.', status: 'APPROVED', date: '2026-08-03' },
-      ])
+      console.error(err)
+      addToast('Error fetching product reviews from database', 'error')
+      setReviews([])
     }
   }
 
@@ -47,11 +43,12 @@ const AdminReviews = () => {
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
       await adminApi.delete(`/api/admin/reviews/${deleteTarget.id}`, config)
-      addToast(`Review deleted successfully`, 'success')
+      addToast(`Review deleted successfully from database`, 'success')
       setDeleteTarget(null)
       fetchReviews()
     } catch (err) {
-      addToast('Error deleting review', 'error')
+      console.error('Backend delete request failed:', err)
+      addToast('Error deleting review from database', 'error')
     } finally {
       setIsDeleting(false)
     }

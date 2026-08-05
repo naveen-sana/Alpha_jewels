@@ -18,7 +18,7 @@ const Navbar = () => {
   const [searchExpanded, setSearchExpanded] = useState(false)
 
   // Hide top global navbar on Home page and Admin pages
-  if (location.pathname === '/' || location.pathname.toLowerCase().startsWith('/admin')) {
+  if (location.pathname === '/' || location.pathname.toLowerCase().includes('admin')) {
     return null
   }
 

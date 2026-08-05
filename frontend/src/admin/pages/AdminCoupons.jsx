@@ -35,16 +35,11 @@ const AdminCoupons = () => {
     try {
       const response = await adminApi.get('/api/admin/coupons', config)
       const data = response.data || []
-      setCoupons(data.length ? data : [
-        { id: 1, code: 'ALPHA10', discountPercentage: 10, minSpend: 50000, expiryDate: '2026-12-31', status: 'ACTIVE' },
-        { id: 2, code: 'LUXURY20', discountPercentage: 20, minSpend: 200000, expiryDate: '2026-12-31', status: 'ACTIVE' },
-      ])
+      setCoupons(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error(err)
-      setCoupons([
-        { id: 1, code: 'ALPHA10', discountPercentage: 10, minSpend: 50000, expiryDate: '2026-12-31', status: 'ACTIVE' },
-        { id: 2, code: 'LUXURY20', discountPercentage: 20, minSpend: 200000, expiryDate: '2026-12-31', status: 'ACTIVE' },
-      ])
+      addToast('Error fetching coupons from database', 'error')
+      setCoupons([])
     } finally {
       setLoading(false)
     }
@@ -65,7 +60,7 @@ const AdminCoupons = () => {
       setIsModalOpen(false)
       fetchCoupons()
     } catch (err) {
-      addToast('Error saving coupon', 'error')
+      addToast('Error saving coupon to database', 'error')
     }
   }
 
@@ -76,11 +71,12 @@ const AdminCoupons = () => {
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
       await adminApi.delete(`/api/admin/coupons/${deleteTarget.id}`, config)
-      addToast(`Coupon "${deleteTarget.code}" deleted from MySQL`, 'success')
+      addToast(`Coupon "${deleteTarget.code}" deleted successfully from database`, 'success')
       setDeleteTarget(null)
       fetchCoupons()
     } catch (err) {
-      addToast('Failed to delete coupon', 'error')
+      console.error('Backend delete request failed:', err)
+      addToast('Error deleting coupon from database', 'error')
     } finally {
       setIsDeleting(false)
     }

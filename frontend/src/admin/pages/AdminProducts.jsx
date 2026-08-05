@@ -70,42 +70,26 @@ const AdminProducts = () => {
   // Fetch Products & Categories from Backend REST API
   const fetchProducts = async () => {
     setLoading(true)
+    localStorage.removeItem('alpha_jewels_admin_products')
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+    
     try {
-      const [resProd, resCat] = await Promise.all([
-        adminApi.get('/api/admin/products', config),
-        adminApi.get('/api/admin/categories', config),
-      ])
-      const prodList = resProd.data || []
-      const catList = resCat.data || []
-
-      if (prodList.length === 0) {
-        setProducts([
-          { id: 1, name: 'Royal Solitaire Diamond Ring', category: 'Rings', price: 125000, discount: 10, stock: 12, weight: '8g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80', sku: 'SKU-RNG-001' },
-          { id: 2, name: 'Imperial Emerald Gold Choker', category: 'Necklaces', price: 450000, discount: 15, stock: 4, weight: '45g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', sku: 'SKU-NCK-002' },
-          { id: 3, name: 'Heritage Kundan Bridal Set', category: 'Collections', price: 850000, discount: 20, stock: 2, weight: '120g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80', sku: 'SKU-COL-003' },
-          { id: 4, name: 'Platinum Solitaire Studs', category: 'Earrings', price: 95000, discount: 5, stock: 8, weight: '5g', metalType: 'Platinum', goldPurity: '950', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80', sku: 'SKU-EAR-004' },
-          { id: 5, name: 'Classic Gold Bangle Set 22K', category: 'Bangles', price: 320000, discount: 10, stock: 6, weight: '60g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1611591475143-be232935f478?auto=format&fit=crop&w=600&q=80', sku: 'SKU-BNG-005' },
-        ])
-      } else {
-        setProducts(prodList)
-      }
-      setCategories(catList.length ? catList : [
-        { id: 1, name: 'Rings' }, { id: 2, name: 'Necklaces' }, { id: 3, name: 'Earrings' }, { id: 4, name: 'Bracelets' }, { id: 5, name: 'Bangles' }, { id: 6, name: 'Collections' }
-      ])
+      const resProd = await adminApi.get('/api/admin/products', config)
+      const prodList = Array.isArray(resProd.data) ? resProd.data : []
+      setProducts(prodList)
     } catch (err) {
-      console.error('Error fetching products', err)
-      setProducts([
-        { id: 1, name: 'Royal Solitaire Diamond Ring', category: 'Rings', price: 125000, discount: 10, stock: 12, weight: '8g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80', sku: 'SKU-RNG-001' },
-        { id: 2, name: 'Imperial Emerald Gold Choker', category: 'Necklaces', price: 450000, discount: 15, stock: 4, weight: '45g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', sku: 'SKU-NCK-002' },
-        { id: 3, name: 'Heritage Kundan Bridal Set', category: 'Collections', price: 850000, discount: 20, stock: 2, weight: '120g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80', sku: 'SKU-COL-003' },
-        { id: 4, name: 'Platinum Solitaire Studs', category: 'Earrings', price: 95000, discount: 5, stock: 8, weight: '5g', metalType: 'Platinum', goldPurity: '950', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80', sku: 'SKU-EAR-004' },
-        { id: 5, name: 'Classic Gold Bangle Set 22K', category: 'Bangles', price: 320000, discount: 10, stock: 6, weight: '60g', metalType: 'Gold', goldPurity: '22K', status: 'ACTIVE', imageUrl: 'https://images.unsplash.com/photo-1611591475143-be232935f478?auto=format&fit=crop&w=600&q=80', sku: 'SKU-BNG-005' },
-      ])
-      setCategories([
-        { id: 1, name: 'Rings' }, { id: 2, name: 'Necklaces' }, { id: 3, name: 'Earrings' }, { id: 4, name: 'Bracelets' }, { id: 5, name: 'Bangles' }, { id: 6, name: 'Collections' }
-      ])
+      console.error('Error fetching products from database:', err)
+      addToast('Error fetching products from MySQL database', 'error')
+      setProducts([])
+    }
+
+    try {
+      const resCat = await adminApi.get('/api/admin/categories', config)
+      const catList = Array.isArray(resCat.data) ? resCat.data : []
+      setCategories(catList)
+    } catch (err) {
+      console.error('Error fetching categories from database:', err)
     } finally {
       setLoading(false)
     }
@@ -159,6 +143,12 @@ const AdminProducts = () => {
     setIsModalOpen(true)
   }
 
+  const cleanImageUrl = (url) => {
+    if (!url) return ''
+    const matches = url.match(/https?:\/\/[^\s"']+/g)
+    return matches && matches.length > 0 ? matches[matches.length - 1] : url
+  }
+
   // Handle Product Form Submit (Create / Update in MySQL)
   const handleSubmitProduct = async (e) => {
     e.preventDefault()
@@ -170,20 +160,23 @@ const AdminProducts = () => {
     setIsSaving(true)
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+    const cleanedData = { ...formData, imageUrl: cleanImageUrl(formData.imageUrl) }
 
     try {
       if (editingProduct) {
-        await adminApi.put(`/api/admin/products/${editingProduct.id}`, formData, config)
+        await adminApi.put(`/api/admin/products/${editingProduct.id}`, cleanedData, config)
         addToast(`Jewellery "${formData.name}" updated successfully in MySQL!`, 'success')
       } else {
-        await adminApi.post('/api/admin/products', formData, config)
-        addToast(`Jewellery "${formData.name}" created and saved to MySQL database!`, 'success')
+        await adminApi.post('/api/admin/products', cleanedData, config)
+        addToast(`Jewellery "${formData.name}" created and saved in MySQL!`, 'success')
       }
+
       setIsModalOpen(false)
       fetchProducts()
     } catch (err) {
-      console.error(err)
-      addToast('Failed to save product to database. Check network.', 'error')
+      console.error('Save product error:', err)
+      const detail = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to save product in database.'
+      addToast(typeof detail === 'string' ? detail : 'Failed to save product in database.', 'error')
     } finally {
       setIsSaving(false)
     }
@@ -229,11 +222,12 @@ const AdminProducts = () => {
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
       await adminApi.delete(`/api/admin/products/${deleteTarget.id}`, config)
-      addToast(`Jewellery "${deleteTarget.name}" deleted permanently from MySQL`, 'success')
+      addToast(`Jewellery "${deleteTarget.name}" deleted successfully from database`, 'success')
       setDeleteTarget(null)
       fetchProducts()
     } catch (err) {
-      addToast('Failed to delete product', 'error')
+      console.error('Backend delete request failed:', err)
+      addToast('Failed to delete product from database', 'error')
     } finally {
       setIsDeleting(false)
     }
@@ -354,6 +348,10 @@ const AdminProducts = () => {
                           alt={product.name}
                           className="rounded-3 border object-fit-cover"
                           style={{ width: '48px', height: '48px' }}
+                          onError={(e) => {
+                            e.target.onerror = null
+                            e.target.src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=150&q=80'
+                          }}
                         />
                         <div>
                           <div className="fw-semibold text-dark fs-7">{product.name}</div>
@@ -428,7 +426,7 @@ const AdminProducts = () => {
       {/* ADD / EDIT PRODUCT MODAL */}
       {isModalOpen && (
         <div className="delete-modal-overlay">
-          <div className="bg-white rounded-4 shadow-2xl p-4 max-w-2xl w-100 overflow-y-auto" style={{ maxHeight: '90vh' }}>
+          <div className="bg-white rounded-4 shadow-2xl p-4 max-w-md w-100 overflow-y-auto" style={{ maxWidth: '600px', maxHeight: '85vh' }}>
             <div className="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
               <h5 className="font-serif fw-bold text-dark mb-0">
                 {editingProduct ? 'Edit Jewellery Item' : 'Add New Jewellery Item'}

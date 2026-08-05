@@ -1,10 +1,21 @@
 import axios from 'axios'
 
 const BASE_URLS = [
-  '',
   'http://localhost:9090',
-  'http://localhost:8080'
+  'http://localhost:8080',
+  ''
 ]
+
+const isValidApiResponse = (res) => {
+  if (!res || res.data === undefined || res.data === null) return false
+  if (typeof res.data === 'string' && (res.data.includes('<!DOCTYPE') || res.data.includes('<html'))) {
+    return false
+  }
+  if (res.data && res.data.error === 'Unauthorized') {
+    return false
+  }
+  return true
+}
 
 export const adminApi = {
   get: async (endpoint, config = {}) => {
@@ -13,7 +24,7 @@ export const adminApi = {
       try {
         const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
         const res = await axios.get(url, config)
-        if (res && res.data) return res
+        if (isValidApiResponse(res)) return res
       } catch (err) {
         lastError = err
       }
@@ -27,7 +38,7 @@ export const adminApi = {
       try {
         const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
         const res = await axios.post(url, data, config)
-        if (res && res.data) return res
+        if (isValidApiResponse(res)) return res
       } catch (err) {
         lastError = err
       }
@@ -41,7 +52,7 @@ export const adminApi = {
       try {
         const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
         const res = await axios.put(url, data, config)
-        if (res && res.data) return res
+        if (isValidApiResponse(res)) return res
       } catch (err) {
         lastError = err
       }
@@ -55,7 +66,7 @@ export const adminApi = {
       try {
         const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
         const res = await axios.patch(url, data, config)
-        if (res && res.data) return res
+        if (isValidApiResponse(res)) return res
       } catch (err) {
         lastError = err
       }
@@ -69,7 +80,7 @@ export const adminApi = {
       try {
         const url = baseUrl ? `${baseUrl}${endpoint}` : endpoint
         const res = await axios.delete(url, config)
-        if (res) return res
+        if (isValidApiResponse(res)) return res
       } catch (err) {
         lastError = err
       }

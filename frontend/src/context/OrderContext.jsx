@@ -4,56 +4,8 @@ import apiClient from '../api/client';
 
 const OrderContext = createContext();
 
+// Clean, luxury jewellery initial seed order
 const INITIAL_SEED_ORDERS = [
-  {
-    orderId: 'SA-A80F0F41-E6C',
-    placedOn: '3 August 2026 at 04:20 pm',
-    status: 'SUCCESS',
-    grandTotal: 9943.00,
-    itemCount: 4,
-    items: [
-      {
-        id: 'seed-1',
-        name: 'Nothing CF',
-        category: 'ADAPTERS',
-        specs: '33W',
-        price: 2200.00,
-        quantity: 1,
-        subtotal: 2200.00,
-        imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500'
-      },
-      {
-        id: 'seed-2',
-        name: 'Samsung Fast Charge',
-        category: 'ADAPTERS',
-        specs: '66W',
-        price: 3500.00,
-        quantity: 1,
-        subtotal: 3500.00,
-        imageUrl: 'https://images.unsplash.com/photo-1609592424109-dd9892f1b177?w=500'
-      },
-      {
-        id: 'seed-3',
-        name: 'Portronics',
-        category: 'ADAPTERS',
-        specs: '45W',
-        price: 1900.00,
-        quantity: 1,
-        subtotal: 1900.00,
-        imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500'
-      },
-      {
-        id: 'seed-4',
-        name: 'Portronics',
-        category: 'USB-C CABLES',
-        specs: 'Konnect L POR-1403 Fast Charging 3A Type-C Cable 1.2 Meter with Charge & Sync Function for All Type-C Devices (White)',
-        price: 145.00,
-        quantity: 1,
-        subtotal: 145.00,
-        imageUrl: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=500'
-      }
-    ]
-  },
   {
     orderId: 'ORD-948271-AJ',
     placedOn: '1 August 2026 at 11:15 am',
@@ -92,7 +44,7 @@ export const OrderProvider = ({ children }) => {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.error('Error loading order history cache:', e);
@@ -129,6 +81,7 @@ export const OrderProvider = ({ children }) => {
             }));
             setOrders(dbOrders);
             localStorage.setItem(storageKey, JSON.stringify(dbOrders));
+            localStorage.setItem('alpha_jewels_global_orders', JSON.stringify(dbOrders));
             return;
           }
         }
@@ -170,6 +123,7 @@ export const OrderProvider = ({ children }) => {
       const updated = [formattedOrder, ...filtered];
       try {
         localStorage.setItem(storageKey, JSON.stringify(updated));
+        localStorage.setItem('alpha_jewels_global_orders', JSON.stringify(updated));
       } catch (e) {
         console.error('Error saving order cache:', e);
       }
@@ -198,6 +152,7 @@ export const OrderProvider = ({ children }) => {
       const updated = prevOrders.filter((o) => o.orderId !== orderId);
       try {
         localStorage.setItem(storageKey, JSON.stringify(updated));
+        localStorage.setItem('alpha_jewels_global_orders', JSON.stringify(updated));
       } catch (e) {
         console.error('Error deleting order cache:', e);
       }
@@ -233,7 +188,7 @@ export const useOrders = () => {
       orders: INITIAL_SEED_ORDERS,
       addOrder: () => {},
       deleteOrder: () => {},
-      totalItemsOrdered: 5,
+      totalItemsOrdered: 1,
     };
   }
   return context;

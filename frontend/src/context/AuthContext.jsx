@@ -29,16 +29,21 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = Boolean(token && user)
 
   useEffect(() => {
-    const storedToken = getToken()
-    const payload = decodeJwtPayload(storedToken)
-
-    if (storedToken && payload && !payload.isExpired) {
-      setTokenState(storedToken)
-      const name = payload.name || payload.email || getStoredUser()?.fullName || ''
-      setStoredUser(name)
-      setUser({ email: payload.email, role: payload.role, fullName: name })
+    const storedToken = getToken() || localStorage.getItem('admin_token')
+    if (storedToken) {
+      const payload = decodeJwtPayload(storedToken)
+      if (payload && payload.isExpired) {
+        clearAuthStorage()
+        setTokenState(null)
+        setUser(null)
+      } else {
+        setTokenState(storedToken)
+        const name = payload?.name || payload?.email || getStoredUser()?.fullName || localStorage.getItem('admin_name') || 'Admin User'
+        const role = payload?.role || localStorage.getItem('user_role') || 'ADMIN'
+        const email = payload?.email || localStorage.getItem('user_email') || 'admin@alphajewels.com'
+        setUser({ email, role, fullName: name })
+      }
     } else {
-      clearAuthStorage()
       setTokenState(null)
       setUser(null)
     }

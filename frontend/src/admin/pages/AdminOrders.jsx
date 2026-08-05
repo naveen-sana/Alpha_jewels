@@ -5,56 +5,6 @@ import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
 
-const defaultOrders = [
-  {
-    orderId: 'ORD-2026-8801',
-    customerName: 'Nandini Ramachandra',
-    customerEmail: 'nandini.ramachandra14@gmail.com',
-    itemCount: 2,
-    orderDate: '2026-08-04',
-    paymentMethod: 'Credit Card',
-    paymentStatus: 'Paid',
-    orderStatus: 'Delivered',
-    grandTotal: 575000,
-    shippingAddress: '42 MG Road, Indiranagar, Bengaluru, KA 560038',
-    items: [
-      { id: 1, name: 'Royal Solitaire Diamond Ring', quantity: 1, price: 125000, subtotal: 125000, imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80' },
-      { id: 2, name: 'Imperial Emerald Gold Choker', quantity: 1, price: 450000, subtotal: 450000, imageUrl: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80' },
-    ]
-  },
-  {
-    orderId: 'ORD-2026-8802',
-    customerName: 'Shaik Sabjan',
-    customerEmail: 'sabjan@alphajewels.com',
-    itemCount: 1,
-    orderDate: '2026-08-03',
-    paymentMethod: 'UPI',
-    paymentStatus: 'Paid',
-    orderStatus: 'Shipped',
-    grandTotal: 850000,
-    shippingAddress: '15 Jubilee Hills, Hyderabad, TS 500033',
-    items: [
-      { id: 3, name: 'Heritage Kundan Bridal Set', quantity: 1, price: 850000, subtotal: 850000, imageUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80' },
-    ]
-  },
-  {
-    orderId: 'ORD-2026-8803',
-    customerName: 'Aishwarya Rai',
-    customerEmail: 'aishwarya@luxury.com',
-    itemCount: 2,
-    orderDate: '2026-08-02',
-    paymentMethod: 'Net Banking',
-    paymentStatus: 'Paid',
-    orderStatus: 'Packed',
-    grandTotal: 415000,
-    shippingAddress: '88 Bandra West, Mumbai, MH 400050',
-    items: [
-      { id: 4, name: 'Platinum Solitaire Studs', quantity: 1, price: 95000, subtotal: 95000, imageUrl: 'https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80' },
-      { id: 5, name: 'Classic Gold Bangle Set 22K', quantity: 1, price: 320000, subtotal: 320000, imageUrl: 'https://images.unsplash.com/photo-1611591475143-be232935f478?auto=format&fit=crop&w=600&q=80' },
-    ]
-  }
-]
-
 const AdminOrders = () => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -80,14 +30,11 @@ const AdminOrders = () => {
     try {
       const response = await adminApi.get('/api/admin/orders', config)
       const data = response.data || []
-      if (data.length === 0) {
-        setOrders(defaultOrders)
-      } else {
-        setOrders(data)
-      }
+      setOrders(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error(err)
-      setOrders(defaultOrders)
+      addToast('Error fetching orders from database', 'error')
+      setOrders([])
     } finally {
       setLoading(false)
     }
@@ -127,15 +74,17 @@ const AdminOrders = () => {
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
     setIsDeleting(true)
+    const targetId = deleteTarget.orderId || deleteTarget.id
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     try {
-      await adminApi.delete(`/api/admin/orders/${deleteTarget.orderId}`, config)
-      addToast(`Order ${deleteTarget.orderId} deleted from MySQL`, 'success')
+      await adminApi.delete(`/api/admin/orders/${targetId}`, config)
+      addToast(`Order ${targetId} deleted successfully from database`, 'success')
       setDeleteTarget(null)
       fetchOrders()
     } catch (err) {
-      addToast('Failed to delete order', 'error')
+      console.error('Backend delete request failed:', err)
+      addToast('Error deleting order from database', 'error')
     } finally {
       setIsDeleting(false)
     }
