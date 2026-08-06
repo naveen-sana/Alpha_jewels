@@ -105,22 +105,15 @@ const AdminLayout = ({ children }) => {
           })}
         </div>
 
-        {/* Sidebar Footer */}
+        {/* Sidebar Footer - Clean Storefront Link without Bottom Logout */}
         <div className="p-3 border-top border-secondary border-opacity-25">
           <Link
             to="/shop"
-            className="nav-link-admin text-muted mb-2 text-decoration-none d-flex align-items-center gap-2"
+            className="nav-link-admin text-muted text-decoration-none d-flex align-items-center gap-2 py-2"
           >
-            <ExternalLink size={18} />
-            {!collapsed && <span className="nav-text">View Storefront</span>}
+            <ExternalLink size={18} className="text-gold" />
+            {!collapsed && <span className="nav-text text-white-50">View Storefront</span>}
           </Link>
-          <button
-            onClick={handleLogout}
-            className="nav-link-admin text-danger bg-transparent border-0 w-100 text-start d-flex align-items-center gap-2"
-          >
-            <LogOut size={18} />
-            {!collapsed && <span className="nav-text">Logout</span>}
-          </button>
         </div>
       </aside>
 

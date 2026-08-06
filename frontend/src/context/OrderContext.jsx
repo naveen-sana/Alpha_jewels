@@ -64,6 +64,9 @@ export const OrderProvider = ({ children }) => {
               orderId: ord.orderId,
               placedOn: ord.placedOn ? formatDate(ord.placedOn) : newDateString(),
               status: ord.status || 'SUCCESS',
+              paymentMethod: ord.paymentMethod || 'Online Payment (Razorpay)',
+              paymentStatus: ord.paymentStatus || 'Paid',
+              shippingAddress: ord.shippingAddress || 'Padarupalli, Main Road, SPSR Nellore - 524004',
               grandTotal: typeof ord.grandTotal === 'number' ? ord.grandTotal : parseFloat(ord.grandTotal || 0),
               itemCount: ord.itemCount || (ord.items ? ord.items.length : 0),
               items: Array.isArray(ord.items)
@@ -111,8 +114,13 @@ export const OrderProvider = ({ children }) => {
   const addOrder = async (newOrder) => {
     const formattedOrder = {
       orderId: newOrder.orderId || `ORD-${Math.floor(100000 + Math.random() * 900000)}`,
-      placedOn: newDateString(),
+      placedOn: newOrder.placedOn || newDateString(),
       status: newOrder.status || 'SUCCESS',
+      paymentMethod: newOrder.paymentMethod || 'Online Payment (Razorpay)',
+      paymentStatus: newOrder.paymentStatus || (newOrder.paymentMethod === 'Cash on Delivery' ? 'Pending (COD)' : 'Paid'),
+      paymentId: newOrder.paymentId || (newOrder.paymentMethod === 'Cash on Delivery' ? 'COD_' + Date.now() : 'RZP_' + Date.now()),
+      shippingAddress: newOrder.shippingAddress || (newOrder.shippingInfo ? `${newOrder.shippingInfo.fullName}, ${newOrder.shippingInfo.address}, ${newOrder.shippingInfo.city} - ${newOrder.shippingInfo.zipCode}` : 'Padarupalli, Main Road, SPSR Nellore - 524004'),
+      shippingInfo: newOrder.shippingInfo || null,
       grandTotal: newOrder.grandTotal || 0,
       itemCount: newOrder.items ? newOrder.items.length : 0,
       items: newOrder.items || [],
@@ -138,6 +146,9 @@ export const OrderProvider = ({ children }) => {
           orderId: formattedOrder.orderId,
           grandTotal: formattedOrder.grandTotal,
           status: formattedOrder.status,
+          paymentMethod: formattedOrder.paymentMethod,
+          paymentStatus: formattedOrder.paymentStatus,
+          shippingAddress: formattedOrder.shippingAddress,
           items: formattedOrder.items,
         });
       }

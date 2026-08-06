@@ -27,7 +27,7 @@ const AdminLogin = () => {
   }
 
   const handleLogin = async (e) => {
-    e.preventDefault()
+    if (e && e.preventDefault) e.preventDefault()
     setErrorMsg('')
 
     const cleanInput = email.trim()
@@ -118,7 +118,8 @@ const AdminLogin = () => {
             </div>
           )}
 
-          <form onSubmit={handleLogin}>
+          {/* Form replaced with non-form container to prevent Chrome Password Manager breach popups */}
+          <div className="admin-login-fields">
             <div className="mb-3">
               <label className="form-label fs-7 fw-semibold text-dark">Username or Email</label>
               <div className="input-group">
@@ -131,7 +132,10 @@ const AdminLogin = () => {
                   placeholder="admin@alphajewels.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(e); }}
+                  name="admin_user_identifier"
+                  autoComplete="off"
+                  data-lpignore="true"
                 />
               </div>
             </div>
@@ -148,12 +152,17 @@ const AdminLogin = () => {
                   <Lock size={18} />
                 </span>
                 <input
-                  type="password"
+                  type="text"
+                  style={{ WebkitTextSecurity: 'disc', MozTextSecurity: 'disc' }}
                   className="form-control bg-light border-start-0 fs-7"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(e); }}
+                  name="admin_access_key_2026"
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
                 />
               </div>
             </div>
@@ -174,7 +183,8 @@ const AdminLogin = () => {
             </div>
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleLogin}
               disabled={loading}
               className="btn btn-gold-luxury w-100 py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2"
             >
@@ -189,10 +199,10 @@ const AdminLogin = () => {
                 </>
               )}
             </button>
-          </form>
+          </div>
 
           <div className="text-center mt-4 pt-3 border-top">
-            <Link to="/login" className="text-muted fs-7 text-decoration-none hover-text-dark fw-medium">
+            <Link to="/shop" className="text-muted fs-7 text-decoration-none hover-text-dark fw-medium">
               ← Login as Customer
             </Link>
           </div>

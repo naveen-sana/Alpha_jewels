@@ -11,6 +11,7 @@ const AdminCoupons = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [toasts, setToasts] = useState([])
 
   const addToast = (message, type = 'info') => {
@@ -23,7 +24,7 @@ const AdminCoupons = () => {
   const [formData, setFormData] = useState({
     code: '',
     discountPercentage: 10,
-    minSpend: 50000,
+    minSpend: 30000,
     expiryDate: '2026-12-31',
     status: 'ACTIVE',
   })
@@ -51,16 +52,34 @@ const AdminCoupons = () => {
 
   const handleSubmitCoupon = async (e) => {
     e.preventDefault()
-    if (!formData.code) return
+    if (!formData.code) {
+      addToast('Coupon code is required', 'error')
+      return
+    }
+
+    setIsSaving(true)
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+
+    const payload = {
+      code: String(formData.code).trim().toUpperCase(),
+      discountPercentage: Number(formData.discountPercentage || 0),
+      minSpend: Number(formData.minSpend || 0),
+      expiryDate: formData.expiryDate || '2026-12-31',
+      status: formData.status || 'ACTIVE',
+    }
+
     try {
-      await adminApi.post('/api/admin/coupons', formData, config)
-      addToast(`Coupon "${formData.code}" created in MySQL`, 'success')
+      await adminApi.post('/api/admin/coupons', payload, config)
+      addToast(`Coupon "${payload.code}" created in MySQL database!`, 'success')
       setIsModalOpen(false)
       fetchCoupons()
     } catch (err) {
-      addToast('Error saving coupon to database', 'error')
+      console.error('Error saving coupon:', err)
+      const errorText = err.response?.data?.message || err.response?.data || 'Error saving coupon to database'
+      addToast(typeof errorText === 'string' ? errorText : 'Error saving coupon to database', 'error')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -105,34 +124,49 @@ const AdminCoupons = () => {
       </div>
 
       <div className="admin-card-luxury p-0 overflow-hidden">
-        <table className="table-luxury">
-          <thead>
-            <tr>
-              <th>Coupon Code</th>
-              <th>Discount (%)</th>
-              <th>Min Spend (INR)</th>
-              <th>Expiry Date</th>
-              <th>Status</th>
-              <th className="text-end pe-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {coupons.map((cpn) => (
-              <tr key={cpn.id || cpn.code}>
-                <td className="fw-bold text-gold fs-7">{cpn.code}</td>
-                <td className="fw-semibold text-dark">{cpn.discountPercentage}% OFF</td>
-                <td>₹{Number(cpn.minSpend || 0).toLocaleString('en-IN')}</td>
-                <td className="fs-8 text-muted">{cpn.expiryDate}</td>
-                <td><span className={`badge-status ${(cpn.status || 'ACTIVE').toLowerCase()}`}>{cpn.status}</span></td>
-                <td className="text-end pe-4">
-                  <button onClick={() => setDeleteTarget(cpn)} className="btn btn-light btn-sm text-danger rounded-2 p-1.5">
-                    <Trash2 size={16} />
-                  </button>
-                </td>
+        {loading ? (
+          <div className="text-center py-5 text-muted">
+            <span className="spinner-border spinner-border-sm me-2 text-gold"></span>
+            Loading coupons from database...
+          </div>
+        ) : (
+          <table className="table-luxury">
+            <thead>
+              <tr>
+                <th>Coupon Code</th>
+                <th>Discount (%)</th>
+                <th>Min Spend (INR)</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th className="text-end pe-4">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {coupons.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-4 text-muted fs-7">
+                    No promo coupons created yet. Click "Create Promo Code" above.
+                  </td>
+                </tr>
+              ) : (
+                coupons.map((cpn) => (
+                  <tr key={cpn.id || cpn.code}>
+                    <td className="fw-bold text-gold fs-7">{cpn.code}</td>
+                    <td className="fw-semibold text-dark">{cpn.discountPercentage}% OFF</td>
+                    <td>₹{Number(cpn.minSpend || 0).toLocaleString('en-IN')}</td>
+                    <td className="fs-8 text-muted">{cpn.expiryDate || '2026-12-31'}</td>
+                    <td><span className={`badge-status ${(cpn.status || 'ACTIVE').toLowerCase()}`}>{cpn.status || 'ACTIVE'}</span></td>
+                    <td className="text-end pe-4">
+                      <button onClick={() => setDeleteTarget(cpn)} className="btn btn-light btn-sm text-danger rounded-2 p-1.5" title="Delete Coupon">
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {isModalOpen && (
@@ -145,19 +179,57 @@ const AdminCoupons = () => {
             <form onSubmit={handleSubmitCoupon}>
               <div className="mb-3">
                 <label className="form-label fs-7 fw-semibold">Coupon Code *</label>
-                <input type="text" className="form-control fs-7" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })} required />
+                <input
+                  type="text"
+                  className="form-control fs-7"
+                  placeholder="e.g. ALPHA10"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  required
+                />
               </div>
+
               <div className="mb-3">
                 <label className="form-label fs-7 fw-semibold">Discount Percentage (%)</label>
-                <input type="number" className="form-control fs-7" value={formData.discountPercentage} onChange={(e) => setFormData({ ...formData, discountPercentage: e.target.value })} required />
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  className="form-control fs-7"
+                  placeholder="e.g. 20"
+                  value={formData.discountPercentage}
+                  onChange={(e) => setFormData({ ...formData, discountPercentage: e.target.value })}
+                  required
+                />
               </div>
+
               <div className="mb-3">
                 <label className="form-label fs-7 fw-semibold">Minimum Spend (INR)</label>
-                <input type="number" className="form-control fs-7" value={formData.minSpend} onChange={(e) => setFormData({ ...formData, minSpend: e.target.value })} />
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control fs-7"
+                  placeholder="e.g. 30000"
+                  value={formData.minSpend}
+                  onChange={(e) => setFormData({ ...formData, minSpend: e.target.value })}
+                />
               </div>
-              <div className="d-flex justify-content-end gap-2 pt-2 border-top">
+
+              <div className="mb-3">
+                <label className="form-label fs-7 fw-semibold">Expiry Date</label>
+                <input
+                  type="date"
+                  className="form-control fs-7"
+                  value={formData.expiryDate}
+                  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                />
+              </div>
+
+              <div className="d-flex justify-content-end gap-2 pt-3 border-top">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-light btn-sm px-3">Cancel</button>
-                <button type="submit" className="btn btn-gold-luxury btn-sm px-3">Save Code</button>
+                <button type="submit" disabled={isSaving} className="btn btn-gold-luxury btn-sm px-3">
+                  {isSaving ? 'Saving...' : 'Save Code'}
+                </button>
               </div>
             </form>
           </div>

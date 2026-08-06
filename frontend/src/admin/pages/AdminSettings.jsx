@@ -242,15 +242,29 @@ const AdminSettings = () => {
 
               {activeTab === 'PAYMENT' && (
                 <div>
-                  <h5 className="fw-bold text-dark mb-3">Payment Gateway Integrations</h5>
-                  <div className="mb-3">
-                    <label className="form-label fs-7 fw-semibold">Razorpay API Key ID</label>
-                    <input
-                      type="text"
-                      className="form-control fs-7"
-                      value={storeData.razorpayKey}
-                      onChange={(e) => setStoreData({ ...storeData, razorpayKey: e.target.value })}
-                    />
+                  <h5 className="fw-bold text-dark mb-3">Razorpay Payment Gateway API Credentials</h5>
+                  <p className="text-muted fs-7 mb-3">Enter your custom Razorpay Key ID and Key Secret to process live or test transactions.</p>
+                  <div className="row g-3">
+                    <div className="col-12 col-md-6">
+                      <label className="form-label fs-7 fw-semibold">Razorpay Key ID</label>
+                      <input
+                        type="text"
+                        className="form-control fs-7"
+                        placeholder="rzp_live_... or rzp_test_..."
+                        value={storeData.razorpayKey}
+                        onChange={(e) => setStoreData({ ...storeData, razorpayKey: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <label className="form-label fs-7 fw-semibold">Razorpay Key Secret</label>
+                      <input
+                        type="password"
+                        className="form-control fs-7"
+                        placeholder="••••••••••••••••"
+                        value={storeData.razorpaySecret || ''}
+                        onChange={(e) => setStoreData({ ...storeData, razorpaySecret: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
               )}

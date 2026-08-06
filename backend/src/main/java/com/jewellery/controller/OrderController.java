@@ -47,7 +47,9 @@ public class OrderController {
                 return ResponseEntity.badRequest().body("User not found");
             }
 
-            String sqlOrders = "SELECT order_id as orderId, total_amount as grandTotal, status, created_at as placedOn " +
+            String sqlOrders = "SELECT order_id as orderId, total_amount as grandTotal, status, " +
+                    "payment_method as paymentMethod, payment_status as paymentStatus, shipping_address as shippingAddress, " +
+                    "created_at as placedOn " +
                     "FROM ecommerce_db.orders WHERE user_id = ? ORDER BY created_at DESC";
             List<Map<String, Object>> ordersList = jdbcTemplate.queryForList(sqlOrders, userId);
 
@@ -95,11 +97,14 @@ public class OrderController {
 
             double grandTotal = ((Number) payload.get("grandTotal")).doubleValue();
             String status = payload.containsKey("status") ? (String) payload.get("status") : "SUCCESS";
+            String paymentMethod = payload.containsKey("paymentMethod") ? (String) payload.get("paymentMethod") : "Razorpay Online Payment";
+            String paymentStatus = payload.containsKey("paymentStatus") ? (String) payload.get("paymentStatus") : "Paid";
+            String shippingAddress = payload.containsKey("shippingAddress") ? (String) payload.get("shippingAddress") : "";
 
             // Save order
-            String insertOrderSql = "INSERT INTO ecommerce_db.orders (order_id, user_id, total_amount, status, created_at, updated_at) " +
-                    "VALUES (?, ?, ?, ?, NOW(), NOW()) ON DUPLICATE KEY UPDATE total_amount=?, status=?, updated_at=NOW()";
-            jdbcTemplate.update(insertOrderSql, orderId, userId, grandTotal, status, grandTotal, status);
+            String insertOrderSql = "INSERT INTO ecommerce_db.orders (order_id, user_id, total_amount, status, payment_method, payment_status, shipping_address, created_at, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW()) ON DUPLICATE KEY UPDATE total_amount=?, status=?, payment_method=?, payment_status=?, shipping_address=?, updated_at=NOW()";
+            jdbcTemplate.update(insertOrderSql, orderId, userId, grandTotal, status, paymentMethod, paymentStatus, shippingAddress, grandTotal, status, paymentMethod, paymentStatus, shippingAddress);
 
             // Save items if provided in payload
             if (payload.containsKey("items") && payload.get("items") instanceof List) {

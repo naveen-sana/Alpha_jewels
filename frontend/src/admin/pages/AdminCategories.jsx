@@ -5,6 +5,16 @@ import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
 
+function getFallbackCategoryImg(name = '') {
+  const n = String(name).toLowerCase();
+  if (n.includes('diamond')) return 'https://cdn.shopify.com/s/files/1/0676/7473/4661/files/Why_diamonds_are_popular.jpg?v=1774099242';
+  if (n.includes('gold')) return 'https://shop.swarna.com/wp-content/uploads/2026/02/NEC17448_1.jpg';
+  if (n.includes('platinum')) return 'https://img.magnific.com/free-photo/shiny-gemstone-ring-platinum-luxury-elegance-captured-generated-by-ai_188544-9991.jpg?semt=ais_test_b&w=740&q=80';
+  if (n.includes('silver')) return 'https://s3.amazonaws.com/assets.jewelxy.com/wp-content/uploads/2026/06/21095640/ngevzhDQGn_20230302163648.jpg';
+  if (n.includes('necklace')) return 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80';
+  return 'https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80';
+}
+
 const AdminCategories = () => {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -56,7 +66,7 @@ const AdminCategories = () => {
       setFormData({
         name: cat.name || '',
         description: cat.description || '',
-        imageUrl: cat.imageUrl || '',
+        imageUrl: cat.imageUrl || getFallbackCategoryImg(cat.name),
         status: cat.status || 'ACTIVE',
       })
     } else {
@@ -64,7 +74,7 @@ const AdminCategories = () => {
       setFormData({
         name: '',
         description: '',
-        imageUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
+        imageUrl: 'https://cdn.shopify.com/s/files/1/0676/7473/4661/files/Why_diamonds_are_popular.jpg?v=1774099242',
         status: 'ACTIVE',
       })
     }
@@ -111,7 +121,8 @@ const AdminCategories = () => {
       fetchCategories()
     } catch (err) {
       console.error('Backend delete request failed:', err)
-      addToast('Error deleting category from database', 'error')
+      const errorMsg = err.response?.data?.message || err.response?.data || 'Error deleting category from database'
+      addToast(typeof errorMsg === 'string' ? errorMsg : 'Error deleting category from database', 'error')
     } finally {
       setIsDeleting(false)
     }
@@ -132,7 +143,7 @@ const AdminCategories = () => {
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
         <div>
           <h2 className="font-serif fw-bold text-dark mb-1">Jewellery Category Management</h2>
-          <p className="text-muted fs-7 mb-0">Rings, Necklaces, Earrings, Bracelets, Bangles, Collections</p>
+          <p className="text-muted fs-7 mb-0">Diamond, Gold, Platinum, Silver, Necklaces & Luxury Collections</p>
         </div>
         <button onClick={() => handleOpenModal()} className="btn btn-gold-luxury px-4 py-2 rounded-3 d-flex align-items-center gap-2">
           <Plus size={18} /> Create Category
@@ -152,37 +163,52 @@ const AdminCategories = () => {
         ) : (
           categories.map((cat) => (
             <div key={cat.id || cat.name} className="col-12 col-sm-6 col-lg-4">
-              <div className="admin-card-luxury p-3 h-100 d-flex flex-column justify-content-between">
+              <div className="admin-card-luxury p-0 overflow-hidden h-100 d-flex flex-column justify-content-between border rounded-4 bg-white shadow-sm hover-shadow-md transition-all">
                 <div>
-                  <div className="d-flex align-items-center justify-content-between mb-3">
+                  {/* Category Image Header */}
+                  <div className="position-relative w-100" style={{ height: '160px', backgroundColor: '#f8f5f0' }}>
                     <img
-                      src={cat.imageUrl || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80'}
+                      src={cat.imageUrl || getFallbackCategoryImg(cat.name)}
                       alt={cat.name}
-                      className="rounded-3 object-fit-cover"
-                      style={{ width: '54px', height: '54px' }}
+                      className="w-100 h-100 object-fit-cover"
                       onError={(e) => {
                         e.target.onerror = null
-                        e.target.src = 'https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=200&q=80'
+                        e.target.src = getFallbackCategoryImg(cat.name)
                       }}
                     />
-                    <span className={`badge-status ${(cat.status || 'ACTIVE').toLowerCase()}`}>
-                      {cat.status || 'ACTIVE'}
-                    </span>
+                    <div 
+                      className="position-absolute top-0 start-0 w-100 h-100" 
+                      style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.65))' }}
+                    />
+                    <div className="position-absolute" style={{ top: '12px', right: '12px' }}>
+                      <span className={`badge-status ${(cat.status || 'ACTIVE').toLowerCase()} shadow-sm`}>
+                        {cat.status || 'ACTIVE'}
+                      </span>
+                    </div>
+                    <div className="position-absolute" style={{ bottom: '12px', left: '16px' }}>
+                      <h4 className="fw-bold font-serif mb-0 text-white" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)', letterSpacing: '0.03em' }}>
+                        {cat.name}
+                      </h4>
+                    </div>
                   </div>
-                  <h5 className="fw-bold text-dark mb-1">{cat.name}</h5>
-                  <p className="text-muted fs-7 mb-3 line-clamp-2">{cat.description || 'Luxury jewellery collection'}</p>
+
+                  <div className="p-3">
+                    <p className="text-muted fs-7 mb-2 line-clamp-2" style={{ minHeight: '38px' }}>
+                      {cat.description || 'Luxury jewellery collection'}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="d-flex align-items-center justify-content-between pt-3 border-top">
-                  <span className="fs-8 fw-semibold text-gold">
-                    <Package size={14} className="me-1" />
+                <div className="d-flex align-items-center justify-content-between p-3 border-top bg-light">
+                  <span className="fs-7 fw-bold text-gold">
+                    <Package size={16} className="me-1.5" />
                     {cat.productCount || 0} Items
                   </span>
                   <div className="d-flex gap-2">
-                    <button onClick={() => handleOpenModal(cat)} className="btn btn-light btn-sm rounded-2 p-1.5" title="Edit">
+                    <button onClick={() => handleOpenModal(cat)} className="btn btn-light btn-sm rounded-2 p-1.5 shadow-sm border" title="Edit Category">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => setDeleteTarget(cat)} className="btn btn-light btn-sm text-danger rounded-2 p-1.5" title="Delete">
+                    <button onClick={() => setDeleteTarget(cat)} className="btn btn-light btn-sm text-danger rounded-2 p-1.5 shadow-sm border" title="Delete Category">
                       <Trash2 size={16} />
                     </button>
                   </div>
