@@ -15,9 +15,13 @@ const Cart = () => {
   const [stockError, setStockError] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(null);
 
-  // Dynamic calculations as shown in Image 1 reference
-  const subtotal = overallTotalPrice;
-  const shippingFee = cartItems.length > 0 ? (subtotal > 5000 ? 0.00 : 370.00) : 0.00;
+  // Dynamic calculations
+  const subtotal = cartItems.reduce((acc, item) => {
+    const price = Number(item.price || item.price_per_unit || 0);
+    const qty = Number(item.quantity || 1);
+    return acc + (price * qty);
+  }, 0);
+  const shippingFee = cartItems.length > 0 ? 370.00 : 0.00;
   const totalProductsCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
   const grandTotal = subtotal + shippingFee;
 

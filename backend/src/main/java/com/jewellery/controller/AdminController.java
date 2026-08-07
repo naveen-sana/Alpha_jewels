@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.annotation.PostConstruct;
 import java.util.*;
 
 @RestController
@@ -19,7 +20,8 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
 
     // Helper method to ensure required database tables and columns exist
-    private void ensureTablesExist() {
+    @PostConstruct
+    public void ensureTablesExist() {
         try {
             // Categories table
             String createCategoriesSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.categories (" +

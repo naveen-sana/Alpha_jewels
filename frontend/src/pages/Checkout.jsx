@@ -28,8 +28,12 @@ const Checkout = () => {
   const [orderConfirmed, setOrderConfirmed] = useState(null);
 
   // Dynamic calculations
-  const subtotal = overallTotalPrice;
-  const deliveryCharges = cartItems.length > 0 ? (subtotal > 5000 ? 0.00 : 250.00) : 0.00;
+  const subtotal = cartItems.reduce((acc, item) => {
+    const price = Number(item.price || item.price_per_unit || 0);
+    const qty = Number(item.quantity || 1);
+    return acc + (price * qty);
+  }, 0);
+  const deliveryCharges = cartItems.length > 0 ? 370.00 : 0.00;
   const totalProductsCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
   const grandTotal = subtotal + deliveryCharges;
 

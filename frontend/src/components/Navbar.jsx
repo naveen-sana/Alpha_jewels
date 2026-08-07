@@ -4,6 +4,7 @@ import { Gem, ShoppingCart, User, LogOut, Trash2, Heart, Search, X, ShoppingBag,
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
+import { getProductImage } from '../utils/productImages'
 
 const Navbar = () => {
   const location = useLocation()
@@ -39,12 +40,17 @@ const Navbar = () => {
 
   const handleSearchChange = (e) => {
     const val = e.target.value
-    const currentParams = Object.fromEntries(searchParams.entries())
     if (val) {
-      setSearchParams({ ...currentParams, search: val })
+      navigate(`/shop?category=${activeCategory}&search=${encodeURIComponent(val)}`)
     } else {
-      const { search, ...rest } = currentParams
-      setSearchParams(rest)
+      navigate(`/shop?category=${activeCategory}`)
+    }
+  }
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchQuery) {
+      navigate(`/shop?category=${activeCategory}&search=${encodeURIComponent(searchQuery)}`)
     }
   }
 
@@ -77,7 +83,7 @@ const Navbar = () => {
                     <Search size={22} className="text-gold" />
                   </button>
                   {searchExpanded && (
-                    <div className="search-input-wrapper animate-slide-left">
+                    <form onSubmit={handleSearchSubmit} className="search-input-wrapper animate-slide-left">
                       <input
                         type="text"
                         placeholder="Search..."
@@ -85,24 +91,19 @@ const Navbar = () => {
                         onChange={handleSearchChange}
                         className="search-input-field-luxury"
                         autoFocus
-                        onBlur={() => {
-                          if (!searchQuery) {
-                            setSearchExpanded(false)
-                          }
-                        }}
                       />
                       {searchQuery && (
                         <button 
+                          type="button"
                           onClick={() => {
-                            const { search, ...rest } = Object.fromEntries(searchParams.entries())
-                            setSearchParams(rest)
+                            navigate(`/shop?category=${activeCategory}`)
                           }}
                           className="search-clear-btn"
                         >
                           <X size={14} className="text-gold" />
                         </button>
                       )}
-                    </div>
+                    </form>
                   )}
                 </div>
 
@@ -137,11 +138,11 @@ const Navbar = () => {
                           wishlistItems.map((item) => (
                             <div key={item.id} className="cart-dropdown-item d-flex align-items-center gap-3 py-2 border-bottom">
                               <img
-                                src={item.imageUrl || '/default-product.png'}
+                                src={getProductImage(item)}
                                 alt={item.name}
                                 className="cart-item-preview-img"
                                 onError={(e) => {
-                                  e.target.src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500';
+                                  e.target.src = getProductImage(item);
                                 }}
                               />
                               <div className="flex-grow-1 min-width-0 text-start">
@@ -183,12 +184,13 @@ const Navbar = () => {
 
                 {/* Cart Icon with Dropdown */}
                 <div className="cart-dropdown-container position-relative">
-                  <button 
+                  <Link 
+                    to="/cart"
                     onClick={() => {
-                      setShowCartDropdown(!showCartDropdown)
+                      setShowCartDropdown(false)
                       setShowWishlistDropdown(false)
                     }} 
-                    className="cart-toggle-btn d-flex align-items-center"
+                    className="cart-toggle-btn d-flex align-items-center text-decoration-none"
                     aria-label="Open Cart"
                   >
                     <div className="position-relative">
@@ -197,7 +199,7 @@ const Navbar = () => {
                         <span className="cart-badge-count">{cartCount}</span>
                       )}
                     </div>
-                  </button>
+                  </Link>
 
                   {showCartDropdown && (
                     <div className="cart-preview-dropdown shadow-lg animate-fade-in">
@@ -214,11 +216,11 @@ const Navbar = () => {
                           cartItems.map((item) => (
                             <div key={item.id} className="cart-dropdown-item d-flex align-items-center gap-3 py-2 border-bottom">
                               <img
-                                src={item.imageUrl || '/default-product.png'}
+                                src={getProductImage(item)}
                                 alt={item.name}
                                 className="cart-item-preview-img"
                                 onError={(e) => {
-                                  e.target.src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500';
+                                  e.target.src = getProductImage(item);
                                 }}
                               />
                               <div className="flex-grow-1 min-width-0 text-start">

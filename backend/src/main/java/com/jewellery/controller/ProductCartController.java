@@ -29,20 +29,139 @@ public class ProductCartController {
         jdbcTemplate.execute(sql);
     }
 
+    private String getColName(String table, String preferred, String fallback) {
+        try {
+            List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'ecommerce_db' AND TABLE_NAME = ?", table
+            );
+            for (Map<String, Object> col : columns) {
+                for (Object val : col.values()) {
+                    String name = String.valueOf(val);
+                    if (preferred.equalsIgnoreCase(name)) return preferred;
+                    if (fallback.equalsIgnoreCase(name)) return fallback;
+                }
+            }
+        } catch (Exception ignored) {}
+        return preferred;
+    }
+
+    private void ensureProductTablesExist() {
+        try {
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS ecommerce_db.categories (" +
+                                 "category_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                 "category_name VARCHAR(100) NOT NULL UNIQUE, " +
+                                 "description TEXT, " +
+                                 "image_url VARCHAR(500), " +
+                                 "status VARCHAR(20) DEFAULT 'ACTIVE')");
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS ecommerce_db.products (" +
+                                 "product_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                 "name VARCHAR(255) NOT NULL, " +
+                                 "category_id INT, " +
+                                 "description TEXT, " +
+                                 "price DECIMAL(10, 2) NOT NULL, " +
+                                 "discount DECIMAL(5, 2) DEFAULT 0.00, " +
+                                 "stock INT DEFAULT 0, " +
+                                 "weight DECIMAL(8, 2), " +
+                                 "metal_type VARCHAR(50), " +
+                                 "gold_purity VARCHAR(50) DEFAULT '22K', " +
+                                 "diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color', " +
+                                 "stone_details VARCHAR(255) DEFAULT 'Natural Diamond', " +
+                                 "certificate_number VARCHAR(100), " +
+                                 "sku VARCHAR(100), " +
+                                 "status VARCHAR(20) DEFAULT 'ACTIVE')");
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS ecommerce_db.productimages (" +
+                                 "image_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                 "product_id INT NOT NULL, " +
+                                 "image_url TEXT NOT NULL, " +
+                                 "is_thumbnail BOOLEAN DEFAULT TRUE)");
+
+            String[] alters = {
+                "ALTER TABLE ecommerce_db.categories ADD COLUMN category_name VARCHAR(100)",
+                "ALTER TABLE ecommerce_db.products ADD COLUMN category_id INT",
+                "ALTER TABLE ecommerce_db.products ADD COLUMN description TEXT",
+                "ALTER TABLE ecommerce_db.products ADD COLUMN price DECIMAL(10, 2) DEFAULT 0.00",
+                "ALTER TABLE ecommerce_db.products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00",
+                "ALTER TABLE ecommerce_db.products ADD COLUMN stock INT DEFAULT 10",
+                "ALTER TABLE ecommerce_db.products ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"
+            };
+            for (String alterSql : alters) {
+                try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
+            }
+
+            // Seed default categories if empty
+            Integer catCount = 0;
+            try { catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.categories", Integer.class); } catch (Exception ignored) {}
+            if (catCount == null || catCount == 0) {
+                try {
+                    jdbcTemplate.execute("INSERT IGNORE INTO ecommerce_db.categories (category_id, category_name) VALUES " +
+                                         "(1, 'Diamond'), (2, 'Gold'), (3, 'Platinum'), (4, 'Silver'), (9, 'Bridal')");
+                } catch (Exception ignored) {}
+            }
+
+            // Seed default products if empty
+            Integer prodCount = 0;
+            try { prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.products", Integer.class); } catch (Exception ignored) {}
+            if (prodCount == null || prodCount == 0) {
+                try {
+                    String insertProd = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, status) " +
+                                        "VALUES (?, 1, 'Exquisite 22K gold ring with VVS solitaire diamond', 125000.00, 5.0, 15, 'ACTIVE')";
+                    jdbcTemplate.update(insertProd, "Royal Solitaire Diamond Ring");
+                    Integer p1 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p1 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p1, "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80");
+
+                    String insertProd2 = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, status) " +
+                                         "VALUES (?, 2, 'Handcrafted royal Kundan and Emerald gold choker necklace', 450000.00, 10.0, 8, 'ACTIVE')";
+                    jdbcTemplate.update(insertProd2, "Imperial Emerald Gold Choker");
+                    Integer p2 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p2 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p2, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80");
+
+                    String insertProd3 = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, status) " +
+                                         "VALUES (?, 3, 'Elegant platinum studs featuring princess cut diamonds', 85000.00, 0.0, 20, 'ACTIVE')";
+                    jdbcTemplate.update(insertProd3, "Princess Cut Diamond Studs");
+                    Integer p3 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    if (p3 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p3, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80");
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception ignored) {}
+    }
+
     // Retrieve product list, with category name and image URL (supports GET and POST)
     @RequestMapping(value = {"/products", "/products/all"}, method = {RequestMethod.GET, RequestMethod.POST})
     public List<Map<String, Object>> getProducts(@RequestParam(required = false) String category) {
-        String sql = "SELECT p.product_id as id, p.name, p.description, p.price, p.stock, c.category_name as categoryName, pi.image_url as imageUrl " +
-                     "FROM ecommerce_db.products p " +
-                     "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.category_id " +
-                     "LEFT JOIN ecommerce_db.productimages pi ON p.product_id = pi.product_id";
-        
-        if (category != null && !category.trim().isEmpty()) {
-            sql += " WHERE c.category_name = ?";
-            return jdbcTemplate.queryForList(sql, category.trim());
+        ensureProductTablesExist();
+        String imgTable = "product_images";
+        try {
+            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
+            if (check == null || check.isEmpty()) {
+                imgTable = "productimages";
+            }
+        } catch (Exception ignored) {
+            imgTable = "productimages";
         }
-        
-        return jdbcTemplate.queryForList(sql);
+
+        String sql = "SELECT p.id as id, p.name, p.description, p.price, COALESCE(p.stock, p.stock_quantity, 10) as stock, c.name as categoryName, pi.image_url as imageUrl " +
+                     "FROM ecommerce_db.products p " +
+                     "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.id " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.id = pi.product_id";
+
+        try {
+            if (category != null && !category.trim().isEmpty()) {
+                String filterSql = sql + " WHERE LOWER(c.name) = LOWER(?)";
+                List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim());
+                if (filtered != null && !filtered.isEmpty()) {
+                    return filtered;
+                }
+            }
+            return jdbcTemplate.queryForList(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                String fallbackSql = "SELECT p.id as id, p.name, p.description, p.price, 10 as stock, 'Jewelry' as categoryName, NULL as imageUrl FROM ecommerce_db.products p";
+                return jdbcTemplate.queryForList(fallbackSql);
+            } catch (Exception ignored) {
+                return new ArrayList<>();
+            }
+        }
     }
 
     // Get Cart Item Count: GET /api/cart/items/count
@@ -83,12 +202,18 @@ public class ProductCartController {
         String role = (String) userInfo.get("role");
         if (role == null) role = "CUSTOMER";
 
+        String imgTable = "product_images";
+        try {
+            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
+            if (check == null || check.isEmpty()) imgTable = "productimages";
+        } catch (Exception ignored) { imgTable = "productimages"; }
+
         String sql = "SELECT ci.id as cart_item_id, ci.product_id, ci.quantity, " +
-                     "p.name, p.description, p.price as price_per_unit, p.stock, " +
+                     "p.name, p.description, p.price as price_per_unit, COALESCE(p.stock, p.stock_quantity, 10) as stock, " +
                      "pi.image_url " +
                      "FROM ecommerce_db.cart_items ci " +
-                     "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
-                     "LEFT JOIN ecommerce_db.productimages pi ON p.product_id = pi.product_id " +
+                     "JOIN ecommerce_db.products p ON (ci.product_id = p.id OR ci.product_id = p.product_id) " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON (p.id = pi.product_id OR p.product_id = pi.product_id) " +
                      "WHERE ci.user_id = ?";
 
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, userId);
