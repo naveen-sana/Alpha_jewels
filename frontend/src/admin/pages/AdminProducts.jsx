@@ -231,15 +231,20 @@ const AdminProducts = () => {
     } finally {
       setIsDeleting(false)
     }
-  }
-
   // Filter products by search and dropdowns
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
+      !searchTerm ||
       p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'ALL' || p.category === selectedCategory
-    const matchesStatus = selectedStatus === 'ALL' || p.status === selectedStatus
+      p.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory =
+      selectedCategory === 'ALL' ||
+      !p.category ||
+      p.category === 'Jewellery' ||
+      p.category.toLowerCase() === selectedCategory.toLowerCase()
+    const matchesStatus =
+      selectedStatus === 'ALL' || p.status === selectedStatus
     return matchesSearch && matchesCategory && matchesStatus
   })
 
