@@ -129,25 +129,16 @@ public class ProductCartController {
     @RequestMapping(value = {"/products", "/products/all"}, method = {RequestMethod.GET, RequestMethod.POST})
     public List<Map<String, Object>> getProducts(@RequestParam(required = false) String category) {
         ensureProductTablesExist();
-        String imgTable = "product_images";
-        try {
-            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check == null || check.isEmpty()) {
-                imgTable = "productimages";
-            }
-        } catch (Exception ignored) {
-            imgTable = "productimages";
-        }
-
-        String sql = "SELECT p.id as id, p.name, p.description, p.price, COALESCE(p.stock, p.stock_quantity, 10) as stock, c.name as categoryName, pi.image_url as imageUrl " +
+        String sql = "SELECT p.id as id, p.name, p.description, p.price, COALESCE(p.stock, p.stock_quantity, 10) as stock, COALESCE(c.name, c.category_name, 'Jewelry') as categoryName, COALESCE(pi.image_url, pi2.image_url) as imageUrl " +
                      "FROM ecommerce_db.products p " +
                      "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.id " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.id = pi.product_id";
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db.productimages GROUP BY product_id) pi ON p.id = pi.product_id " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db.product_images GROUP BY product_id) pi2 ON p.id = pi2.product_id";
 
         try {
             if (category != null && !category.trim().isEmpty()) {
-                String filterSql = sql + " WHERE LOWER(c.name) = LOWER(?)";
-                List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim());
+                String filterSql = sql + " WHERE LOWER(c.name) = LOWER(?) OR LOWER(c.category_name) = LOWER(?)";
+                List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim(), category.trim());
                 if (filtered != null && !filtered.isEmpty()) {
                     return filtered;
                 }

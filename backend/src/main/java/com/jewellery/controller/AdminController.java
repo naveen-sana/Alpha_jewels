@@ -276,9 +276,9 @@ public class AdminController {
             // Low Stock Products
             List<Map<String, Object>> lowStock = new ArrayList<>();
             try {
-                String lowStockSql = "SELECT p.product_id as id, p.name, p.stock, p.price, pi.image_url as imageUrl " +
+                String lowStockSql = "SELECT p.id as id, p.name, p.stock, p.price, pi.image_url as imageUrl " +
                         "FROM ecommerce_db.products p " +
-                        "LEFT JOIN ecommerce_db.productimages pi ON p.product_id = pi.product_id " +
+                        "LEFT JOIN ecommerce_db.productimages pi ON p.id = pi.product_id " +
                         "WHERE p.stock <= 5 ORDER BY p.stock ASC LIMIT 5";
                 lowStock = jdbcTemplate.queryForList(lowStockSql);
             } catch (Exception ignored) {}
@@ -305,23 +305,18 @@ public class AdminController {
     }
 
     private List<Map<String, Object>> getProductsListInternal(int limit) {
-        String imgTable = "product_images";
-        try {
-            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check == null || check.isEmpty()) imgTable = "productimages";
-        } catch (Exception ignored) { imgTable = "productimages"; }
-
-        String sql = "SELECT COALESCE(p.id, p.product_id) as id, p.name, p.category_id as categoryId, COALESCE(c.name, c.category_name, 'Jewellery') as category, " +
+        String sql = "SELECT p.id as id, p.name, p.category_id as categoryId, COALESCE(c.name, c.category_name, 'Jewellery') as category, " +
                 "p.description, p.price, COALESCE(p.discount, 0.00) as discount, COALESCE(p.stock, p.stock_quantity, 10) as stock, " +
                 "COALESCE(p.weight, '10g') as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
                 "COALESCE(p.gold_purity, '22K') as goldPurity, COALESCE(p.diamond_details, 'VS1 / G-H Color') as diamondDetails, " +
                 "COALESCE(p.stone_details, 'Natural Diamond') as stoneDetails, " +
-                "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', COALESCE(p.id, p.product_id))) as sku, " +
-                "COALESCE(p.status, 'ACTIVE') as status, pi.image_url as imageUrl " +
+                "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', p.id)) as sku, " +
+                "COALESCE(p.status, 'ACTIVE') as status, COALESCE(pi.image_url, pi2.image_url) as imageUrl " +
                 "FROM ecommerce_db.products p " +
-                "LEFT JOIN ecommerce_db.categories c ON (p.category_id = c.id OR p.category_id = c.category_id) " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON (p.id = pi.product_id OR p.product_id = pi.product_id) " +
-                "ORDER BY COALESCE(p.id, p.product_id) DESC LIMIT " + limit;
+                "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db.productimages GROUP BY product_id) pi ON p.id = pi.product_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db.product_images GROUP BY product_id) pi2 ON p.id = pi2.product_id " +
+                "ORDER BY p.id DESC LIMIT " + limit;
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
@@ -377,17 +372,17 @@ public class AdminController {
 
             // Find or set category_id
             Integer categoryId = 1;
-            if (body.containsKey("category")) {
+            if (body.containsKey("category") && body.get("category") != null) {
                 String catName = (String) body.get("category");
                 try {
-                    List<Map<String, Object>> cats = jdbcTemplate.queryForList("SELECT category_id FROM ecommerce_db.categories WHERE category_name = ?", catName);
+                    List<Map<String, Object>> cats = jdbcTemplate.queryForList("SELECT id FROM ecommerce_db.categories WHERE name = ? OR category_name = ?", catName, catName);
                     if (!cats.isEmpty()) {
-                        categoryId = ((Number) cats.get(0).get("category_id")).intValue();
+                        categoryId = ((Number) cats.get(0).get("id")).intValue();
                     } else {
-                        jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description) VALUES (?, ?)", catName, catName + " collection");
-                        List<Map<String, Object>> newCats = jdbcTemplate.queryForList("SELECT category_id FROM ecommerce_db.categories WHERE category_name = ?", catName);
+                        jdbcTemplate.update("INSERT INTO ecommerce_db.categories (name, category_name, description) VALUES (?, ?, ?)", catName, catName, catName + " collection");
+                        List<Map<String, Object>> newCats = jdbcTemplate.queryForList("SELECT id FROM ecommerce_db.categories WHERE name = ? OR category_name = ?", catName, catName);
                         if (!newCats.isEmpty()) {
-                            categoryId = ((Number) newCats.get(0).get("category_id")).intValue();
+                            categoryId = ((Number) newCats.get(0).get("id")).intValue();
                         }
                     }
                 } catch (Exception ignored) {}
@@ -401,8 +396,8 @@ public class AdminController {
             Integer productId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
 
             if (productId != null && imageUrl != null && !imageUrl.trim().isEmpty()) {
-                String insertImgSql = "INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)";
-                jdbcTemplate.update(insertImgSql, productId, imageUrl.trim());
+                try { jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", productId, imageUrl.trim()); } catch (Exception ignored) {}
+                try { jdbcTemplate.update("INSERT INTO ecommerce_db.product_images (product_id, image_url, is_primary) VALUES (?, ?, TRUE)", productId, imageUrl.trim()); } catch (Exception ignored) {}
             }
 
             Map<String, Object> resp = new HashMap<>();
@@ -433,15 +428,39 @@ public class AdminController {
             String sku = body.get("sku") != null && !((String) body.get("sku")).trim().isEmpty() ? (String) body.get("sku") : "SKU-" + id + "-" + ((int)(Math.random() * 8999) + 1000);
             String status = body.containsKey("status") ? (String) body.get("status") : "ACTIVE";
 
-            String updateSql = "UPDATE ecommerce_db.products SET name=?, description=?, price=?, discount=?, stock=?, " +
-                    "weight=?, metal_type=?, gold_purity=?, diamond_details=?, stone_details=?, certificate_number=?, sku=?, status=? " +
-                    "WHERE product_id=?";
-            jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
+            Integer categoryId = null;
+            if (body.containsKey("category") && body.get("category") != null) {
+                String catName = (String) body.get("category");
+                try {
+                    List<Map<String, Object>> cats = jdbcTemplate.queryForList("SELECT id FROM ecommerce_db.categories WHERE name = ? OR category_name = ?", catName, catName);
+                    if (!cats.isEmpty()) {
+                        categoryId = ((Number) cats.get(0).get("id")).intValue();
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (categoryId != null) {
+                String updateSql = "UPDATE ecommerce_db.products SET name=?, category_id=?, description=?, price=?, discount=?, stock=?, " +
+                        "weight=?, metal_type=?, gold_purity=?, diamond_details=?, stone_details=?, certificate_number=?, sku=?, status=? " +
+                        "WHERE id=?";
+                jdbcTemplate.update(updateSql, name, categoryId, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
+            } else {
+                String updateSql = "UPDATE ecommerce_db.products SET name=?, description=?, price=?, discount=?, stock=?, " +
+                        "weight=?, metal_type=?, gold_purity=?, diamond_details=?, stone_details=?, certificate_number=?, sku=?, status=? " +
+                        "WHERE id=?";
+                jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
+            }
 
             if (body.containsKey("imageUrl") && body.get("imageUrl") != null) {
                 String imageUrl = (String) body.get("imageUrl");
-                jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
-                jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl.trim());
+                try {
+                    jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl.trim());
+                } catch (Exception ignored) {}
+                try {
+                    jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id);
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.product_images (product_id, image_url, is_primary) VALUES (?, ?, TRUE)", id, imageUrl.trim());
+                } catch (Exception ignored) {}
             }
 
             return ResponseEntity.ok(Map.of("message", "Product updated successfully"));
@@ -455,7 +474,7 @@ public class AdminController {
     public ResponseEntity<?> updateProductStock(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
             int stock = parseIntSafe(body.get("stock"), 0);
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET stock=? WHERE product_id=?", stock, id);
+            jdbcTemplate.update("UPDATE ecommerce_db.products SET stock=? WHERE id=?", stock, id);
             return ResponseEntity.ok(Map.of("message", "Stock updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating stock: " + e.getMessage());
@@ -466,7 +485,7 @@ public class AdminController {
     public ResponseEntity<?> updateProductPrice(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
             double price = parseDoubleSafe(body.get("price"), 0.0);
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET price=? WHERE product_id=?", price, id);
+            jdbcTemplate.update("UPDATE ecommerce_db.products SET price=? WHERE id=?", price, id);
             return ResponseEntity.ok(Map.of("message", "Price updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating price: " + e.getMessage());
@@ -477,7 +496,7 @@ public class AdminController {
     public ResponseEntity<?> toggleProductStatus(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
             String status = (String) body.get("status");
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET status=? WHERE product_id=?", status, id);
+            jdbcTemplate.update("UPDATE ecommerce_db.products SET status=? WHERE id=?", status, id);
             return ResponseEntity.ok(Map.of("message", "Product status updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating status: " + e.getMessage());
@@ -488,9 +507,10 @@ public class AdminController {
     public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
         ensureTablesExist();
         try {
-            jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
-            jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE product_id=?", id);
-            jdbcTemplate.update("DELETE FROM ecommerce_db.products WHERE product_id=?", id);
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE product_id=?", id); } catch (Exception ignored) {}
+            jdbcTemplate.update("DELETE FROM ecommerce_db.products WHERE id=?", id);
             return ResponseEntity.ok(Map.of("message", "Product deleted successfully from MySQL database"));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error deleting product: " + e.getMessage());
@@ -504,9 +524,9 @@ public class AdminController {
     public ResponseEntity<List<Map<String, Object>>> getCategories() {
         ensureTablesExist();
         try {
-            String sql = "SELECT COALESCE(c.id, c.category_id) as id, COALESCE(c.name, c.category_name) as name, " +
+            String sql = "SELECT c.id as id, COALESCE(c.name, c.category_name) as name, " +
                     "c.description, c.image_url as imageUrl, COALESCE(c.status, 'ACTIVE') as status, " +
-                    "(SELECT COUNT(*) FROM ecommerce_db.products p WHERE (p.category_id = c.id OR p.category_id = c.category_id)) as productCount " +
+                    "(SELECT COUNT(*) FROM ecommerce_db.products p WHERE p.category_id = c.id) as productCount " +
                     "FROM ecommerce_db.categories c";
             List<Map<String, Object>> cats = jdbcTemplate.queryForList(sql);
             return ResponseEntity.ok(cats);
@@ -530,8 +550,8 @@ public class AdminController {
             String imageUrl = body.containsKey("imageUrl") ? (String) body.get("imageUrl") : "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f";
             String status = body.containsKey("status") ? (String) body.get("status") : "ACTIVE";
 
-            jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description, image_url, status) VALUES (?, ?, ?, ?)",
-                    name, description, imageUrl, status);
+            jdbcTemplate.update("INSERT INTO ecommerce_db.categories (name, category_name, description, image_url, status) VALUES (?, ?, ?, ?, ?)",
+                    name, name, description, imageUrl, status);
             return ResponseEntity.ok(Map.of("message", "Category created successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error creating category: " + e.getMessage());
@@ -547,8 +567,8 @@ public class AdminController {
             String imageUrl = (String) body.get("imageUrl");
             String status = (String) body.get("status");
 
-            jdbcTemplate.update("UPDATE ecommerce_db.categories SET category_name=?, description=?, image_url=?, status=? WHERE category_id=?",
-                    name, description, imageUrl, status, id);
+            jdbcTemplate.update("UPDATE ecommerce_db.categories SET name=?, category_name=?, description=?, image_url=?, status=? WHERE id=?",
+                    name, name, description, imageUrl, status, id);
             return ResponseEntity.ok(Map.of("message", "Category updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating category: " + e.getMessage());
@@ -560,7 +580,7 @@ public class AdminController {
         ensureTablesExist();
         try {
             jdbcTemplate.update("UPDATE ecommerce_db.products SET category_id = NULL WHERE category_id = ?", id);
-            jdbcTemplate.update("DELETE FROM ecommerce_db.categories WHERE category_id = ?", id);
+            jdbcTemplate.update("DELETE FROM ecommerce_db.categories WHERE id = ?", id);
             return ResponseEntity.ok(Map.of("message", "Category deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", "Error deleting category: " + e.getMessage()));
@@ -786,12 +806,29 @@ public class AdminController {
     @GetMapping("/reviews")
     public ResponseEntity<List<Map<String, Object>>> getReviews() {
         ensureTablesExist();
-        String sql = "SELECT r.review_id as id, r.product_id as productId, p.name as productName, " +
-                "r.customer_name as customerName, r.rating, r.comment, r.status, r.created_at as date " +
+        // Seed default sample reviews if empty
+        try {
+            Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.reviews", Integer.class);
+            if (count == null || count == 0) {
+                jdbcTemplate.execute("INSERT INTO ecommerce_db.reviews (product_id, customer_name, rating, comment, status) VALUES " +
+                        "(111, 'Ananya Sharma', 5, 'Absolutely exquisite craftsmanship on the Nury Chevron Ring! Worth every rupee.', 'APPROVED'), " +
+                        "(115, 'Rohan Verma', 5, 'Stunning Mazikeen necklace. The gold shine and weight feel very premium.', 'APPROVED'), " +
+                        "(124, 'Priya Patel', 4, 'Beautiful traditional Kundan Jhumka earrings. Arrived in luxurious packaging.', 'APPROVED'), " +
+                        "(131, 'Vikram Mehta', 5, 'Top notch platinum solitaire ring. Certificate was included in the box.', 'APPROVED')");
+            }
+        } catch (Exception ignored) {}
+
+        String sql = "SELECT r.review_id as id, r.product_id as productId, COALESCE(p.name, 'Jewellery Item') as productName, " +
+                "r.customer_name as customerName, r.rating, r.comment, COALESCE(r.status, 'APPROVED') as status, r.created_at as date " +
                 "FROM ecommerce_db.reviews r " +
-                "LEFT JOIN ecommerce_db.products p ON r.product_id = p.product_id " +
-                "ORDER BY r.created_at DESC";
-        return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
+                "LEFT JOIN ecommerce_db.products p ON r.product_id = p.id " +
+                "ORDER BY r.review_id DESC";
+        try {
+            return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(new ArrayList<>());
+        }
     }
 
     @DeleteMapping("/reviews/{id}")
