@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Sparkles, Shield, Truck, Award, ArrowRight, Eye } from 'lucide-react'
 import Button from '../components/Button'
 import JewelryMotionReel from '../components/JewelryMotionReel'
-import LuxuryJewelryHero from '../components/LuxuryJewelryHero'
+import AlphaYouTubeCommercial from '../components/AlphaYouTubeCommercial'
 
 const features = [
   { icon: Sparkles, title: 'Handcrafted Excellence', text: 'Every piece is meticulously crafted by master artisans.' },
@@ -14,8 +14,8 @@ const features = [
 const Home = () => {
   return (
     <div className="home-page bg-cream-soft">
-      {/* Top Hero Section: Luxury Model Gold Necklace Background Banner */}
-      <LuxuryJewelryHero />
+      {/* 100vh Full Screen Auto-Loop Video Hero with Alpha Jewels & Explore Now button to /login */}
+      <AlphaYouTubeCommercial />
 
       {/* Large Featured Collections Grid (Attractive, Big Jewelry Images) */}
       <section className="section-padding py-5.5">
