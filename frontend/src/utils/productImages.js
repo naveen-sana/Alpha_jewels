@@ -1,4 +1,4 @@
-// Utility to resolve exact database images for products (with fallback for any missing images)
+// Utility to resolve exact database ImageKit images for products
 
 const DEFAULT_IMAGES = {
   Diamond: 'https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476',
@@ -60,16 +60,16 @@ const PRODUCT_SPECIFIC_IMAGES = {
 export const getProductImage = (product) => {
   if (!product) return DEFAULT_IMAGES.Diamond;
   
-  // 1. If API returns a valid image_url or imageUrl
-  const img = product.imageUrl || product.image_url;
-  if (img && typeof img === 'string' && img.trim() !== '' && !img.includes('photo-1605100804763-247f67b3557e')) {
-    return img;
-  }
-  
-  // 2. Lookup by exact product ID from database
+  // 1. Prioritize lookup by exact product ID from database
   const pid = Number(product.id || product.productId || product.product_id);
   if (pid && PRODUCT_SPECIFIC_IMAGES[pid]) {
     return PRODUCT_SPECIFIC_IMAGES[pid];
+  }
+  
+  // 2. If API returns a valid ImageKit or custom image_url
+  const img = product.imageUrl || product.image_url;
+  if (img && typeof img === 'string' && img.trim() !== '' && !img.includes('unsplash.com')) {
+    return img;
   }
 
   // 3. Fallback by Category Name
