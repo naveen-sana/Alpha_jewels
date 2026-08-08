@@ -19,7 +19,7 @@ const Navbar = () => {
   const [searchExpanded, setSearchExpanded] = useState(false)
 
   // Hide top global navbar on Home page and Admin pages
-  if (location.pathname === '/' || location.pathname.toLowerCase().includes('admin')) {
+  if (location.pathname === '/' || location.pathname.toLowerCase() === '/home' || location.pathname.toLowerCase() === '/home/' || location.pathname.toLowerCase().includes('admin')) {
     return null
   }
 
@@ -62,7 +62,7 @@ const Navbar = () => {
       <div className="top-luxury-header">
         <div className="container d-flex align-items-center justify-content-between flex-nowrap">
           {/* Logo / Brand Name (Left Corner) */}
-          <Link to={isAuthenticated ? "/shop" : "/"} className="header-brand-logo d-flex align-items-center gap-2 flex-shrink-0">
+          <Link to="/" className="header-brand-logo d-flex align-items-center gap-2 flex-shrink-0">
             <Gem size={32} className="text-gold" />
             <span className="brand-title-text text-white font-serif fs-3">
               Alpha <span className="text-gold">Jewels</span>

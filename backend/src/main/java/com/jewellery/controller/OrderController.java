@@ -135,12 +135,31 @@ public class OrderController {
                         "VALUES (?, ?, ?, ?, ?)";
                 for (Map<String, Object> item : items) {
                     Long productId = 1L;
-                    if (item.get("id") != null) productId = ((Number) item.get("id")).longValue();
-                    else if (item.get("productId") != null) productId = ((Number) item.get("productId")).longValue();
+                    Object rawId = item.get("id") != null ? item.get("id") : item.get("productId");
+                    if (rawId != null) {
+                        try {
+                            String idStr = rawId.toString().replaceAll("[^0-9]", "");
+                            if (!idStr.isEmpty()) productId = Long.parseLong(idStr);
+                        } catch (Exception ignored) {}
+                    }
 
-                    int quantity = item.get("quantity") != null ? ((Number) item.get("quantity")).intValue() : 1;
-                    double price = item.get("price") != null ? ((Number) item.get("price")).doubleValue() : 0.0;
-                    double subtotal = item.get("subtotal") != null ? ((Number) item.get("subtotal")).doubleValue() : (price * quantity);
+                    int quantity = 1;
+                    if (item.get("quantity") instanceof Number) quantity = ((Number) item.get("quantity")).intValue();
+                    else if (item.get("quantity") != null) {
+                        try { quantity = Integer.parseInt(item.get("quantity").toString()); } catch (Exception ignored) {}
+                    }
+
+                    double price = 0.0;
+                    if (item.get("price") instanceof Number) price = ((Number) item.get("price")).doubleValue();
+                    else if (item.get("price") != null) {
+                        try { price = Double.parseDouble(item.get("price").toString()); } catch (Exception ignored) {}
+                    }
+
+                    double subtotal = price * quantity;
+                    if (item.get("subtotal") instanceof Number) subtotal = ((Number) item.get("subtotal")).doubleValue();
+                    else if (item.get("subtotal") != null) {
+                        try { subtotal = Double.parseDouble(item.get("subtotal").toString()); } catch (Exception ignored) {}
+                    }
 
                     jdbcTemplate.update(insertItemSql, orderId, productId, quantity, price, subtotal);
                 }

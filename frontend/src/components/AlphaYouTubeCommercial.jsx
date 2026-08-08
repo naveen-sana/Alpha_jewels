@@ -10,7 +10,7 @@ const AlphaYouTubeCommercial = () => {
   const START_TIME_SEC = 35;     // Starts at lotus flower water dipping gold bangle scene (35s)
   const END_TIME_SEC = 49;       // Ends before 49s end card
 
-  const directEmbedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&start=${START_TIME_SEC}&end=${END_TIME_SEC}&modestbranding=1&rel=0&disablekb=1&iv_load_policy=3&fs=0&playsinline=1&enablejsapi=1`;
+  const directEmbedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&start=${START_TIME_SEC}&end=${END_TIME_SEC}&modestbranding=1&rel=0&disablekb=1&iv_load_policy=3&fs=0&playsinline=1&enablejsapi=1&showinfo=0`;
 
   useEffect(() => {
     const initPlayer = () => {
@@ -23,6 +23,8 @@ const AlphaYouTubeCommercial = () => {
               try {
                 if (typeof event.target.setPlaybackQuality === 'function') {
                   event.target.setPlaybackQuality('highres');
+                  event.target.setPlaybackQuality('hd2160');
+                  event.target.setPlaybackQuality('hd1440');
                   event.target.setPlaybackQuality('hd1080');
                 }
               } catch (e) {
@@ -95,21 +97,23 @@ const AlphaYouTubeCommercial = () => {
         height: '100vh', 
         width: '100vw',
         minWidth: '100vw',
-        left: '50%',
-        right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        marginTop: 0,
-        marginBottom: 0,
-        padding: 0
+        left: 0,
+        top: 0,
+        margin: 0,
+        padding: 0,
       }}
     >
-      {/* Absolute CSS rules blocking pointer events and focus on YouTube iframe */}
+      {/* Global CSS overrides to eliminate any left white gaps & disable youtube controls */}
       <style>{`
-        html, body, #root, .home-page {
+        html, body, #root, .app-shell, main {
           margin: 0 !important;
           padding: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
           overflow-x: hidden !important;
+        }
+        .alpha-fullscreen-video-hero {
+          background-color: #000000 !important;
         }
         #alpha-yt-iframe-player,
         .alpha-fullscreen-video-hero iframe {
@@ -127,7 +131,9 @@ const AlphaYouTubeCommercial = () => {
         .ytp-overlay-inline,
         .ytp-pause-overlay-container,
         .ytp-large-play-button,
-        .ytp-button {
+        .ytp-button,
+        .ytp-bezel,
+        .ytp-bezel-icon {
           display: none !important;
           opacity: 0 !important;
           visibility: hidden !important;
@@ -135,7 +141,7 @@ const AlphaYouTubeCommercial = () => {
         }
       `}</style>
 
-      {/* 100% Pure Full-Screen Video Container with User's Exact YouTube Video (pT0xD8UYbm0) */}
+      {/* 100% Pure Full-Screen Video Container */}
       <div
         className="w-100 h-100 position-relative overflow-hidden bg-black"
         style={{ border: 'none', margin: 0, padding: 0 }}
@@ -149,7 +155,7 @@ const AlphaYouTubeCommercial = () => {
           tabIndex="-1"
           aria-hidden="true"
           style={{
-            transform: 'scale(1.35)',
+            transform: 'scale(1.4)',
             transformOrigin: 'center center',
             pointerEvents: 'none',
             border: 'none',
@@ -169,6 +175,7 @@ const AlphaYouTubeCommercial = () => {
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
         onMouseUp={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
       />
 
       {/* Luxury Dark Overlay Top Header Bar (Z-Index 1000) */}
@@ -187,7 +194,7 @@ const AlphaYouTubeCommercial = () => {
           </span>
         </Link>
 
-        {/* Top-Right Login & Register Buttons */}
+        {/* Top-Right Header Actions: ONLY Login & Register */}
         <div className="d-flex align-items-center gap-3">
           <Link
             to="/login"

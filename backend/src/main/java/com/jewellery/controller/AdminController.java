@@ -605,12 +605,29 @@ public class AdminController {
                 "o.total_amount as grandTotal, COALESCE(o.payment_method, 'Razorpay Online') as paymentMethod, COALESCE(o.payment_status, 'COMPLETED') as paymentStatus, " +
                 "COALESCE(o.status, 'SUCCESS') as orderStatus, COALESCE(o.shipping_address, 'Standard Delivery Address') as shippingAddress, o.created_at as orderDate " +
                 "FROM ecommerce_db.orders o " +
-                "LEFT JOIN ecommerce_db." + userTable + " u ON (o.user_id = u.id OR o.user_id = u.user_id) " +
+                "LEFT JOIN ecommerce_db." + userTable + " u ON o.user_id = u.id " +
                 "ORDER BY o.created_at DESC LIMIT " + limit;
         try {
             List<Map<String, Object>> orders = jdbcTemplate.queryForList(sqlOrders);
             for (Map<String, Object> order : orders) {
                 String orderId = (String) order.get("orderId");
+                String custName = (String) order.get("customerName");
+                String shipAddr = (String) order.get("shippingAddress");
+
+                if (custName == null || custName.equalsIgnoreCase("Customer") || custName.trim().isEmpty()) {
+                    if (shipAddr != null && shipAddr.contains(",")) {
+                        String namePart = shipAddr.split(",")[0].trim();
+                        if (!namePart.isEmpty() && !namePart.toLowerCase().contains("house") && !namePart.toLowerCase().contains("street")) {
+                            order.put("customerName", namePart);
+                        }
+                    }
+                }
+
+                String status = (String) order.get("orderStatus");
+                if (status == null || status.equalsIgnoreCase("SUCCESS") || status.trim().isEmpty()) {
+                    order.put("orderStatus", "Confirmed");
+                }
+
                 String sqlItems = "SELECT oi.product_id as id, COALESCE(p.name, CONCAT('Jewellery Item #', oi.product_id)) as name, oi.quantity, oi.price_per_unit as price, oi.total_price as subtotal, pi.image_url as imageUrl " +
                         "FROM ecommerce_db.order_items oi " +
                         "LEFT JOIN ecommerce_db.products p ON oi.product_id = p.product_id " +
