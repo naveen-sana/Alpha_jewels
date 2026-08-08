@@ -140,12 +140,10 @@ const Checkout = () => {
       }
 
       const rawAmount = orderData.amount || Math.round(grandTotal * 100);
-      // Cap the amount sent to Razorpay Test SDK to max 149900 (₹1,499) so Razorpay test keys never throw "Amount exceeds maximum amount allowed", while preserving actual grandTotal for DB and verification!
-      const safeTestAmount = Math.min(rawAmount, 149900);
 
       const options = {
         key: orderData.key || 'rzp_test_TK7E94H666yiG6',
-        amount: safeTestAmount,
+        amount: rawAmount,
         currency: orderData.currency || 'INR',
         name: 'Alpha Jewels',
         description: `Order Payment (${totalProductsCount} item(s))`,

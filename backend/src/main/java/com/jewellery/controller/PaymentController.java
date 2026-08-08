@@ -114,16 +114,13 @@ public class PaymentController {
                 return ResponseEntity.badRequest().body("Invalid order amount");
             }
 
-            // Cap the amount passed to Razorpay test API to max 149900 (₹1,499) so Razorpay test keys don't throw "Amount exceeds maximum amount allowed", while preserving actual grandTotal for DB and verification!
-            long razorpayTestAmount = Math.min(amountInPaise, 149900L);
-
             String keyId = getRazorpayKeyId();
             String keySecret = getRazorpayKeySecret();
 
             RazorpayClient razorpayClient = new RazorpayClient(keyId, keySecret);
 
             JSONObject orderRequest = new JSONObject();
-            orderRequest.put("amount", razorpayTestAmount);
+            orderRequest.put("amount", amountInPaise);
             orderRequest.put("currency", "INR");
             orderRequest.put("receipt", "order_rcpt_" + userId + "_" + System.currentTimeMillis());
 
@@ -131,7 +128,7 @@ public class PaymentController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("orderId", razorpayOrder.get("id"));
-            response.put("amount", razorpayTestAmount);
+            response.put("amount", amountInPaise);
             response.put("currency", "INR");
             response.put("key", keyId);
             response.put("userEmail", email);

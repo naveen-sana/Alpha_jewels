@@ -139,14 +139,14 @@ public class ProductCartController {
             imgTable = "productimages";
         }
 
-        String sql = "SELECT p.id as id, p.name, p.description, p.price, COALESCE(p.stock, p.stock_quantity, 10) as stock, c.name as categoryName, pi.image_url as imageUrl " +
+        String sql = "SELECT p.product_id as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, c.category_name as categoryName, pi.image_url as imageUrl " +
                      "FROM ecommerce_db.products p " +
-                     "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.id " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.id = pi.product_id";
+                     "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.category_id " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id";
 
         try {
             if (category != null && !category.trim().isEmpty()) {
-                String filterSql = sql + " WHERE LOWER(c.name) = LOWER(?)";
+                String filterSql = sql + " WHERE LOWER(c.category_name) = LOWER(?)";
                 List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim());
                 if (filtered != null && !filtered.isEmpty()) {
                     return filtered;
@@ -156,7 +156,7 @@ public class ProductCartController {
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String fallbackSql = "SELECT p.id as id, p.name, p.description, p.price, 10 as stock, 'Jewelry' as categoryName, NULL as imageUrl FROM ecommerce_db.products p";
+                String fallbackSql = "SELECT p.product_id as id, p.name, p.description, p.price, 10 as stock, 'Jewelry' as categoryName, NULL as imageUrl FROM ecommerce_db.products p";
                 return jdbcTemplate.queryForList(fallbackSql);
             } catch (Exception ignored) {
                 return new ArrayList<>();
@@ -209,11 +209,11 @@ public class ProductCartController {
         } catch (Exception ignored) { imgTable = "productimages"; }
 
         String sql = "SELECT ci.id as cart_item_id, ci.product_id, ci.quantity, " +
-                     "p.name, p.description, p.price as price_per_unit, COALESCE(p.stock, p.stock_quantity, 10) as stock, " +
+                     "p.name, p.description, p.price as price_per_unit, COALESCE(p.stock, 10) as stock, " +
                      "pi.image_url " +
                      "FROM ecommerce_db.cart_items ci " +
-                     "JOIN ecommerce_db.products p ON (ci.product_id = p.id OR ci.product_id = p.product_id) " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON (p.id = pi.product_id OR p.product_id = pi.product_id) " +
+                     "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
                      "WHERE ci.user_id = ?";
 
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, userId);

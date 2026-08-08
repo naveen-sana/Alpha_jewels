@@ -140,18 +140,15 @@ export const OrderProvider = ({ children }) => {
 
     // Sync to backend database
     try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        await apiClient.post('/api/orders/create', {
-          orderId: formattedOrder.orderId,
-          grandTotal: formattedOrder.grandTotal,
-          status: formattedOrder.status,
-          paymentMethod: formattedOrder.paymentMethod,
-          paymentStatus: formattedOrder.paymentStatus,
-          shippingAddress: formattedOrder.shippingAddress,
-          items: formattedOrder.items,
-        });
-      }
+      await apiClient.post('/api/orders/create', {
+        orderId: formattedOrder.orderId,
+        grandTotal: formattedOrder.grandTotal,
+        status: formattedOrder.status,
+        paymentMethod: formattedOrder.paymentMethod,
+        paymentStatus: formattedOrder.paymentStatus,
+        shippingAddress: formattedOrder.shippingAddress,
+        items: formattedOrder.items,
+      });
     } catch (e) {
       console.warn('Failed to save order to database:', e);
     }

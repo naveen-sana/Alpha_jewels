@@ -305,29 +305,29 @@ public class AdminController {
     }
 
     private List<Map<String, Object>> getProductsListInternal(int limit) {
-        String imgTable = "product_images";
+        String imgTable = "productimages";
         try {
             List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check == null || check.isEmpty()) imgTable = "productimages";
-        } catch (Exception ignored) { imgTable = "productimages"; }
+            if (check != null && !check.isEmpty()) imgTable = "product_images";
+        } catch (Exception ignored) {}
 
-        String sql = "SELECT COALESCE(p.id, p.product_id) as id, p.name, p.category_id as categoryId, COALESCE(c.name, c.category_name, 'Jewellery') as category, " +
-                "p.description, p.price, COALESCE(p.discount, 0.00) as discount, COALESCE(p.stock, p.stock_quantity, 10) as stock, " +
+        String sql = "SELECT p.product_id as id, p.name, p.category_id as categoryId, COALESCE(c.category_name, 'Jewellery') as category, " +
+                "p.description, p.price, COALESCE(p.discount, 0.00) as discount, COALESCE(p.stock, 10) as stock, " +
                 "COALESCE(p.weight, '10g') as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
                 "COALESCE(p.gold_purity, '22K') as goldPurity, COALESCE(p.diamond_details, 'VS1 / G-H Color') as diamondDetails, " +
                 "COALESCE(p.stone_details, 'Natural Diamond') as stoneDetails, " +
-                "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', COALESCE(p.id, p.product_id))) as sku, " +
+                "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', p.product_id)) as sku, " +
                 "COALESCE(p.status, 'ACTIVE') as status, pi.image_url as imageUrl " +
                 "FROM ecommerce_db.products p " +
-                "LEFT JOIN ecommerce_db.categories c ON (p.category_id = c.id OR p.category_id = c.category_id) " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON (p.id = pi.product_id OR p.product_id = pi.product_id) " +
-                "ORDER BY COALESCE(p.id, p.product_id) DESC LIMIT " + limit;
+                "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.category_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                "ORDER BY p.product_id DESC LIMIT " + limit;
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String simpleSql = "SELECT p.id as id, p.name, 'Jewellery' as category, p.description, p.price, 0 as discount, 10 as stock, 'ACTIVE' as status FROM ecommerce_db.products p LIMIT " + limit;
+                String simpleSql = "SELECT p.product_id as id, p.name, 'Jewellery' as category, p.description, p.price, 0 as discount, 10 as stock, 'ACTIVE' as status FROM ecommerce_db.products p LIMIT " + limit;
                 return jdbcTemplate.queryForList(simpleSql);
             } catch (Exception ignored) {
                 return new ArrayList<>();
@@ -401,8 +401,13 @@ public class AdminController {
             Integer productId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
 
             if (productId != null && imageUrl != null && !imageUrl.trim().isEmpty()) {
-                String insertImgSql = "INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)";
-                jdbcTemplate.update(insertImgSql, productId, imageUrl.trim());
+                String cleanUrl = imageUrl.trim();
+                try {
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", productId, cleanUrl);
+                } catch (Exception ignored) {}
+                try {
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.product_images (product_id, image_url) VALUES (?, ?)", productId, cleanUrl);
+                } catch (Exception ignored) {}
             }
 
             Map<String, Object> resp = new HashMap<>();
@@ -439,9 +444,15 @@ public class AdminController {
             jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
 
             if (body.containsKey("imageUrl") && body.get("imageUrl") != null) {
-                String imageUrl = (String) body.get("imageUrl");
-                jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
-                jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl.trim());
+                String imageUrl = ((String) body.get("imageUrl")).trim();
+                try {
+                    jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl);
+                } catch (Exception ignored) {}
+                try {
+                    jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id);
+                    jdbcTemplate.update("INSERT INTO ecommerce_db.product_images (product_id, image_url) VALUES (?, ?)", id, imageUrl);
+                } catch (Exception ignored) {}
             }
 
             return ResponseEntity.ok(Map.of("message", "Product updated successfully"));
@@ -489,6 +500,7 @@ public class AdminController {
         ensureTablesExist();
         try {
             jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id); } catch (Exception ignored) {}
             jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE product_id=?", id);
             jdbcTemplate.update("DELETE FROM ecommerce_db.products WHERE product_id=?", id);
             return ResponseEntity.ok(Map.of("message", "Product deleted successfully from MySQL database"));
@@ -504,16 +516,16 @@ public class AdminController {
     public ResponseEntity<List<Map<String, Object>>> getCategories() {
         ensureTablesExist();
         try {
-            String sql = "SELECT COALESCE(c.id, c.category_id) as id, COALESCE(c.name, c.category_name) as name, " +
+            String sql = "SELECT c.category_id as id, c.category_name as name, " +
                     "c.description, c.image_url as imageUrl, COALESCE(c.status, 'ACTIVE') as status, " +
-                    "(SELECT COUNT(*) FROM ecommerce_db.products p WHERE (p.category_id = c.id OR p.category_id = c.category_id)) as productCount " +
-                    "FROM ecommerce_db.categories c";
+                    "(SELECT COUNT(*) FROM ecommerce_db.products p WHERE p.category_id = c.category_id) as productCount " +
+                    "FROM ecommerce_db.categories c ORDER BY c.category_id ASC";
             List<Map<String, Object>> cats = jdbcTemplate.queryForList(sql);
             return ResponseEntity.ok(cats);
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String simpleSql = "SELECT id, name, description, image_url as imageUrl, status, 10 as productCount FROM ecommerce_db.categories";
+                String simpleSql = "SELECT category_id as id, category_name as name, description, image_url as imageUrl, status, 10 as productCount FROM ecommerce_db.categories";
                 return ResponseEntity.ok(jdbcTemplate.queryForList(simpleSql));
             } catch (Exception ignored) {
                 return ResponseEntity.ok(new ArrayList<>());
@@ -577,26 +589,32 @@ public class AdminController {
     }
 
     private List<Map<String, Object>> getOrdersListInternal(int limit) {
-        String imgTable = "product_images";
+        String imgTable = "productimages";
         try {
             List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check == null || check.isEmpty()) imgTable = "productimages";
-        } catch (Exception ignored) { imgTable = "productimages"; }
+            if (check != null && !check.isEmpty()) imgTable = "product_images";
+        } catch (Exception ignored) {}
 
-        String sqlOrders = "SELECT o.order_id as orderId, o.user_id as userId, u.full_name as customerName, u.email as customerEmail, " +
-                "o.total_amount as grandTotal, o.payment_method as paymentMethod, o.payment_status as paymentStatus, " +
-                "o.status as orderStatus, o.shipping_address as shippingAddress, o.created_at as orderDate " +
+        String userTable = "user";
+        try {
+            List<Map<String, Object>> checkU = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='users'");
+            if (checkU != null && !checkU.isEmpty()) userTable = "users";
+        } catch (Exception ignored) {}
+
+        String sqlOrders = "SELECT o.order_id as orderId, o.user_id as userId, COALESCE(u.full_name, 'Customer') as customerName, COALESCE(u.email, 'customer@alphajewels.com') as customerEmail, " +
+                "o.total_amount as grandTotal, COALESCE(o.payment_method, 'Razorpay Online') as paymentMethod, COALESCE(o.payment_status, 'COMPLETED') as paymentStatus, " +
+                "COALESCE(o.status, 'SUCCESS') as orderStatus, COALESCE(o.shipping_address, 'Standard Delivery Address') as shippingAddress, o.created_at as orderDate " +
                 "FROM ecommerce_db.orders o " +
-                "LEFT JOIN ecommerce_db.user u ON o.user_id = u.id " +
+                "LEFT JOIN ecommerce_db." + userTable + " u ON (o.user_id = u.id OR o.user_id = u.user_id) " +
                 "ORDER BY o.created_at DESC LIMIT " + limit;
         try {
             List<Map<String, Object>> orders = jdbcTemplate.queryForList(sqlOrders);
             for (Map<String, Object> order : orders) {
                 String orderId = (String) order.get("orderId");
-                String sqlItems = "SELECT oi.product_id as id, p.name, oi.quantity, oi.price_per_unit as price, oi.total_price as subtotal, pi.image_url as imageUrl " +
+                String sqlItems = "SELECT oi.product_id as id, COALESCE(p.name, CONCAT('Jewellery Item #', oi.product_id)) as name, oi.quantity, oi.price_per_unit as price, oi.total_price as subtotal, pi.image_url as imageUrl " +
                         "FROM ecommerce_db.order_items oi " +
-                        "LEFT JOIN ecommerce_db.products p ON (oi.product_id = p.id OR oi.product_id = p.product_id) " +
-                        "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON (p.id = pi.product_id OR p.product_id = pi.product_id) " +
+                        "LEFT JOIN ecommerce_db.products p ON oi.product_id = p.product_id " +
+                        "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
                         "WHERE oi.order_id = ?";
                 List<Map<String, Object>> items = jdbcTemplate.queryForList(sqlItems, orderId);
                 order.put("items", items);
