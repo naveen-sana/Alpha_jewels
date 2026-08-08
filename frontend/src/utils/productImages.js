@@ -1,4 +1,4 @@
-// Utility to resolve exact database images for products (with fallback for any missing images)
+// Utility to resolve live database image URLs with dynamic fallbacks
 
 const DEFAULT_IMAGES = {
   Diamond: 'https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476',
@@ -8,7 +8,7 @@ const DEFAULT_IMAGES = {
 };
 
 const PRODUCT_SPECIFIC_IMAGES = {
-  // Diamond Collection (111 - 120) - StringstackNaveen
+  // Diamond Collection (111 - 120)
   111: 'https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476',
   112: 'https://ik.imagekit.io/StringstackNaveen/ring4-the%20trina%20ring(m).webp?updatedAt=1785154301792',
   113: 'https://ik.imagekit.io/StringstackNaveen/earring1.webp?updatedAt=1785154351435',
@@ -20,7 +20,7 @@ const PRODUCT_SPECIFIC_IMAGES = {
   119: 'https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553',
   120: 'https://ik.imagekit.io/StringstackNaveen/bangle%202.webp?updatedAt=1785155972034',
 
-  // Gold Collection (121 - 130) - StringstackNaveen
+  // Gold Collection (121 - 130)
   121: 'https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg',
   122: 'https://ik.imagekit.io/StringstackNaveen/gold%20ring1.jpg',
   123: 'https://ik.imagekit.io/StringstackNaveen/earrings.jpg',
@@ -32,7 +32,7 @@ const PRODUCT_SPECIFIC_IMAGES = {
   129: 'https://ik.imagekit.io/StringstackNaveen/bangles-1.webp',
   130: 'https://ik.imagekit.io/StringstackNaveen/bangle2.jpg',
 
-  // Platinum Collection (131 - 140) - StringstackSanjana & StringstackNaveen
+  // Platinum Collection (131 - 140)
   131: 'https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp',
   132: 'https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%202.webp',
   133: 'https://ik.imagekit.io/StringstackSanjana/Platinum/ear%201.jpeg',
@@ -44,7 +44,7 @@ const PRODUCT_SPECIFIC_IMAGES = {
   139: 'https://ik.imagekit.io/StringstackSanjana/Platinum/braclet%201.webp',
   140: 'https://ik.imagekit.io/StringstackSanjana/Platinum/BANG%203.webp',
 
-  // Silver Collection (141 - 150) - StringStackSavitri
+  // Silver Collection (141 - 150)
   141: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp',
   142: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image2.webp',
   143: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image3.webp',
@@ -60,13 +60,13 @@ const PRODUCT_SPECIFIC_IMAGES = {
 export const getProductImage = (product) => {
   if (!product) return DEFAULT_IMAGES.Diamond;
   
-  // 1. If API returns a valid image_url or imageUrl
-  const img = product.imageUrl || product.image_url;
-  if (img && typeof img === 'string' && img.trim() !== '' && !img.includes('photo-1605100804763-247f67b3557e')) {
-    return img;
+  // 1. ALWAYS PRIORITIZE LIVE DATABASE URL FROM MYSQL (product.imageUrl / product.image_url)
+  const dbImg = product.imageUrl || product.image_url;
+  if (dbImg && typeof dbImg === 'string' && dbImg.trim().startsWith('http') && !dbImg.includes('unsplash.com')) {
+    return dbImg.trim();
   }
-  
-  // 2. Lookup by exact product ID from database
+
+  // 2. Fallback to product-specific map if database image is missing
   const pid = Number(product.id || product.productId || product.product_id);
   if (pid && PRODUCT_SPECIFIC_IMAGES[pid]) {
     return PRODUCT_SPECIFIC_IMAGES[pid];
