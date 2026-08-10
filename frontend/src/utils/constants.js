@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.DEV ? '' : 'http://localhost:9090'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 export const STORAGE_KEYS = {
   TOKEN: 'jewellery_token',

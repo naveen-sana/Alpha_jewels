@@ -40,11 +40,10 @@ const AdminLogin = () => {
 
     setLoading(true)
 
-    const endpoints = [
-      '/api/users/login',
-      'http://localhost:9090/api/users/login',
-      'http://localhost:8080/api/users/login'
-    ]
+    const envApiUrl = import.meta.env.VITE_API_URL || ''
+    const endpoints = envApiUrl
+      ? [`${envApiUrl}/api/users/login`, '/api/users/login']
+      : ['/api/users/login', 'http://localhost:9090/api/users/login', 'http://localhost:8080/api/users/login']
 
     let response = null
 
