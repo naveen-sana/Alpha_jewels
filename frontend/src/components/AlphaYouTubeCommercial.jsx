@@ -34,29 +34,47 @@ const AlphaYouTubeCommercial = () => {
           width: 100% !important;
           max-width: 100% !important;
           overflow-x: hidden !important;
+          border-radius: 0 !important;
         }
         .alpha-fullscreen-video-hero {
           background-color: #000000 !important;
           position: relative !important;
           left: 0 !important;
           top: 0 !important;
-          width: 100% !important;
+          right: 0 !important;
+          width: 100vw !important;
+          max-width: 100vw !important;
           height: 100vh !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          box-shadow: none !important;
+          outline: none !important;
+          border: none !important;
           overflow: hidden !important;
         }
         .alpha-video-bg {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          width: 100% !important;
-          height: 100% !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          min-width: 100% !important;
+          min-height: 100% !important;
           object-fit: cover !important;
           object-position: center !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          border: none !important;
+          outline: none !important;
           pointer-events: none !important;
           user-select: none !important;
           -webkit-user-select: none !important;
           touch-action: none !important;
-          transform: scale(1.05) !important;
+          transform: scale(1.08) !important;
         }
       `}</style>
 

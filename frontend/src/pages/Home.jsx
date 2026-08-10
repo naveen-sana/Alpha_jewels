@@ -13,7 +13,7 @@ const features = [
 
 const Home = () => {
   return (
-    <div className="home-page bg-cream-soft">
+    <div className="home-page bg-cream-soft p-0 m-0 w-100 overflow-hidden">
       {/* 100vh Full Screen Auto-Loop Video Hero with Alpha Jewels & Explore Now button to /login */}
       <AlphaYouTubeCommercial />
 
