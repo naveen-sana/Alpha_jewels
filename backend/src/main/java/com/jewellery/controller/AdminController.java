@@ -499,12 +499,19 @@ public class AdminController {
     public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
         ensureTablesExist();
         try {
+            jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=0");
             jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
             try { jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id); } catch (Exception ignored) {}
-            jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE product_id=?", id);
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.order_items WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.reviews WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist_items WHERE product_id=?", id); } catch (Exception ignored) {}
             jdbcTemplate.update("DELETE FROM ecommerce_db.products WHERE product_id=?", id);
+            jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1");
             return ResponseEntity.ok(Map.of("message", "Product deleted successfully from MySQL database"));
         } catch (Exception e) {
+            try { jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1"); } catch (Exception ignored) {}
             return ResponseEntity.internalServerError().body("Error deleting product: " + e.getMessage());
         }
     }

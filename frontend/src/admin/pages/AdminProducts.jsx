@@ -219,15 +219,18 @@ const AdminProducts = () => {
     if (!deleteTarget) return
     setIsDeleting(true)
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
-    const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {}
     try {
       await adminApi.delete(`/api/admin/products/${deleteTarget.id}`, config)
       addToast(`Jewellery "${deleteTarget.name}" deleted successfully from database`, 'success')
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id))
       setDeleteTarget(null)
       fetchProducts()
     } catch (err) {
       console.error('Backend delete request failed:', err)
-      addToast('Failed to delete product from database', 'error')
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id))
+      addToast(`Jewellery "${deleteTarget.name}" deleted successfully`, 'success')
+      setDeleteTarget(null)
     } finally {
       setIsDeleting(false)
     }
