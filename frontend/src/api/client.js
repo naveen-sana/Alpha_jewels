@@ -38,7 +38,24 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       clearAuthStorage()
 
-      if (window.location.pathname !== '/login') {
+      const protectedPrefixes = [
+        '/checkout',
+        '/orders',
+        '/order-history',
+        '/my-orders',
+        '/dashboard',
+        '/profile',
+        '/change-password',
+        '/admin',
+      ]
+
+      const currentPath = window.location.pathname.toLowerCase()
+      const isProtected = protectedPrefixes.some(
+        (prefix) => currentPath === prefix || currentPath.startsWith(prefix + '/')
+      )
+      const isAdminLogin = currentPath.startsWith('/admin/login')
+
+      if (isProtected && !isAdminLogin && currentPath !== '/login') {
         window.location.href = '/login'
       }
     }

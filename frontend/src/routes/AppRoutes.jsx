@@ -36,11 +36,6 @@ const AppRoutes = () => {
       {/* Customer Store Front Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/home" element={<Home />} />
-      <Route path="/home/" element={<Home />} />
-      <Route path="/Home" element={<Home />} />
-      <Route path="/Home/" element={<Home />} />
-      <Route path="/HOME" element={<Home />} />
-      <Route path="/HOME/" element={<Home />} />
       <Route path="/index" element={<Home />} />
       <Route path="/index.html" element={<Home />} />
       <Route path="/register" element={<Register />} />
