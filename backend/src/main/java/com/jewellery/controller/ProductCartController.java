@@ -48,19 +48,19 @@ public class ProductCartController {
     private void ensureProductTablesExist() {
         try {
             jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categories (" +
-                                 "category_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                 "category_id SERIAL PRIMARY KEY, " +
                                  "category_name VARCHAR(100) NOT NULL UNIQUE, " +
                                  "description TEXT, " +
                                  "image_url VARCHAR(500), " +
                                  "status VARCHAR(20) DEFAULT 'ACTIVE')");
             jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS products (" +
-                                 "product_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                 "product_id SERIAL PRIMARY KEY, " +
                                  "name VARCHAR(255) NOT NULL, " +
                                  "category_id INT, " +
                                  "description TEXT, " +
                                  "price DECIMAL(10, 2) NOT NULL, " +
                                  "discount DECIMAL(5, 2) DEFAULT 0.00, " +
-                                 "stock INT DEFAULT 0, " +
+                                 "stock INT DEFAULT 10, " +
                                  "weight DECIMAL(8, 2), " +
                                  "metal_type VARCHAR(50), " +
                                  "gold_purity VARCHAR(50) DEFAULT '22K', " +
@@ -70,7 +70,7 @@ public class ProductCartController {
                                  "sku VARCHAR(100), " +
                                  "status VARCHAR(20) DEFAULT 'ACTIVE')");
             jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS productimages (" +
-                                 "image_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                 "image_id SERIAL PRIMARY KEY, " +
                                  "product_id INT NOT NULL, " +
                                  "image_url TEXT NOT NULL, " +
                                  "is_thumbnail BOOLEAN DEFAULT TRUE)");
