@@ -24,145 +24,150 @@ public class AdminController {
     public void ensureTablesExist() {
         try {
             // Categories table
-            String createCategoriesSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.categories (" +
-                    "category_id INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "category_name VARCHAR(100) NOT NULL UNIQUE, " +
-                    "description TEXT, " +
-                    "image_url VARCHAR(500), " +
-                    "status VARCHAR(20) DEFAULT 'ACTIVE', " +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ")";
-            jdbcTemplate.execute(createCategoriesSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categories (" +
+                        "category_id SERIAL PRIMARY KEY, " +
+                        "category_name VARCHAR(100) NOT NULL UNIQUE, " +
+                        "description TEXT, " +
+                        "image_url VARCHAR(500), " +
+                        "status VARCHAR(20) DEFAULT 'ACTIVE', " +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                        ")");
+            } catch (Exception ignored) {}
 
             // Seed default categories if empty
-            Integer catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.categories", Integer.class);
-            if (catCount == null || catCount == 0) {
-                String[] defaultCats = {"Rings", "Necklaces", "Earrings", "Bracelets", "Bangles", "Chains", "Pendants", "Anklets", "Collections"};
-                for (String cat : defaultCats) {
-                    try {
-                        jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description, status) VALUES (?, ?, 'ACTIVE')",
-                                cat, cat + " luxury jewellery collection");
-                    } catch (Exception ignored) {}
+            try {
+                Integer catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories", Integer.class);
+                if (catCount == null || catCount == 0) {
+                    String[] defaultCats = {"Rings", "Necklaces", "Earrings", "Bracelets", "Bangles", "Chains", "Pendants", "Anklets", "Collections"};
+                    for (String cat : defaultCats) {
+                        try {
+                            jdbcTemplate.update("INSERT INTO categories (category_name, description, status) VALUES (?, ?, 'ACTIVE')",
+                                    cat, cat + " luxury jewellery collection");
+                        } catch (Exception ignored) {}
+                    }
                 }
-            }
+            } catch (Exception ignored) {}
 
             // Products table
-            String createProductsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.products (" +
-                    "product_id INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "name VARCHAR(255) NOT NULL, " +
-                    "category_id INT, " +
-                    "description TEXT, " +
-                    "price DECIMAL(12, 2) NOT NULL DEFAULT 0.00, " +
-                    "discount DECIMAL(5, 2) DEFAULT 0.00, " +
-                    "stock INT NOT NULL DEFAULT 10, " +
-                    "weight VARCHAR(50) DEFAULT '10g', " +
-                    "metal_type VARCHAR(50) DEFAULT 'Gold', " +
-                    "gold_purity VARCHAR(50) DEFAULT '22K', " +
-                    "diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color', " +
-                    "stone_details VARCHAR(255) DEFAULT 'Natural Diamond', " +
-                    "certificate_number VARCHAR(100), " +
-                    "sku VARCHAR(100) UNIQUE, " +
-                    "status VARCHAR(20) DEFAULT 'ACTIVE', " +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                    "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" +
-                    ")";
-            jdbcTemplate.execute(createProductsSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS products (" +
+                        "product_id SERIAL PRIMARY KEY, " +
+                        "name VARCHAR(255) NOT NULL, " +
+                        "category_id INT, " +
+                        "description TEXT, " +
+                        "price DECIMAL(12, 2) NOT NULL DEFAULT 0.00, " +
+                        "discount DECIMAL(5, 2) DEFAULT 0.00, " +
+                        "stock INT NOT NULL DEFAULT 10, " +
+                        "weight VARCHAR(50) DEFAULT '10g', " +
+                        "metal_type VARCHAR(50) DEFAULT 'Gold', " +
+                        "gold_purity VARCHAR(50) DEFAULT '22K', " +
+                        "diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color', " +
+                        "stone_details VARCHAR(255) DEFAULT 'Natural Diamond', " +
+                        "certificate_number VARCHAR(100), " +
+                        "sku VARCHAR(100) UNIQUE, " +
+                        "status VARCHAR(20) DEFAULT 'ACTIVE', " +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                        ")");
+            } catch (Exception ignored) {}
 
             // Add missing columns to products table if existing table had fewer columns
             String[] columnsToAdd = {
-                "ALTER TABLE ecommerce_db.products ADD COLUMN weight VARCHAR(50) DEFAULT '10g'",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN metal_type VARCHAR(50) DEFAULT 'Gold'",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN gold_purity VARCHAR(50) DEFAULT '22K'",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color'",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN stone_details VARCHAR(255) DEFAULT 'Natural Diamond'",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN certificate_number VARCHAR(100)",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN sku VARCHAR(100)",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"
+                "ALTER TABLE products ADD COLUMN weight VARCHAR(50) DEFAULT '10g'",
+                "ALTER TABLE products ADD COLUMN metal_type VARCHAR(50) DEFAULT 'Gold'",
+                "ALTER TABLE products ADD COLUMN gold_purity VARCHAR(50) DEFAULT '22K'",
+                "ALTER TABLE products ADD COLUMN diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color'",
+                "ALTER TABLE products ADD COLUMN stone_details VARCHAR(255) DEFAULT 'Natural Diamond'",
+                "ALTER TABLE products ADD COLUMN certificate_number VARCHAR(100)",
+                "ALTER TABLE products ADD COLUMN sku VARCHAR(100)",
+                "ALTER TABLE products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00",
+                "ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"
             };
             for (String alterSql : columnsToAdd) {
                 try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
             }
 
             // Product Images table
-            String createImagesSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.productimages (" +
-                    "image_id INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "product_id INT NOT NULL, " +
-                    "image_url TEXT NOT NULL, " +
-                    "is_thumbnail BOOLEAN DEFAULT TRUE" +
-                    ")";
-            jdbcTemplate.execute(createImagesSql);
-            try { jdbcTemplate.execute("ALTER TABLE ecommerce_db.productimages MODIFY COLUMN image_url TEXT"); } catch (Exception ignored) {}
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS productimages (" +
+                        "image_id SERIAL PRIMARY KEY, " +
+                        "product_id INT NOT NULL, " +
+                        "image_url TEXT NOT NULL, " +
+                        "is_thumbnail BOOLEAN DEFAULT TRUE" +
+                        ")");
+            } catch (Exception ignored) {}
 
             // Orders table
-            String createOrdersSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.orders (" +
-                    "order_id VARCHAR(100) PRIMARY KEY, " +
-                    "user_id BIGINT NOT NULL, " +
-                    "total_amount DECIMAL(12, 2) NOT NULL, " +
-                    "payment_method VARCHAR(50) DEFAULT 'Credit Card', " +
-                    "payment_status VARCHAR(50) DEFAULT 'Paid', " +
-                    "status VARCHAR(50) NOT NULL DEFAULT 'Delivered', " +
-                    "shipping_address TEXT, " +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                    "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" +
-                    ")";
-            jdbcTemplate.execute(createOrdersSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS orders (" +
+                        "order_id VARCHAR(100) PRIMARY KEY, " +
+                        "user_id BIGINT NOT NULL, " +
+                        "total_amount DECIMAL(12, 2) NOT NULL, " +
+                        "payment_method VARCHAR(50) DEFAULT 'Credit Card', " +
+                        "payment_status VARCHAR(50) DEFAULT 'Paid', " +
+                        "status VARCHAR(50) NOT NULL DEFAULT 'Delivered', " +
+                        "shipping_address TEXT, " +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                        ")");
+            } catch (Exception ignored) {}
 
             String[] orderColsToAdd = {
-                "ALTER TABLE ecommerce_db.orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Credit Card'",
-                "ALTER TABLE ecommerce_db.orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'Paid'",
-                "ALTER TABLE ecommerce_db.orders ADD COLUMN shipping_address TEXT"
+                "ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Credit Card'",
+                "ALTER TABLE orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'Paid'",
+                "ALTER TABLE orders ADD COLUMN shipping_address TEXT"
             };
             for (String alterSql : orderColsToAdd) {
                 try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
             }
 
             // Order Items table
-            String createOrderItemsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.order_items (" +
-                    "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                    "order_id VARCHAR(100) NOT NULL, " +
-                    "product_id BIGINT NOT NULL, " +
-                    "quantity INT NOT NULL DEFAULT 1, " +
-                    "price_per_unit DECIMAL(12, 2) NOT NULL, " +
-                    "total_price DECIMAL(12, 2) NOT NULL" +
-                    ")";
-            jdbcTemplate.execute(createOrderItemsSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS order_items (" +
+                        "id SERIAL PRIMARY KEY, " +
+                        "order_id VARCHAR(100) NOT NULL, " +
+                        "product_id BIGINT NOT NULL, " +
+                        "quantity INT NOT NULL DEFAULT 1, " +
+                        "price_per_unit DECIMAL(12, 2) NOT NULL, " +
+                        "total_price DECIMAL(12, 2) NOT NULL" +
+                        ")");
+            } catch (Exception ignored) {}
 
             // Coupons table
-            String createCouponsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.coupons (" +
-                    "coupon_id INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "code VARCHAR(50) NOT NULL UNIQUE, " +
-                    "discount_percentage DECIMAL(5, 2) NOT NULL, " +
-                    "min_spend DECIMAL(12, 2) DEFAULT 0.00, " +
-                    "expiry_date VARCHAR(50), " +
-                    "status VARCHAR(20) DEFAULT 'ACTIVE', " +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ")";
-            jdbcTemplate.execute(createCouponsSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS coupons (" +
+                        "coupon_id SERIAL PRIMARY KEY, " +
+                        "code VARCHAR(50) NOT NULL UNIQUE, " +
+                        "discount_percentage DECIMAL(5, 2) NOT NULL, " +
+                        "min_spend DECIMAL(12, 2) DEFAULT 0.00, " +
+                        "expiry_date VARCHAR(50), " +
+                        "status VARCHAR(20) DEFAULT 'ACTIVE', " +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                        ")");
+            } catch (Exception ignored) {}
 
             // Reviews table
-            String createReviewsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.reviews (" +
-                    "review_id INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "product_id INT, " +
-                    "user_id BIGINT, " +
-                    "customer_name VARCHAR(100), " +
-                    "rating INT DEFAULT 5, " +
-                    "comment TEXT, " +
-                    "status VARCHAR(20) DEFAULT 'APPROVED', " +
-                    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                    ")";
-            jdbcTemplate.execute(createReviewsSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS reviews (" +
+                        "review_id SERIAL PRIMARY KEY, " +
+                        "product_id INT, " +
+                        "user_id BIGINT, " +
+                        "customer_name VARCHAR(100), " +
+                        "rating INT DEFAULT 5, " +
+                        "comment TEXT, " +
+                        "status VARCHAR(20) DEFAULT 'APPROVED', " +
+                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                        ")");
+            } catch (Exception ignored) {}
 
             // Store Settings table
-            String createSettingsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.store_settings (" +
-                    "setting_key VARCHAR(100) PRIMARY KEY, " +
-                    "setting_value TEXT" +
-                    ")";
-            jdbcTemplate.execute(createSettingsSql);
+            try {
+                jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS store_settings (" +
+                        "setting_key VARCHAR(100) PRIMARY KEY, " +
+                        "setting_value TEXT" +
+                        ")");
+            } catch (Exception ignored) {}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
     }
 
     // ==========================================
@@ -175,16 +180,16 @@ public class AdminController {
 
         try {
             // Product count
-            Integer totalProducts = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.products", Integer.class);
+            Integer totalProducts = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class);
             // Category count
-            Integer totalCategories = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.categories", Integer.class);
+            Integer totalCategories = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories", Integer.class);
             // Customer & User count
             Integer totalUsers = 0;
             try {
-                totalUsers = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.user", Integer.class);
+                totalUsers = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM user", Integer.class);
             } catch (Exception e) {
                 try {
-                    totalUsers = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.users", Integer.class);
+                    totalUsers = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
                 } catch (Exception ignored) {}
             }
             Integer totalCustomers = totalUsers;
@@ -193,8 +198,8 @@ public class AdminController {
             Integer pendingOrders = 0;
             Integer completedOrders = 0;
             try {
-                pendingOrders = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.orders WHERE status IN ('Pending', 'Confirmed', 'Packed', 'Shipped')", Integer.class);
-                completedOrders = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.orders WHERE status = 'Delivered'", Integer.class);
+                pendingOrders = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders WHERE status IN ('Pending', 'Confirmed', 'Packed', 'Shipped')", Integer.class);
+                completedOrders = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders WHERE status = 'Delivered'", Integer.class);
             } catch (Exception ignored) {}
 
             // Revenue metrics
@@ -204,16 +209,16 @@ public class AdminController {
             Double yearlyRevenue = 0.0;
 
             try {
-                Double rev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM ecommerce_db.orders WHERE status != 'Cancelled'", Double.class);
+                Double rev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled'", Double.class);
                 overallRevenue = rev != null ? rev : 0.0;
 
-                Double tRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM ecommerce_db.orders WHERE status != 'Cancelled' AND DATE(created_at) = CURRENT_DATE()", Double.class);
+                Double tRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND DATE(created_at) = CURRENT_DATE()", Double.class);
                 todayRevenue = tRev != null ? tRev : 0.0;
 
-                Double mRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM ecommerce_db.orders WHERE status != 'Cancelled' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())", Double.class);
+                Double mRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())", Double.class);
                 monthlyRevenue = mRev != null ? mRev : 0.0;
 
-                Double yRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM ecommerce_db.orders WHERE status != 'Cancelled' AND YEAR(created_at) = YEAR(CURRENT_DATE())", Double.class);
+                Double yRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND YEAR(created_at) = YEAR(CURRENT_DATE())", Double.class);
                 yearlyRevenue = yRev != null ? yRev : 0.0;
             } catch (Exception ignored) {}
 
@@ -232,7 +237,7 @@ public class AdminController {
             List<Map<String, Object>> revenueLineChart = new ArrayList<>();
             try {
                 String chartSql = "SELECT DATE_FORMAT(created_at, '%b %Y') as label, SUM(total_amount) as revenue, COUNT(*) as orders " +
-                        "FROM ecommerce_db.orders WHERE status != 'Cancelled' " +
+                        "FROM orders WHERE status != 'Cancelled' " +
                         "GROUP BY DATE_FORMAT(created_at, '%b %Y'), YEAR(created_at), MONTH(created_at) " +
                         "ORDER BY YEAR(created_at) ASC, MONTH(created_at) ASC LIMIT 12";
                 revenueLineChart = jdbcTemplate.queryForList(chartSql);
@@ -258,8 +263,8 @@ public class AdminController {
             List<Map<String, Object>> categoryPieChart = new ArrayList<>();
             try {
                 String catSql = "SELECT c.category_name as name, COUNT(p.product_id) as value " +
-                        "FROM ecommerce_db.categories c " +
-                        "LEFT JOIN ecommerce_db.products p ON c.category_id = p.category_id " +
+                        "FROM categories c " +
+                        "LEFT JOIN products p ON c.category_id = p.category_id " +
                         "GROUP BY c.category_id, c.category_name";
                 categoryPieChart = jdbcTemplate.queryForList(catSql);
             } catch (Exception ignored) {}
@@ -277,8 +282,8 @@ public class AdminController {
             List<Map<String, Object>> lowStock = new ArrayList<>();
             try {
                 String lowStockSql = "SELECT p.product_id as id, p.name, p.stock, p.price, pi.image_url as imageUrl " +
-                        "FROM ecommerce_db.products p " +
-                        "LEFT JOIN ecommerce_db.productimages pi ON p.product_id = pi.product_id " +
+                        "FROM products p " +
+                        "LEFT JOIN productimages pi ON p.product_id = pi.product_id " +
                         "WHERE p.stock <= 5 ORDER BY p.stock ASC LIMIT 5";
                 lowStock = jdbcTemplate.queryForList(lowStockSql);
             } catch (Exception ignored) {}
@@ -318,16 +323,16 @@ public class AdminController {
                 "COALESCE(p.stone_details, 'Natural Diamond') as stoneDetails, " +
                 "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', p.product_id)) as sku, " +
                 "COALESCE(p.status, 'ACTIVE') as status, pi.image_url as imageUrl " +
-                "FROM ecommerce_db.products p " +
-                "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.category_id " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                "FROM products p " +
+                "LEFT JOIN categories c ON p.category_id = c.category_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
                 "ORDER BY p.product_id DESC LIMIT " + limit;
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String simpleSql = "SELECT p.product_id as id, p.name, 'Jewellery' as category, p.description, p.price, 0 as discount, 10 as stock, 'ACTIVE' as status FROM ecommerce_db.products p LIMIT " + limit;
+                String simpleSql = "SELECT p.product_id as id, p.name, 'Jewellery' as category, p.description, p.price, 0 as discount, 10 as stock, 'ACTIVE' as status FROM products p LIMIT " + limit;
                 return jdbcTemplate.queryForList(simpleSql);
             } catch (Exception ignored) {
                 return new ArrayList<>();
@@ -380,12 +385,12 @@ public class AdminController {
             if (body.containsKey("category")) {
                 String catName = (String) body.get("category");
                 try {
-                    List<Map<String, Object>> cats = jdbcTemplate.queryForList("SELECT category_id FROM ecommerce_db.categories WHERE category_name = ?", catName);
+                    List<Map<String, Object>> cats = jdbcTemplate.queryForList("SELECT category_id FROM categories WHERE category_name = ?", catName);
                     if (!cats.isEmpty()) {
                         categoryId = ((Number) cats.get(0).get("category_id")).intValue();
                     } else {
-                        jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description) VALUES (?, ?)", catName, catName + " collection");
-                        List<Map<String, Object>> newCats = jdbcTemplate.queryForList("SELECT category_id FROM ecommerce_db.categories WHERE category_name = ?", catName);
+                        jdbcTemplate.update("INSERT INTO categories (category_name, description) VALUES (?, ?)", catName, catName + " collection");
+                        List<Map<String, Object>> newCats = jdbcTemplate.queryForList("SELECT category_id FROM categories WHERE category_name = ?", catName);
                         if (!newCats.isEmpty()) {
                             categoryId = ((Number) newCats.get(0).get("category_id")).intValue();
                         }
@@ -393,7 +398,7 @@ public class AdminController {
                 } catch (Exception ignored) {}
             }
 
-            String insertProductSql = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, weight, metal_type, gold_purity, diamond_details, stone_details, certificate_number, sku, status) " +
+            String insertProductSql = "INSERT INTO products (name, category_id, description, price, discount, stock, weight, metal_type, gold_purity, diamond_details, stone_details, certificate_number, sku, status) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             jdbcTemplate.update(insertProductSql, name, categoryId, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status);
 
@@ -403,10 +408,10 @@ public class AdminController {
             if (productId != null && imageUrl != null && !imageUrl.trim().isEmpty()) {
                 String cleanUrl = imageUrl.trim();
                 try {
-                    jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", productId, cleanUrl);
+                    jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", productId, cleanUrl);
                 } catch (Exception ignored) {}
                 try {
-                    jdbcTemplate.update("INSERT INTO ecommerce_db.product_images (product_id, image_url) VALUES (?, ?)", productId, cleanUrl);
+                    jdbcTemplate.update("INSERT INTO product_images (product_id, image_url) VALUES (?, ?)", productId, cleanUrl);
                 } catch (Exception ignored) {}
             }
 
@@ -438,7 +443,7 @@ public class AdminController {
             String sku = body.get("sku") != null && !((String) body.get("sku")).trim().isEmpty() ? (String) body.get("sku") : "SKU-" + id + "-" + ((int)(Math.random() * 8999) + 1000);
             String status = body.containsKey("status") ? (String) body.get("status") : "ACTIVE";
 
-            String updateSql = "UPDATE ecommerce_db.products SET name=?, description=?, price=?, discount=?, stock=?, " +
+            String updateSql = "UPDATE products SET name=?, description=?, price=?, discount=?, stock=?, " +
                     "weight=?, metal_type=?, gold_purity=?, diamond_details=?, stone_details=?, certificate_number=?, sku=?, status=? " +
                     "WHERE product_id=?";
             jdbcTemplate.update(updateSql, name, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status, id);
@@ -446,12 +451,12 @@ public class AdminController {
             if (body.containsKey("imageUrl") && body.get("imageUrl") != null) {
                 String imageUrl = ((String) body.get("imageUrl")).trim();
                 try {
-                    jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
-                    jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl);
+                    jdbcTemplate.update("DELETE FROM productimages WHERE product_id=?", id);
+                    jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", id, imageUrl);
                 } catch (Exception ignored) {}
                 try {
-                    jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id);
-                    jdbcTemplate.update("INSERT INTO ecommerce_db.product_images (product_id, image_url) VALUES (?, ?)", id, imageUrl);
+                    jdbcTemplate.update("DELETE FROM product_images WHERE product_id=?", id);
+                    jdbcTemplate.update("INSERT INTO product_images (product_id, image_url) VALUES (?, ?)", id, imageUrl);
                 } catch (Exception ignored) {}
             }
 
@@ -466,7 +471,7 @@ public class AdminController {
     public ResponseEntity<?> updateProductStock(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
             int stock = parseIntSafe(body.get("stock"), 0);
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET stock=? WHERE product_id=?", stock, id);
+            jdbcTemplate.update("UPDATE products SET stock=? WHERE product_id=?", stock, id);
             return ResponseEntity.ok(Map.of("message", "Stock updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating stock: " + e.getMessage());
@@ -477,7 +482,7 @@ public class AdminController {
     public ResponseEntity<?> updateProductPrice(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
             double price = parseDoubleSafe(body.get("price"), 0.0);
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET price=? WHERE product_id=?", price, id);
+            jdbcTemplate.update("UPDATE products SET price=? WHERE product_id=?", price, id);
             return ResponseEntity.ok(Map.of("message", "Price updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating price: " + e.getMessage());
@@ -488,7 +493,7 @@ public class AdminController {
     public ResponseEntity<?> toggleProductStatus(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
             String status = (String) body.get("status");
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET status=? WHERE product_id=?", status, id);
+            jdbcTemplate.update("UPDATE products SET status=? WHERE product_id=?", status, id);
             return ResponseEntity.ok(Map.of("message", "Product status updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating status: " + e.getMessage());
@@ -500,14 +505,14 @@ public class AdminController {
         ensureTablesExist();
         try {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=0");
-            jdbcTemplate.update("DELETE FROM ecommerce_db.productimages WHERE product_id=?", id);
-            try { jdbcTemplate.update("DELETE FROM ecommerce_db.product_images WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM ecommerce_db.cart_items WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM ecommerce_db.order_items WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM ecommerce_db.reviews WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM ecommerce_db.wishlist_items WHERE product_id=?", id); } catch (Exception ignored) {}
-            jdbcTemplate.update("DELETE FROM ecommerce_db.products WHERE product_id=?", id);
+            jdbcTemplate.update("DELETE FROM productimages WHERE product_id=?", id);
+            try { jdbcTemplate.update("DELETE FROM product_images WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM cart_items WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM order_items WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM reviews WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM wishlist WHERE product_id=?", id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM wishlist_items WHERE product_id=?", id); } catch (Exception ignored) {}
+            jdbcTemplate.update("DELETE FROM products WHERE product_id=?", id);
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1");
             return ResponseEntity.ok(Map.of("message", "Product deleted successfully from MySQL database"));
         } catch (Exception e) {
@@ -525,14 +530,14 @@ public class AdminController {
         try {
             String sql = "SELECT c.category_id as id, c.category_name as name, " +
                     "c.description, c.image_url as imageUrl, COALESCE(c.status, 'ACTIVE') as status, " +
-                    "(SELECT COUNT(*) FROM ecommerce_db.products p WHERE p.category_id = c.category_id) as productCount " +
-                    "FROM ecommerce_db.categories c ORDER BY c.category_id ASC";
+                    "(SELECT COUNT(*) FROM products p WHERE p.category_id = c.category_id) as productCount " +
+                    "FROM categories c ORDER BY c.category_id ASC";
             List<Map<String, Object>> cats = jdbcTemplate.queryForList(sql);
             return ResponseEntity.ok(cats);
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String simpleSql = "SELECT category_id as id, category_name as name, description, image_url as imageUrl, status, 10 as productCount FROM ecommerce_db.categories";
+                String simpleSql = "SELECT category_id as id, category_name as name, description, image_url as imageUrl, status, 10 as productCount FROM categories";
                 return ResponseEntity.ok(jdbcTemplate.queryForList(simpleSql));
             } catch (Exception ignored) {
                 return ResponseEntity.ok(new ArrayList<>());
@@ -549,7 +554,7 @@ public class AdminController {
             String imageUrl = body.containsKey("imageUrl") ? (String) body.get("imageUrl") : "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f";
             String status = body.containsKey("status") ? (String) body.get("status") : "ACTIVE";
 
-            jdbcTemplate.update("INSERT INTO ecommerce_db.categories (category_name, description, image_url, status) VALUES (?, ?, ?, ?)",
+            jdbcTemplate.update("INSERT INTO categories (category_name, description, image_url, status) VALUES (?, ?, ?, ?)",
                     name, description, imageUrl, status);
             return ResponseEntity.ok(Map.of("message", "Category created successfully"));
         } catch (Exception e) {
@@ -566,7 +571,7 @@ public class AdminController {
             String imageUrl = (String) body.get("imageUrl");
             String status = (String) body.get("status");
 
-            jdbcTemplate.update("UPDATE ecommerce_db.categories SET category_name=?, description=?, image_url=?, status=? WHERE category_id=?",
+            jdbcTemplate.update("UPDATE categories SET category_name=?, description=?, image_url=?, status=? WHERE category_id=?",
                     name, description, imageUrl, status, id);
             return ResponseEntity.ok(Map.of("message", "Category updated successfully"));
         } catch (Exception e) {
@@ -578,8 +583,8 @@ public class AdminController {
     public ResponseEntity<?> deleteCategory(@PathVariable Integer id) {
         ensureTablesExist();
         try {
-            jdbcTemplate.update("UPDATE ecommerce_db.products SET category_id = NULL WHERE category_id = ?", id);
-            jdbcTemplate.update("DELETE FROM ecommerce_db.categories WHERE category_id = ?", id);
+            jdbcTemplate.update("UPDATE products SET category_id = NULL WHERE category_id = ?", id);
+            jdbcTemplate.update("DELETE FROM categories WHERE category_id = ?", id);
             return ResponseEntity.ok(Map.of("message", "Category deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", "Error deleting category: " + e.getMessage()));
@@ -611,8 +616,8 @@ public class AdminController {
         String sqlOrders = "SELECT o.order_id as orderId, o.user_id as userId, COALESCE(u.full_name, 'Customer') as customerName, COALESCE(u.email, 'customer@alphajewels.com') as customerEmail, " +
                 "o.total_amount as grandTotal, COALESCE(o.payment_method, 'Razorpay Online') as paymentMethod, COALESCE(o.payment_status, 'COMPLETED') as paymentStatus, " +
                 "COALESCE(o.status, 'SUCCESS') as orderStatus, COALESCE(o.shipping_address, 'Standard Delivery Address') as shippingAddress, o.created_at as orderDate " +
-                "FROM ecommerce_db.orders o " +
-                "LEFT JOIN ecommerce_db." + userTable + " u ON o.user_id = u.id " +
+                "FROM orders o " +
+                "LEFT JOIN " + userTable + " u ON o.user_id = u.id " +
                 "ORDER BY o.created_at DESC LIMIT " + limit;
         try {
             List<Map<String, Object>> orders = jdbcTemplate.queryForList(sqlOrders);
@@ -636,9 +641,9 @@ public class AdminController {
                 }
 
                 String sqlItems = "SELECT oi.product_id as id, COALESCE(p.name, CONCAT('Jewellery Item #', oi.product_id)) as name, oi.quantity, oi.price_per_unit as price, oi.total_price as subtotal, pi.image_url as imageUrl " +
-                        "FROM ecommerce_db.order_items oi " +
-                        "LEFT JOIN ecommerce_db.products p ON oi.product_id = p.product_id " +
-                        "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                        "FROM order_items oi " +
+                        "LEFT JOIN products p ON oi.product_id = p.product_id " +
+                        "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
                         "WHERE oi.order_id = ?";
                 List<Map<String, Object>> items = jdbcTemplate.queryForList(sqlItems, orderId);
                 order.put("items", items);
@@ -656,7 +661,7 @@ public class AdminController {
         ensureTablesExist();
         try {
             String status = (String) body.get("status");
-            jdbcTemplate.update("UPDATE ecommerce_db.orders SET status=?, updated_at=NOW() WHERE order_id=?", status, orderId);
+            jdbcTemplate.update("UPDATE orders SET status=?, updated_at=NOW() WHERE order_id=?", status, orderId);
             return ResponseEntity.ok(Map.of("message", "Order status updated to " + status));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating order status: " + e.getMessage());
@@ -668,7 +673,7 @@ public class AdminController {
         ensureTablesExist();
         try {
             String paymentStatus = (String) body.get("paymentStatus");
-            jdbcTemplate.update("UPDATE ecommerce_db.orders SET payment_status=?, updated_at=NOW() WHERE order_id=?", paymentStatus, orderId);
+            jdbcTemplate.update("UPDATE orders SET payment_status=?, updated_at=NOW() WHERE order_id=?", paymentStatus, orderId);
             return ResponseEntity.ok(Map.of("message", "Payment status updated to " + paymentStatus));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating payment status: " + e.getMessage());
@@ -679,8 +684,8 @@ public class AdminController {
     public ResponseEntity<?> deleteOrderAdmin(@PathVariable String orderId) {
         ensureTablesExist();
         try {
-            jdbcTemplate.update("DELETE FROM ecommerce_db.order_items WHERE order_id=?", orderId);
-            jdbcTemplate.update("DELETE FROM ecommerce_db.orders WHERE order_id=?", orderId);
+            jdbcTemplate.update("DELETE FROM order_items WHERE order_id=?", orderId);
+            jdbcTemplate.update("DELETE FROM orders WHERE order_id=?", orderId);
             return ResponseEntity.ok(Map.of("message", "Order deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error deleting order: " + e.getMessage());
@@ -699,8 +704,8 @@ public class AdminController {
     private List<Map<String, Object>> getUsersListInternal(int limit) {
         String sql = "SELECT u.id, u.full_name as name, u.email, u.phone, u.role, 'ACTIVE' as status, " +
                 "COUNT(o.order_id) as ordersCount, COALESCE(SUM(o.total_amount), 0) as totalSpent " +
-                "FROM ecommerce_db.user u " +
-                "LEFT JOIN ecommerce_db.orders o ON u.id = o.user_id " +
+                "FROM user u " +
+                "LEFT JOIN orders o ON u.id = o.user_id " +
                 "GROUP BY u.id, u.full_name, u.email, u.phone, u.role " +
                 "ORDER BY u.id DESC LIMIT " + limit;
         try {
@@ -708,7 +713,7 @@ public class AdminController {
         } catch (Exception e) {
             try {
                 sql = "SELECT u.id, u.full_name as name, u.email, u.phone, u.role, 'ACTIVE' as status " +
-                        "FROM ecommerce_db.user u ORDER BY u.id DESC LIMIT " + limit;
+                        "FROM user u ORDER BY u.id DESC LIMIT " + limit;
                 return jdbcTemplate.queryForList(sql);
             } catch (Exception ex) {
                 return new ArrayList<>();
@@ -724,7 +729,7 @@ public class AdminController {
             String phone = (String) body.get("phone");
             String role = (String) body.get("role");
 
-            jdbcTemplate.update("UPDATE ecommerce_db.user SET full_name=?, email=?, phone=?, role=? WHERE id=?",
+            jdbcTemplate.update("UPDATE user SET full_name=?, email=?, phone=?, role=? WHERE id=?",
                     name, email, phone, role, id);
             return ResponseEntity.ok(Map.of("message", "User updated successfully"));
         } catch (Exception e) {
@@ -736,7 +741,7 @@ public class AdminController {
     public ResponseEntity<?> updateUserRole(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         try {
             String role = (String) body.get("role");
-            jdbcTemplate.update("UPDATE ecommerce_db.user SET role=? WHERE id=?", role, id);
+            jdbcTemplate.update("UPDATE user SET role=? WHERE id=?", role, id);
             return ResponseEntity.ok(Map.of("message", "User role updated to " + role));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating user role: " + e.getMessage());
@@ -748,7 +753,7 @@ public class AdminController {
         try {
             String newPassword = (String) body.get("newPassword");
             String encoded = passwordEncoder != null ? passwordEncoder.encode(newPassword) : newPassword;
-            jdbcTemplate.update("UPDATE ecommerce_db.user SET password=? WHERE id=?", encoded, id);
+            jdbcTemplate.update("UPDATE user SET password=? WHERE id=?", encoded, id);
             return ResponseEntity.ok(Map.of("message", "User password reset successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error resetting password: " + e.getMessage());
@@ -758,7 +763,7 @@ public class AdminController {
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUserAdmin(@PathVariable Long id) {
         try {
-            jdbcTemplate.update("DELETE FROM ecommerce_db.user WHERE id=?", id);
+            jdbcTemplate.update("DELETE FROM user WHERE id=?", id);
             return ResponseEntity.ok(Map.of("message", "User account deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error deleting user: " + e.getMessage());
@@ -771,7 +776,7 @@ public class AdminController {
     @GetMapping("/coupons")
     public ResponseEntity<List<Map<String, Object>>> getCoupons() {
         ensureTablesExist();
-        return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT coupon_id as id, code, discount_percentage as discountPercentage, min_spend as minSpend, expiry_date as expiryDate, status FROM ecommerce_db.coupons"));
+        return ResponseEntity.ok(jdbcTemplate.queryForList("SELECT coupon_id as id, code, discount_percentage as discountPercentage, min_spend as minSpend, expiry_date as expiryDate, status FROM coupons"));
     }
 
     @PostMapping("/coupons")
@@ -807,7 +812,7 @@ public class AdminController {
                     ? body.get("status").toString()
                     : "ACTIVE";
 
-            jdbcTemplate.update("INSERT INTO ecommerce_db.coupons (code, discount_percentage, min_spend, expiry_date, status) VALUES (?, ?, ?, ?, ?) " +
+            jdbcTemplate.update("INSERT INTO coupons (code, discount_percentage, min_spend, expiry_date, status) VALUES (?, ?, ?, ?, ?) " +
                     "ON DUPLICATE KEY UPDATE discount_percentage=VALUES(discount_percentage), min_spend=VALUES(min_spend), expiry_date=VALUES(expiry_date), status=VALUES(status)",
                     code, discountPercentage, minSpend, expiryDate, status);
 
@@ -821,7 +826,7 @@ public class AdminController {
     @DeleteMapping("/coupons/{id}")
     public ResponseEntity<?> deleteCoupon(@PathVariable Integer id) {
         ensureTablesExist();
-        jdbcTemplate.update("DELETE FROM ecommerce_db.coupons WHERE coupon_id=?", id);
+        jdbcTemplate.update("DELETE FROM coupons WHERE coupon_id=?", id);
         return ResponseEntity.ok(Map.of("message", "Coupon deleted"));
     }
 
@@ -830,8 +835,8 @@ public class AdminController {
         ensureTablesExist();
         String sql = "SELECT r.review_id as id, r.product_id as productId, p.name as productName, " +
                 "r.customer_name as customerName, r.rating, r.comment, r.status, r.created_at as date " +
-                "FROM ecommerce_db.reviews r " +
-                "LEFT JOIN ecommerce_db.products p ON r.product_id = p.product_id " +
+                "FROM reviews r " +
+                "LEFT JOIN products p ON r.product_id = p.product_id " +
                 "ORDER BY r.created_at DESC";
         return ResponseEntity.ok(jdbcTemplate.queryForList(sql));
     }
@@ -839,7 +844,7 @@ public class AdminController {
     @DeleteMapping("/reviews/{id}")
     public ResponseEntity<?> deleteReview(@PathVariable Integer id) {
         ensureTablesExist();
-        jdbcTemplate.update("DELETE FROM ecommerce_db.reviews WHERE review_id=?", id);
+        jdbcTemplate.update("DELETE FROM reviews WHERE review_id=?", id);
         return ResponseEntity.ok(Map.of("message", "Review deleted"));
     }
 
@@ -847,7 +852,7 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getSettings() {
         ensureTablesExist();
         Map<String, Object> settings = new HashMap<>();
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT setting_key, setting_value FROM ecommerce_db.store_settings");
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT setting_key, setting_value FROM store_settings");
         for (Map<String, Object> r : rows) {
             settings.put((String) r.get("setting_key"), r.get("setting_value"));
         }
@@ -860,7 +865,7 @@ public class AdminController {
         for (Map.Entry<String, Object> entry : body.entrySet()) {
             String key = entry.getKey();
             String val = String.valueOf(entry.getValue());
-            jdbcTemplate.update("INSERT INTO ecommerce_db.store_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value=?",
+            jdbcTemplate.update("INSERT INTO store_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value=?",
                     key, val, val);
         }
         return ResponseEntity.ok(Map.of("message", "Settings updated successfully"));

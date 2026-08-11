@@ -19,7 +19,7 @@ public class ProductCartController {
     private JdbcTemplate jdbcTemplate;
 
     private void ensureCartTableExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS ecommerce_db.cart_items (" +
+        String sql = "CREATE TABLE IF NOT EXISTS cart_items (" +
                      "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
                      "user_id BIGINT NOT NULL, " +
                      "product_id INT NOT NULL, " +
@@ -47,13 +47,13 @@ public class ProductCartController {
 
     private void ensureProductTablesExist() {
         try {
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS ecommerce_db.categories (" +
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categories (" +
                                  "category_id INT AUTO_INCREMENT PRIMARY KEY, " +
                                  "category_name VARCHAR(100) NOT NULL UNIQUE, " +
                                  "description TEXT, " +
                                  "image_url VARCHAR(500), " +
                                  "status VARCHAR(20) DEFAULT 'ACTIVE')");
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS ecommerce_db.products (" +
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS products (" +
                                  "product_id INT AUTO_INCREMENT PRIMARY KEY, " +
                                  "name VARCHAR(255) NOT NULL, " +
                                  "category_id INT, " +
@@ -69,20 +69,20 @@ public class ProductCartController {
                                  "certificate_number VARCHAR(100), " +
                                  "sku VARCHAR(100), " +
                                  "status VARCHAR(20) DEFAULT 'ACTIVE')");
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS ecommerce_db.productimages (" +
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS productimages (" +
                                  "image_id INT AUTO_INCREMENT PRIMARY KEY, " +
                                  "product_id INT NOT NULL, " +
                                  "image_url TEXT NOT NULL, " +
                                  "is_thumbnail BOOLEAN DEFAULT TRUE)");
 
             String[] alters = {
-                "ALTER TABLE ecommerce_db.categories ADD COLUMN category_name VARCHAR(100)",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN category_id INT",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN description TEXT",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN price DECIMAL(10, 2) DEFAULT 0.00",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN stock INT DEFAULT 10",
-                "ALTER TABLE ecommerce_db.products ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"
+                "ALTER TABLE categories ADD COLUMN category_name VARCHAR(100)",
+                "ALTER TABLE products ADD COLUMN category_id INT",
+                "ALTER TABLE products ADD COLUMN description TEXT",
+                "ALTER TABLE products ADD COLUMN price DECIMAL(10, 2) DEFAULT 0.00",
+                "ALTER TABLE products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00",
+                "ALTER TABLE products ADD COLUMN stock INT DEFAULT 10",
+                "ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"
             };
             for (String alterSql : alters) {
                 try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
@@ -90,36 +90,36 @@ public class ProductCartController {
 
             // Seed default categories if empty
             Integer catCount = 0;
-            try { catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.categories", Integer.class); } catch (Exception ignored) {}
+            try { catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories", Integer.class); } catch (Exception ignored) {}
             if (catCount == null || catCount == 0) {
                 try {
-                    jdbcTemplate.execute("INSERT IGNORE INTO ecommerce_db.categories (category_id, category_name) VALUES " +
+                    jdbcTemplate.execute("INSERT IGNORE INTO categories (category_id, category_name) VALUES " +
                                          "(1, 'Diamond'), (2, 'Gold'), (3, 'Platinum'), (4, 'Silver'), (9, 'Bridal')");
                 } catch (Exception ignored) {}
             }
 
             // Seed default products if empty
             Integer prodCount = 0;
-            try { prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ecommerce_db.products", Integer.class); } catch (Exception ignored) {}
+            try { prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class); } catch (Exception ignored) {}
             if (prodCount == null || prodCount == 0) {
                 try {
-                    String insertProd = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, status) " +
+                    String insertProd = "INSERT INTO products (name, category_id, description, price, discount, stock, status) " +
                                         "VALUES (?, 1, 'Exquisite 22K gold ring with VVS solitaire diamond', 125000.00, 5.0, 15, 'ACTIVE')";
                     jdbcTemplate.update(insertProd, "Royal Solitaire Diamond Ring");
                     Integer p1 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-                    if (p1 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p1, "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80");
+                    if (p1 != null) jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p1, "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80");
 
-                    String insertProd2 = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, status) " +
+                    String insertProd2 = "INSERT INTO products (name, category_id, description, price, discount, stock, status) " +
                                          "VALUES (?, 2, 'Handcrafted royal Kundan and Emerald gold choker necklace', 450000.00, 10.0, 8, 'ACTIVE')";
                     jdbcTemplate.update(insertProd2, "Imperial Emerald Gold Choker");
                     Integer p2 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-                    if (p2 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p2, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80");
+                    if (p2 != null) jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p2, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80");
 
-                    String insertProd3 = "INSERT INTO ecommerce_db.products (name, category_id, description, price, discount, stock, status) " +
+                    String insertProd3 = "INSERT INTO products (name, category_id, description, price, discount, stock, status) " +
                                          "VALUES (?, 3, 'Elegant platinum studs featuring princess cut diamonds', 85000.00, 0.0, 20, 'ACTIVE')";
                     jdbcTemplate.update(insertProd3, "Princess Cut Diamond Studs");
                     Integer p3 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-                    if (p3 != null) jdbcTemplate.update("INSERT INTO ecommerce_db.productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p3, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80");
+                    if (p3 != null) jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p3, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80");
                 } catch (Exception ignored) {}
             }
         } catch (Exception ignored) {}
@@ -140,9 +140,9 @@ public class ProductCartController {
         }
 
         String sql = "SELECT p.product_id as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, c.category_name as categoryName, pi.image_url as imageUrl " +
-                     "FROM ecommerce_db.products p " +
-                     "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.category_id " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id";
+                     "FROM products p " +
+                     "LEFT JOIN categories c ON p.category_id = c.category_id " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id";
 
         try {
             if (category != null && !category.trim().isEmpty()) {
@@ -156,7 +156,7 @@ public class ProductCartController {
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String fallbackSql = "SELECT p.product_id as id, p.name, p.description, p.price, 10 as stock, 'Jewelry' as categoryName, NULL as imageUrl FROM ecommerce_db.products p";
+                String fallbackSql = "SELECT p.product_id as id, p.name, p.description, p.price, 10 as stock, 'Jewelry' as categoryName, NULL as imageUrl FROM products p";
                 return jdbcTemplate.queryForList(fallbackSql);
             } catch (Exception ignored) {
                 return new ArrayList<>();
@@ -176,7 +176,7 @@ public class ProductCartController {
             return ResponseEntity.ok(err);
         }
 
-        String sql = "SELECT COALESCE(SUM(quantity), 0) FROM ecommerce_db.cart_items WHERE user_id = ?";
+        String sql = "SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
 
         Map<String, Object> response = new HashMap<>();
@@ -211,9 +211,9 @@ public class ProductCartController {
         String sql = "SELECT ci.id as cart_item_id, ci.product_id, ci.quantity, " +
                      "p.name, p.description, p.price as price_per_unit, COALESCE(p.stock, 10) as stock, " +
                      "pi.image_url " +
-                     "FROM ecommerce_db.cart_items ci " +
-                     "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM ecommerce_db." + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                     "FROM cart_items ci " +
+                     "JOIN products p ON ci.product_id = p.product_id " +
+                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
                      "WHERE ci.user_id = ?";
 
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, userId);
@@ -298,10 +298,10 @@ public class ProductCartController {
             // Fetch product stock with fallback for column names
             int availableStock = 999;
             try {
-                String stockSql = "SELECT stock FROM ecommerce_db.products WHERE product_id = ?";
+                String stockSql = "SELECT stock FROM products WHERE product_id = ?";
                 List<Map<String, Object>> productRows = jdbcTemplate.queryForList(stockSql, productId);
                 if (productRows.isEmpty()) {
-                    stockSql = "SELECT stock FROM ecommerce_db.products WHERE id = ?";
+                    stockSql = "SELECT stock FROM products WHERE id = ?";
                     productRows = jdbcTemplate.queryForList(stockSql, productId);
                 }
                 if (!productRows.isEmpty() && productRows.get(0).get("stock") != null) {
@@ -312,7 +312,7 @@ public class ProductCartController {
             }
 
             // Check existing quantity in cart
-            String checkSql = "SELECT id, quantity FROM ecommerce_db.cart_items WHERE user_id = ? AND product_id = ?";
+            String checkSql = "SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?";
             List<Map<String, Object>> existing = jdbcTemplate.queryForList(checkSql, userId, productId);
 
             int currentQty = existing.isEmpty() ? 0 : ((Number) existing.get(0).get("quantity")).intValue();
@@ -327,15 +327,15 @@ public class ProductCartController {
             }
 
             if (!existing.isEmpty()) {
-                String updateSql = "UPDATE ecommerce_db.cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
+                String updateSql = "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
                 jdbcTemplate.update(updateSql, newTotalQty, userId, productId);
             } else {
-                String insertSql = "INSERT INTO ecommerce_db.cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
+                String insertSql = "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
                 jdbcTemplate.update(insertSql, userId, productId, requestedQuantity);
             }
 
             // Get updated count
-            String countSql = "SELECT COALESCE(SUM(quantity), 0) FROM ecommerce_db.cart_items WHERE user_id = ?";
+            String countSql = "SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?";
             Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, userId);
 
             Map<String, Object> response = new HashMap<>();
@@ -372,7 +372,7 @@ public class ProductCartController {
         int productId = productIdObj;
 
         // Check if existing item in cart
-        String checkSql = "SELECT id, quantity FROM ecommerce_db.cart_items WHERE user_id = ? AND product_id = ?";
+        String checkSql = "SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?";
         List<Map<String, Object>> existing = jdbcTemplate.queryForList(checkSql, userId, productId);
 
         if (existing.isEmpty()) {
@@ -395,7 +395,7 @@ public class ProductCartController {
 
         // If target quantity becomes 0 or less, remove item automatically
         if (targetQty <= 0) {
-            String deleteSql = "DELETE FROM ecommerce_db.cart_items WHERE user_id = ? AND product_id = ?";
+            String deleteSql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
             jdbcTemplate.update(deleteSql, userId, productId);
 
             Map<String, Object> response = new HashMap<>();
@@ -405,7 +405,7 @@ public class ProductCartController {
         }
 
         // Stock validation check
-        String stockSql = "SELECT stock FROM ecommerce_db.products WHERE product_id = ?";
+        String stockSql = "SELECT stock FROM products WHERE product_id = ?";
         List<Map<String, Object>> productRows = jdbcTemplate.queryForList(stockSql, productId);
         if (productRows.isEmpty()) {
             return ResponseEntity.badRequest().body("Product not found");
@@ -420,7 +420,7 @@ public class ProductCartController {
             return ResponseEntity.badRequest().body(err);
         }
 
-        String updateSql = "UPDATE ecommerce_db.cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
+        String updateSql = "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
         jdbcTemplate.update(updateSql, targetQty, userId, productId);
 
         Map<String, Object> response = new HashMap<>();
@@ -458,7 +458,7 @@ public class ProductCartController {
             return ResponseEntity.badRequest().body("Valid productId is required");
         }
 
-        String deleteSql = "DELETE FROM ecommerce_db.cart_items WHERE user_id = ? AND product_id = ?";
+        String deleteSql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
         jdbcTemplate.update(deleteSql, userId, targetProductId);
 
         Map<String, Object> response = new HashMap<>();
@@ -470,10 +470,10 @@ public class ProductCartController {
     private Long getUserIdByEmail(String email) {
         if (email == null) return null;
         try {
-            String sql = "SELECT id FROM ecommerce_db.user WHERE LOWER(email) = LOWER(?)";
+            String sql = "SELECT id FROM user WHERE LOWER(email) = LOWER(?)";
             List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
             if (result.isEmpty()) {
-                sql = "SELECT id FROM ecommerce_db.users WHERE LOWER(email) = LOWER(?)";
+                sql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?)";
                 result = jdbcTemplate.queryForList(sql, email.trim());
             }
             if (result.isEmpty()) {
@@ -488,10 +488,10 @@ public class ProductCartController {
     private Map<String, Object> getUserInfoByEmail(String email) {
         if (email == null) return null;
         try {
-            String sql = "SELECT id, full_name, role FROM ecommerce_db.user WHERE LOWER(email) = LOWER(?)";
+            String sql = "SELECT id, full_name, role FROM user WHERE LOWER(email) = LOWER(?)";
             List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
             if (result.isEmpty()) {
-                sql = "SELECT id, full_name, role FROM ecommerce_db.users WHERE LOWER(email) = LOWER(?)";
+                sql = "SELECT id, full_name, role FROM users WHERE LOWER(email) = LOWER(?)";
                 result = jdbcTemplate.queryForList(sql, email.trim());
             }
             if (result.isEmpty()) {

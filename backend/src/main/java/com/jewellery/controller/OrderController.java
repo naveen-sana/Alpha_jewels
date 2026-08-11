@@ -16,7 +16,7 @@ public class OrderController {
     private JdbcTemplate jdbcTemplate;
 
     public void ensureOrderTablesExist() {
-        String createOrdersSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.orders (" +
+        String createOrdersSql = "CREATE TABLE IF NOT EXISTS orders (" +
                 "order_id VARCHAR(100) PRIMARY KEY, " +
                 "user_id BIGINT NOT NULL, " +
                 "total_amount DECIMAL(12, 2) NOT NULL, " +
@@ -26,7 +26,7 @@ public class OrderController {
                 ")";
         jdbcTemplate.execute(createOrdersSql);
 
-        String createOrderItemsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.order_items (" +
+        String createOrderItemsSql = "CREATE TABLE IF NOT EXISTS order_items (" +
                 "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
                 "order_id VARCHAR(100) NOT NULL, " +
                 "product_id BIGINT NOT NULL, " +
@@ -50,7 +50,7 @@ public class OrderController {
             String sqlOrders = "SELECT order_id as orderId, total_amount as grandTotal, status, " +
                     "payment_method as paymentMethod, payment_status as paymentStatus, shipping_address as shippingAddress, " +
                     "created_at as placedOn " +
-                    "FROM ecommerce_db.orders WHERE user_id = ? ORDER BY created_at DESC";
+                    "FROM orders WHERE user_id = ? ORDER BY created_at DESC";
             List<Map<String, Object>> ordersList = jdbcTemplate.queryForList(sqlOrders, userId);
 
             List<Map<String, Object>> result = new ArrayList<>();
@@ -60,10 +60,10 @@ public class OrderController {
                 String sqlItems = "SELECT oi.product_id as id, p.name, c.category_name as category, " +
                         "p.description as specs, oi.price_per_unit as price, oi.quantity, oi.total_price as subtotal, " +
                         "pi.image_url as imageUrl " +
-                        "FROM ecommerce_db.order_items oi " +
-                        "LEFT JOIN ecommerce_db.products p ON oi.product_id = p.product_id " +
-                        "LEFT JOIN ecommerce_db.categories c ON p.category_id = c.category_id " +
-                        "LEFT JOIN ecommerce_db.productimages pi ON p.product_id = pi.product_id " +
+                        "FROM order_items oi " +
+                        "LEFT JOIN products p ON oi.product_id = p.product_id " +
+                        "LEFT JOIN categories c ON p.category_id = c.category_id " +
+                        "LEFT JOIN productimages pi ON p.product_id = pi.product_id " +
                         "WHERE oi.order_id = ?";
                 List<Map<String, Object>> items = jdbcTemplate.queryForList(sqlItems, orderId);
 
@@ -115,23 +115,23 @@ public class OrderController {
 
             // Ensure columns exist
             String[] orderCols = {
-                "ALTER TABLE ecommerce_db.orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Credit Card'",
-                "ALTER TABLE ecommerce_db.orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'Paid'",
-                "ALTER TABLE ecommerce_db.orders ADD COLUMN shipping_address TEXT"
+                "ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Credit Card'",
+                "ALTER TABLE orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'Paid'",
+                "ALTER TABLE orders ADD COLUMN shipping_address TEXT"
             };
             for (String alterSql : orderCols) {
                 try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
             }
 
             // Save order
-            String insertOrderSql = "INSERT INTO ecommerce_db.orders (order_id, user_id, total_amount, status, payment_method, payment_status, shipping_address, created_at, updated_at) " +
+            String insertOrderSql = "INSERT INTO orders (order_id, user_id, total_amount, status, payment_method, payment_status, shipping_address, created_at, updated_at) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW()) ON DUPLICATE KEY UPDATE total_amount=?, status=?, payment_method=?, payment_status=?, shipping_address=?, updated_at=NOW()";
             jdbcTemplate.update(insertOrderSql, orderId, userId, grandTotal, status, paymentMethod, paymentStatus, shippingAddress, grandTotal, status, paymentMethod, paymentStatus, shippingAddress);
 
             // Save items if provided in payload
             if (payload.containsKey("items") && payload.get("items") instanceof List) {
                 List<Map<String, Object>> items = (List<Map<String, Object>>) payload.get("items");
-                String insertItemSql = "INSERT INTO ecommerce_db.order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
+                String insertItemSql = "INSERT INTO order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
                         "VALUES (?, ?, ?, ?, ?)";
                 for (Map<String, Object> item : items) {
                     Long productId = 1L;
@@ -166,11 +166,11 @@ public class OrderController {
             } else {
                 // Otherwise fetch from cart
                 String fetchCartSql = "SELECT ci.product_id, ci.quantity, p.price " +
-                        "FROM ecommerce_db.cart_items ci " +
-                        "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
+                        "FROM cart_items ci " +
+                        "JOIN products p ON ci.product_id = p.product_id " +
                         "WHERE ci.user_id = ?";
                 List<Map<String, Object>> cartItems = jdbcTemplate.queryForList(fetchCartSql, userId);
-                String insertItemSql = "INSERT INTO ecommerce_db.order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
+                String insertItemSql = "INSERT INTO order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
                         "VALUES (?, ?, ?, ?, ?)";
                 for (Map<String, Object> item : cartItems) {
                     Long productId = ((Number) item.get("product_id")).longValue();
@@ -183,7 +183,7 @@ public class OrderController {
 
             // Clear cart
             try {
-                String clearCartSql = "DELETE FROM ecommerce_db.cart_items WHERE user_id = ?";
+                String clearCartSql = "DELETE FROM cart_items WHERE user_id = ?";
                 jdbcTemplate.update(clearCartSql, userId);
             } catch (Exception ignored) {}
 
@@ -209,10 +209,10 @@ public class OrderController {
                 userId = 1L;
             }
 
-            String deleteItemsSql = "DELETE FROM ecommerce_db.order_items WHERE order_id = ?";
+            String deleteItemsSql = "DELETE FROM order_items WHERE order_id = ?";
             jdbcTemplate.update(deleteItemsSql, orderId);
 
-            String deleteOrderSql = "DELETE FROM ecommerce_db.orders WHERE order_id = ?";
+            String deleteOrderSql = "DELETE FROM orders WHERE order_id = ?";
             jdbcTemplate.update(deleteOrderSql, orderId);
 
             return ResponseEntity.ok("Order deleted successfully from database");
@@ -225,10 +225,10 @@ public class OrderController {
     private Long getUserIdByEmail(String email) {
         if (email == null || email.trim().isEmpty()) return 1L;
         try {
-            String sql = "SELECT id FROM ecommerce_db.user WHERE LOWER(email) = LOWER(?)";
+            String sql = "SELECT id FROM user WHERE LOWER(email) = LOWER(?)";
             List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
             if (result.isEmpty()) {
-                sql = "SELECT id FROM ecommerce_db.users WHERE LOWER(email) = LOWER(?)";
+                sql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?)";
                 result = jdbcTemplate.queryForList(sql, email.trim());
             }
             if (result.isEmpty()) {

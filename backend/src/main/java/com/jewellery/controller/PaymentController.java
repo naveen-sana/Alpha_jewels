@@ -22,7 +22,7 @@ public class PaymentController {
         String envKey = System.getenv("RAZORPAY_KEY_ID");
         if (envKey != null && !envKey.trim().isEmpty() && !envKey.contains("YOUR_")) return envKey.trim();
         try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT value FROM ecommerce_db.settings WHERE key_name = 'razorpayKeyId' OR key_name = 'razorpayKey'");
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT value FROM settings WHERE key_name = 'razorpayKeyId' OR key_name = 'razorpayKey'");
             if (!rows.isEmpty() && rows.get(0).get("value") != null) {
                 String val = (String) rows.get(0).get("value");
                 if (val != null && !val.trim().isEmpty() && !val.contains("YOUR_") && !val.contains("rzp_live_alpha9021")) return val.trim();
@@ -35,7 +35,7 @@ public class PaymentController {
         String envSecret = System.getenv("RAZORPAY_KEY_SECRET");
         if (envSecret != null && !envSecret.trim().isEmpty() && !envSecret.contains("YOUR_")) return envSecret.trim();
         try {
-            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT value FROM ecommerce_db.settings WHERE key_name = 'razorpayKeySecret' OR key_name = 'razorpaySecret'");
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT value FROM settings WHERE key_name = 'razorpayKeySecret' OR key_name = 'razorpaySecret'");
             if (!rows.isEmpty() && rows.get(0).get("value") != null) {
                 String val = (String) rows.get(0).get("value");
                 if (val != null && !val.trim().isEmpty() && !val.contains("YOUR_")) return val.trim();
@@ -48,7 +48,7 @@ public class PaymentController {
     private JdbcTemplate jdbcTemplate;
 
     private void ensureOrderTablesExist() {
-        String createOrdersSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.orders (" +
+        String createOrdersSql = "CREATE TABLE IF NOT EXISTS orders (" +
                 "order_id VARCHAR(100) PRIMARY KEY, " +
                 "user_id BIGINT NOT NULL, " +
                 "total_amount DECIMAL(12, 2) NOT NULL, " +
@@ -58,7 +58,7 @@ public class PaymentController {
                 ")";
         jdbcTemplate.execute(createOrdersSql);
 
-        String createOrderItemsSql = "CREATE TABLE IF NOT EXISTS ecommerce_db.order_items (" +
+        String createOrderItemsSql = "CREATE TABLE IF NOT EXISTS order_items (" +
                 "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
                 "order_id VARCHAR(100) NOT NULL, " +
                 "product_id BIGINT NOT NULL, " +
@@ -87,8 +87,8 @@ public class PaymentController {
             } else {
                 // Calculate total from active cart
                 String sql = "SELECT ci.quantity, p.price " +
-                             "FROM ecommerce_db.cart_items ci " +
-                             "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
+                             "FROM cart_items ci " +
+                             "JOIN products p ON ci.product_id = p.product_id " +
                              "WHERE ci.user_id = ?";
 
                 List<Map<String, Object>> items = jdbcTemplate.queryForList(sql, userId);
@@ -175,8 +175,8 @@ public class PaymentController {
 
                 // Fetch cart items to calculate order total and create order items
                 String fetchCartSql = "SELECT ci.product_id, ci.quantity, p.price " +
-                                      "FROM ecommerce_db.cart_items ci " +
-                                      "JOIN ecommerce_db.products p ON ci.product_id = p.product_id " +
+                                      "FROM cart_items ci " +
+                                      "JOIN products p ON ci.product_id = p.product_id " +
                                       "WHERE ci.user_id = ?";
                 List<Map<String, Object>> cartItems = jdbcTemplate.queryForList(fetchCartSql, userId);
 
@@ -194,13 +194,13 @@ public class PaymentController {
                 }
 
                 // Insert into orders table with actual full grand total
-                String insertOrderSql = "INSERT INTO ecommerce_db.orders (order_id, user_id, total_amount, status, created_at, updated_at) " +
+                String insertOrderSql = "INSERT INTO orders (order_id, user_id, total_amount, status, created_at, updated_at) " +
                                         "VALUES (?, ?, ?, 'SUCCESS', NOW(), NOW()) " +
                                         "ON DUPLICATE KEY UPDATE total_amount=?, status=?, updated_at=NOW()";
                 jdbcTemplate.update(insertOrderSql, razorpayOrderId, userId, grandTotal, grandTotal, "SUCCESS");
 
                 // Insert each cart item into order_items table
-                String insertOrderItemSql = "INSERT INTO ecommerce_db.order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
+                String insertOrderItemSql = "INSERT INTO order_items (order_id, product_id, quantity, price_per_unit, total_price) " +
                                             "VALUES (?, ?, ?, ?, ?)";
                 for (Map<String, Object> item : cartItems) {
                     Long productId = ((Number) item.get("product_id")).longValue();
@@ -211,7 +211,7 @@ public class PaymentController {
                 }
 
                 // Clear user cart on successful order placement
-                String clearCartSql = "DELETE FROM ecommerce_db.cart_items WHERE user_id = ?";
+                String clearCartSql = "DELETE FROM cart_items WHERE user_id = ?";
                 jdbcTemplate.update(clearCartSql, userId);
 
                 Map<String, Object> response = new HashMap<>();
@@ -232,7 +232,7 @@ public class PaymentController {
     }
 
     private Long getUserIdByEmail(String email) {
-        String sql = "SELECT id FROM ecommerce_db.user WHERE email = ?";
+        String sql = "SELECT id FROM user WHERE email = ?";
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email);
         if (result.isEmpty()) {
             return null;
@@ -241,7 +241,7 @@ public class PaymentController {
     }
 
     private Map<String, Object> getUserInfoByEmail(String email) {
-        String sql = "SELECT id, full_name FROM ecommerce_db.user WHERE email = ?";
+        String sql = "SELECT id, full_name FROM user WHERE email = ?";
         List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email);
         if (result.isEmpty()) {
             return null;
