@@ -135,29 +135,54 @@ public class ProductCartController {
     public List<Map<String, Object>> getProducts(@RequestParam(required = false) String category) {
         ensureProductTablesExist();
         try {
-            String sql = "SELECT COALESCE(p.product_id, p.id) as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, " +
-                         "COALESCE(c.category_name, c.name, 'Diamond') as categoryName, " +
-                         "COALESCE(pi.image_url, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e') as imageUrl " +
-                         "FROM products p " +
-                         "LEFT JOIN categories c ON (p.category_id = c.category_id OR p.category_id = c.id) " +
-                         "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pi ON (p.product_id = pi.product_id OR p.id = pi.product_id)";
-
-            if (category != null && !category.trim().isEmpty()) {
-                String filterSql = sql + " WHERE LOWER(c.category_name) = LOWER(?) OR LOWER(c.name) = LOWER(?)";
-                List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim(), category.trim());
-                if (filtered != null && !filtered.isEmpty()) {
-                    return filtered;
-                }
-            }
-            return jdbcTemplate.queryForList(sql);
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                String simpleSql = "SELECT COALESCE(product_id, id) as id, name, description, price, COALESCE(stock, 10) as stock, 'Diamond' as categoryName FROM products";
-                return jdbcTemplate.queryForList(simpleSql);
-            } catch (Exception ignored) {
+            List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
+            if (list == null || list.isEmpty()) {
                 return new ArrayList<>();
             }
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Map<String, Object> row : list) {
+                Map<String, Object> map = new HashMap<>(row);
+                Object pId = row.get("product_id") != null ? row.get("product_id") : row.get("id");
+                map.put("id", pId);
+                map.put("productId", pId);
+
+                // Fetch Category Name
+                Object catId = row.get("category_id");
+                String catName = "Diamond";
+                if (catId != null) {
+                    try {
+                        List<String> catList = jdbcTemplate.queryForList("SELECT COALESCE(category_name, name) FROM categories WHERE category_id = ? OR id = ? LIMIT 1", String.class, catId, catId);
+                        if (!catList.isEmpty() && catList.get(0) != null) {
+                            catName = catList.get(0);
+                        }
+                    } catch (Exception ignored) {}
+                }
+                map.put("categoryName", catName);
+                map.put("category", catName);
+
+                // Fetch Image URL
+                String imgUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80";
+                if (pId != null) {
+                    try {
+                        List<String> imgs = jdbcTemplate.queryForList("SELECT image_url FROM productimages WHERE product_id = ? AND image_url IS NOT NULL LIMIT 1", String.class, pId);
+                        if (imgs.isEmpty()) {
+                            imgs = jdbcTemplate.queryForList("SELECT image_url FROM product_images WHERE product_id = ? AND image_url IS NOT NULL LIMIT 1", String.class, pId);
+                        }
+                        if (!imgs.isEmpty() && imgs.get(0) != null && !imgs.get(0).trim().isEmpty()) {
+                            imgUrl = imgs.get(0).trim();
+                        }
+                    } catch (Exception ignored) {}
+                }
+                map.put("imageUrl", imgUrl);
+
+                if (category == null || category.trim().isEmpty() || category.equalsIgnoreCase("All") || catName.equalsIgnoreCase(category.trim())) {
+                    result.add(map);
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 
