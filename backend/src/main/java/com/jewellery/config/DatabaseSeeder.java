@@ -148,7 +148,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         };
 
         for (Object[] p : products) {
-            int pId = (Integer) p[0];
             String name = (String) p[1];
             int catId = (Integer) p[2];
             String desc = (String) p[3];
@@ -157,36 +156,37 @@ public class DatabaseSeeder implements CommandLineRunner {
             String imgUrl = (String) p[6];
 
             try {
-                // Upsert product
+                // Check existing product by name
                 Integer existingCount = 0;
-                try { existingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products WHERE product_id = ? OR id = ?", Integer.class, pId, pId); } catch (Exception ignored) {}
+                try { existingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products WHERE LOWER(name) = LOWER(?)", Integer.class, name); } catch (Exception ignored) {}
+                
                 if (existingCount == null || existingCount == 0) {
                     jdbcTemplate.update(
-                            "INSERT INTO products (product_id, id, name, category_id, description, price, stock, status) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE')",
-                            pId, pId, name, catId, desc, price, stock
-                    );
-                } else {
-                    jdbcTemplate.update(
-                            "UPDATE products SET name = ?, category_id = ?, description = ?, price = ?, stock = ? WHERE product_id = ? OR id = ?",
-                            name, catId, desc, price, stock, pId, pId
+                            "INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')",
+                            name, catId, desc, price, stock
                     );
                 }
 
-                // Upsert image
-                try {
-                    jdbcTemplate.update(
-                            "INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)",
-                            pId, imgUrl
-                    );
-                } catch (Exception ignored) {}
+                // Fetch created product_id
+                Integer pId = null;
+                try { pId = jdbcTemplate.queryForObject("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name); } catch (Exception ignored) {}
 
-                try {
-                    jdbcTemplate.update(
-                            "INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?, ?, 1)",
-                            pId, imgUrl
-                    );
-                } catch (Exception ignored) {}
+                if (pId != null) {
+                    // Upsert image
+                    try {
+                        jdbcTemplate.update(
+                                "INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)",
+                                pId, imgUrl
+                        );
+                    } catch (Exception ignored) {}
+
+                    try {
+                        jdbcTemplate.update(
+                                "INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?, ?, 1)",
+                                pId, imgUrl
+                        );
+                    } catch (Exception ignored) {}
+                }
 
             } catch (Exception ignored) {}
         }
