@@ -327,6 +327,14 @@ public class ProductCartController {
     public List<Map<String, Object>> getProducts(@RequestParam(required = false) String category) {
         ensureProductTablesExist();
         List<Map<String, Object>> result = new ArrayList<>();
+
+        boolean isAll = category == null || 
+                        category.trim().isEmpty() || 
+                        category.trim().equalsIgnoreCase("null") || 
+                        category.trim().equalsIgnoreCase("undefined") || 
+                        category.trim().equalsIgnoreCase("All") || 
+                        category.trim().equalsIgnoreCase("all");
+
         try {
             List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
             if (list != null && !list.isEmpty()) {
@@ -363,7 +371,7 @@ public class ProductCartController {
                     }
                     map.put("imageUrl", imgUrl);
 
-                    if (category == null || category.trim().isEmpty() || category.equalsIgnoreCase("All") || catName.equalsIgnoreCase(category.trim())) {
+                    if (isAll || catName.equalsIgnoreCase(category.trim())) {
                         result.add(map);
                     }
                 }
@@ -437,7 +445,7 @@ public class ProductCartController {
             int stock = (Integer) p[5];
             String imgUrl = (String) p[6];
 
-            if (category == null || category.trim().isEmpty() || category.equalsIgnoreCase("All") || catName.equalsIgnoreCase(category.trim())) {
+            if (isAll || catName.equalsIgnoreCase(category.trim())) {
                 Map<String, Object> item = new HashMap<>();
                 item.put("id", id);
                 item.put("productId", id);
