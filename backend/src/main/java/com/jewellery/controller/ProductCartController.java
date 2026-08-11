@@ -131,29 +131,20 @@ public class ProductCartController {
         } catch (Exception ignored) {}
     }
 
-    // Retrieve product list, with category name and image URL (supports GET and POST)
     @RequestMapping(value = {"/products", "/products/all"}, method = {RequestMethod.GET, RequestMethod.POST})
     public List<Map<String, Object>> getProducts(@RequestParam(required = false) String category) {
         ensureProductTablesExist();
-        String imgTable = "product_images";
         try {
-            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check == null || check.isEmpty()) {
-                imgTable = "productimages";
-            }
-        } catch (Exception ignored) {
-            imgTable = "productimages";
-        }
+            String sql = "SELECT COALESCE(p.product_id, p.id) as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, " +
+                         "COALESCE(c.category_name, c.name, 'Diamond') as categoryName, " +
+                         "COALESCE(pi.image_url, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e') as imageUrl " +
+                         "FROM products p " +
+                         "LEFT JOIN categories c ON (p.category_id = c.category_id OR p.category_id = c.id) " +
+                         "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pi ON (p.product_id = pi.product_id OR p.id = pi.product_id)";
 
-        String sql = "SELECT p.product_id as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, c.category_name as categoryName, pi.image_url as imageUrl " +
-                     "FROM products p " +
-                     "LEFT JOIN categories c ON p.category_id = c.category_id " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id";
-
-        try {
             if (category != null && !category.trim().isEmpty()) {
-                String filterSql = sql + " WHERE LOWER(c.category_name) = LOWER(?)";
-                List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim());
+                String filterSql = sql + " WHERE LOWER(c.category_name) = LOWER(?) OR LOWER(c.name) = LOWER(?)";
+                List<Map<String, Object>> filtered = jdbcTemplate.queryForList(filterSql, category.trim(), category.trim());
                 if (filtered != null && !filtered.isEmpty()) {
                     return filtered;
                 }
@@ -162,8 +153,8 @@ public class ProductCartController {
         } catch (Exception e) {
             e.printStackTrace();
             try {
-                String fallbackSql = "SELECT p.product_id as id, p.name, p.description, p.price, 10 as stock, 'Jewelry' as categoryName, NULL as imageUrl FROM products p";
-                return jdbcTemplate.queryForList(fallbackSql);
+                String simpleSql = "SELECT COALESCE(product_id, id) as id, name, description, price, COALESCE(stock, 10) as stock, 'Diamond' as categoryName FROM products";
+                return jdbcTemplate.queryForList(simpleSql);
             } catch (Exception ignored) {
                 return new ArrayList<>();
             }
