@@ -88,12 +88,9 @@ public class ProductCartController {
                 try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
             }
 
-            // Seed products if empty
-            Integer prodCount = 0;
-            try { prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class); } catch (Exception ignored) {}
-            if (prodCount == null || prodCount == 0) {
-                seedAllProducts();
-            }
+            // Always seed any missing products from ecommerce_db
+            seedAllProducts();
+
         } catch (Exception ignored) {}
     }
 
@@ -169,18 +166,23 @@ public class ProductCartController {
             String imgUrl = (String) p[5];
 
             try {
-                jdbcTemplate.update(
-                        "INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')",
-                        name, catId, desc, price, stock
-                );
-            } catch (Exception e) {
-                try {
-                    jdbcTemplate.update(
-                            "INSERT INTO products (name, description, price, stock, status) VALUES (?, ?, ?, ?, 'ACTIVE')",
-                            name, desc, price, stock
-                    );
-                } catch (Exception ignored) {}
-            }
+                List<Integer> existing = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
+                if (existing == null || existing.isEmpty()) {
+                    try {
+                        jdbcTemplate.update(
+                                "INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')",
+                                name, catId, desc, price, stock
+                        );
+                    } catch (Exception e) {
+                        try {
+                            jdbcTemplate.update(
+                                    "INSERT INTO products (name, description, price, stock, status) VALUES (?, ?, ?, ?, 'ACTIVE')",
+                                    name, desc, price, stock
+                            );
+                        } catch (Exception ignored) {}
+                    }
+                }
+            } catch (Exception ignored) {}
 
             try {
                 List<Integer> pIds = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
