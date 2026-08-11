@@ -139,6 +139,7 @@ public class ProductCartController {
             {"Chain Bracelet", "Silver", "Clara Women's Evil Eye Bracelet", 35241.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image8.webp"},
             {"Rewa Bangles", "Silver", "Rounded Rewa Silver Bangles", 42516.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image9.webp"},
             {"Sterling Bangles", "Silver", "Sterling Silver Unique Bangles for Women", 39564.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image10.webp"},
+            // MySQL WorkBench items from user screenshot:
             {"Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jumkas", 5632.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"},
             {"Kemp-green Lakshmi Necklace", "Gold", "Antique gold tone kemp-green lakshmi necklace", 7986.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {"Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
@@ -158,37 +159,20 @@ public class ProductCartController {
             int stock = (Integer) p[4];
             String imgUrl = (String) p[5];
 
-            Integer catId = 1;
             try {
-                List<Integer> list = jdbcTemplate.queryForList("SELECT COALESCE(category_id, id) FROM categories WHERE LOWER(category_name) = LOWER(?) OR LOWER(name) = LOWER(?) LIMIT 1", Integer.class, catName, catName);
-                if (list != null && !list.isEmpty() && list.get(0) != null) {
-                    catId = list.get(0);
-                } else {
-                    jdbcTemplate.update("INSERT INTO categories (category_name, name, description, status) VALUES (?, ?, ?, 'ACTIVE')", catName, catName, catName + " collection");
-                    List<Integer> newList = jdbcTemplate.queryForList("SELECT COALESCE(category_id, id) FROM categories WHERE LOWER(category_name) = LOWER(?) OR LOWER(name) = LOWER(?) LIMIT 1", Integer.class, catName, catName);
-                    if (newList != null && !newList.isEmpty() && newList.get(0) != null) {
-                        catId = newList.get(0);
-                    }
-                }
+                jdbcTemplate.update(
+                        "INSERT INTO products (name, description, price, stock, status) VALUES (?, ?, ?, ?, 'ACTIVE')",
+                        name, desc, price, stock
+                );
             } catch (Exception ignored) {}
 
             try {
-                jdbcTemplate.update(
-                        "INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')",
-                        name, catId, desc, price, stock
-                );
-
-                Integer pId = null;
-                List<Integer> updatedList = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
-                if (!updatedList.isEmpty()) {
-                    pId = updatedList.get(0);
-                }
-
-                if (pId != null) {
+                List<Integer> pIds = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
+                if (!pIds.isEmpty() && pIds.get(0) != null) {
+                    Integer pId = pIds.get(0);
                     try { jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", pId, imgUrl); } catch (Exception ignored) {}
                     try { jdbcTemplate.update("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?, ?, 1)", pId, imgUrl); } catch (Exception ignored) {}
                 }
-
             } catch (Exception ignored) {}
         }
     }
