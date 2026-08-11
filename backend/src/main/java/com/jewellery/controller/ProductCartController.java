@@ -325,9 +325,7 @@ public class ProductCartController {
 
     @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
-        ensureProductTablesExist();
         List<Map<String, Object>> result = new ArrayList<>();
-
         boolean isAll = category == null || 
                         category.trim().isEmpty() || 
                         category.trim().equalsIgnoreCase("null") || 
@@ -336,6 +334,7 @@ public class ProductCartController {
                         category.trim().equalsIgnoreCase("all");
 
         try {
+            ensureProductTablesExist();
             List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
             if (list != null && !list.isEmpty()) {
                 for (Map<String, Object> row : list) {
@@ -371,19 +370,20 @@ public class ProductCartController {
                     }
                     map.put("imageUrl", imgUrl);
 
-                    if (isAll || catName.equalsIgnoreCase(category.trim())) {
+                    if (isAll || (category != null && catName.equalsIgnoreCase(category.trim()))) {
                         result.add(map);
                     }
-                }
-                if (!result.isEmpty()) {
-                    return ResponseEntity.ok(result);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Fallback: Populate static product catalog if DB return is empty
+        if (!result.isEmpty()) {
+            return ResponseEntity.ok(result);
+        }
+
+        // Guaranteed Fallback Catalog of all 48 products
         Object[][] products = {
             {1, "Nury Chevron Ring", "Diamond", "Nury Chevron Ring", 55400.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"},
             {2, "The Trina Ring", "Diamond", "Beautifully Designed Trina", 67500.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring4-the%20trina%20ring(m).webp?updatedAt=1785154301792"},
@@ -445,7 +445,7 @@ public class ProductCartController {
             int stock = (Integer) p[5];
             String imgUrl = (String) p[6];
 
-            if (isAll || catName.equalsIgnoreCase(category.trim())) {
+            if (isAll || (category != null && catName.equalsIgnoreCase(category.trim()))) {
                 Map<String, Object> item = new HashMap<>();
                 item.put("id", id);
                 item.put("productId", id);
