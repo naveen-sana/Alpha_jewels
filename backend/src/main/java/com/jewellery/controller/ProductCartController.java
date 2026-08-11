@@ -323,8 +323,8 @@ public class ProductCartController {
         }
     }
 
-    @RequestMapping(value = {"/products", "/products/all"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public List<Map<String, Object>> getProducts(@RequestParam(required = false) String category) {
+    @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
         ensureProductTablesExist();
         List<Map<String, Object>> result = new ArrayList<>();
 
@@ -376,7 +376,7 @@ public class ProductCartController {
                     }
                 }
                 if (!result.isEmpty()) {
-                    return result;
+                    return ResponseEntity.ok(result);
                 }
             }
         } catch (Exception e) {
@@ -460,7 +460,7 @@ public class ProductCartController {
                 result.add(item);
             }
         }
-        return result;
+        return ResponseEntity.ok(result);
     }
 
     private void ensureCartTableExists() {
