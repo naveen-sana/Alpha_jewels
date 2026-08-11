@@ -38,7 +38,7 @@ public class SecurityConfig {
 	        .authorizeHttpRequests(auth -> auth
 	        		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 	        		.requestMatchers("/api/users/register", "/api/users/login",
-	        		        "/api/users/forgot-password", "/api/users/reset-password", "/error", "/health", "/api/health", "/api/seed-now").permitAll()
+	        		        "/api/users/forgot-password", "/api/users/reset-password", "/error", "/health", "/api/health", "/api/seed-now", "/api/seed-database-now").permitAll()
 	        		.requestMatchers("/api/products", "/api/products/**", "/api/categories", "/api/categories/**", "/api/reviews/product/**", "/api/orders", "/api/orders/**", "/api/payment", "/api/payment/**").permitAll()
 	        		.requestMatchers("/api/cart", "/api/cart/**", "/api/wishlist", "/api/wishlist/**", "/api/reviews", "/api/reviews/**").authenticated()
 	        		.requestMatchers("/api/admin/**").permitAll()
