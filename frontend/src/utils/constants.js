@@ -1,8 +1,5 @@
-// Production Render API Endpoint: https://alpha-jewels-1.onrender.com
-const envUrl = import.meta.env.VITE_API_URL
-export const API_BASE_URL = (envUrl && typeof envUrl === 'string' && envUrl.trim().startsWith('http'))
-  ? envUrl.trim()
-  : 'https://alpha-jewels-1.onrender.com'
+// Production Render API Endpoint
+export const API_BASE_URL = 'https://alpha-jewels-1.onrender.com'
 
 export const STORAGE_KEYS = {
   TOKEN: 'jewellery_token',
