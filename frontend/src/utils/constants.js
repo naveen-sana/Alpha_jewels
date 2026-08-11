@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://alpha-jewels-backend.onrender.com'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://alpha-jewels-1.onrender.com'
 
 export const STORAGE_KEYS = {
   TOKEN: 'jewellery_token',
