@@ -92,10 +92,13 @@ public class ProductCartController {
             Integer catCount = 0;
             try { catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories", Integer.class); } catch (Exception ignored) {}
             if (catCount == null || catCount == 0) {
-                try {
-                    jdbcTemplate.execute("INSERT IGNORE INTO categories (category_id, category_name) VALUES " +
-                                         "(1, 'Diamond'), (2, 'Gold'), (3, 'Platinum'), (4, 'Silver'), (9, 'Bridal')");
-                } catch (Exception ignored) {}
+                String[] defaultCats = {"Diamond", "Gold", "Platinum", "Silver", "Bridal"};
+                for (String cat : defaultCats) {
+                    try {
+                        jdbcTemplate.update("INSERT INTO categories (category_name, description, status) VALUES (?, ?, 'ACTIVE')",
+                                cat, cat + " luxury jewellery collection");
+                    } catch (Exception ignored) {}
+                }
             }
 
             // Seed default products if empty
@@ -106,19 +109,22 @@ public class ProductCartController {
                     String insertProd = "INSERT INTO products (name, category_id, description, price, discount, stock, status) " +
                                         "VALUES (?, 1, 'Exquisite 22K gold ring with VVS solitaire diamond', 125000.00, 5.0, 15, 'ACTIVE')";
                     jdbcTemplate.update(insertProd, "Royal Solitaire Diamond Ring");
-                    Integer p1 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    Integer p1 = null;
+                    try { p1 = jdbcTemplate.queryForObject("SELECT MAX(product_id) FROM products", Integer.class); } catch (Exception ignored) {}
                     if (p1 != null) jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p1, "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80");
 
                     String insertProd2 = "INSERT INTO products (name, category_id, description, price, discount, stock, status) " +
                                          "VALUES (?, 2, 'Handcrafted royal Kundan and Emerald gold choker necklace', 450000.00, 10.0, 8, 'ACTIVE')";
                     jdbcTemplate.update(insertProd2, "Imperial Emerald Gold Choker");
-                    Integer p2 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    Integer p2 = null;
+                    try { p2 = jdbcTemplate.queryForObject("SELECT MAX(product_id) FROM products", Integer.class); } catch (Exception ignored) {}
                     if (p2 != null) jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p2, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80");
 
                     String insertProd3 = "INSERT INTO products (name, category_id, description, price, discount, stock, status) " +
                                          "VALUES (?, 3, 'Elegant platinum studs featuring princess cut diamonds', 85000.00, 0.0, 20, 'ACTIVE')";
                     jdbcTemplate.update(insertProd3, "Princess Cut Diamond Studs");
-                    Integer p3 = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+                    Integer p3 = null;
+                    try { p3 = jdbcTemplate.queryForObject("SELECT MAX(product_id) FROM products", Integer.class); } catch (Exception ignored) {}
                     if (p3 != null) jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", p3, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80");
                 } catch (Exception ignored) {}
             }

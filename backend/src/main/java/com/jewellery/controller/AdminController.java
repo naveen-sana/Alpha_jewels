@@ -403,7 +403,10 @@ public class AdminController {
             jdbcTemplate.update(insertProductSql, name, categoryId, description, price, discount, stock, weight, metalType, goldPurity, diamondDetails, stoneDetails, certificateNumber, sku, status);
 
             // Fetch created product_id
-            Integer productId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+            Integer productId = null;
+            try {
+                productId = jdbcTemplate.queryForObject("SELECT MAX(product_id) FROM products", Integer.class);
+            } catch (Exception ignored) {}
 
             if (productId != null && imageUrl != null && !imageUrl.trim().isEmpty()) {
                 String cleanUrl = imageUrl.trim();
