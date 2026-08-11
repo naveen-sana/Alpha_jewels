@@ -27,7 +27,7 @@ public class ProductCartController {
         } catch (Exception ignored) {}
     }
 
-    @GetMapping("/seed-now")
+    @GetMapping("/products/seed-now")
     public ResponseEntity<Map<String, Object>> seedNow() {
         Map<String, Object> response = new HashMap<>();
         List<String> logs = new ArrayList<>();
