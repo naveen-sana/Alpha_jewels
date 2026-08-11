@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Gem, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react'
 import axios from 'axios'
 import LuxuryToast from '../components/LuxuryToast'
+import { API_BASE_URL } from '../../utils/constants'
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('')
@@ -40,10 +41,7 @@ const AdminLogin = () => {
 
     setLoading(true)
 
-    const envApiUrl = import.meta.env.VITE_API_URL || ''
-    const endpoints = envApiUrl
-      ? [`${envApiUrl}/api/users/login`, '/api/users/login']
-      : ['/api/users/login', 'http://localhost:9090/api/users/login', 'http://localhost:8080/api/users/login']
+    const endpoints = [`${API_BASE_URL}/api/users/login`, '/api/users/login']
 
     let response = null
 

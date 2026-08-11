@@ -1,7 +1,7 @@
 import axios from 'axios'
+import { API_BASE_URL } from '../../utils/constants'
 
-const envApiUrl = import.meta.env.VITE_API_URL || ''
-const BASE_URLS = envApiUrl ? [envApiUrl, ''] : ['', 'http://localhost:9090', 'http://localhost:8080']
+const BASE_URLS = [API_BASE_URL, '']
 
 const isValidApiResponse = (res) => {
   if (!res || res.data === undefined || res.data === null) return false
