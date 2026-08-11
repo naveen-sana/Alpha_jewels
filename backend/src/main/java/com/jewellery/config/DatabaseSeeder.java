@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -18,6 +19,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             seedTablesAndProducts();
         } catch (Exception e) {
             System.err.println("DatabaseSeeder error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -147,17 +149,17 @@ public class DatabaseSeeder implements CommandLineRunner {
             String name = (String) p[0];
             String catName = (String) p[1];
             String desc = (String) p[2];
-            double price = (Double) p[3];
+            double priceDouble = (Double) p[3];
+            BigDecimal price = BigDecimal.valueOf(priceDouble);
             int stock = (Integer) p[4];
             String imgUrl = (String) p[5];
 
             Integer catId = getOrCreateCategoryId(catName);
 
             try {
-                Integer existingCount = 0;
-                try { existingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products WHERE LOWER(name) = LOWER(?)", Integer.class, name); } catch (Exception ignored) {}
+                List<Integer> existing = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?)", Integer.class, name);
 
-                if (existingCount == null || existingCount == 0) {
+                if (existing.isEmpty()) {
                     jdbcTemplate.update(
                             "INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')",
                             name, catId, desc, price, stock
@@ -170,7 +172,10 @@ public class DatabaseSeeder implements CommandLineRunner {
                 }
 
                 Integer pId = null;
-                try { pId = jdbcTemplate.queryForObject("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name); } catch (Exception ignored) {}
+                List<Integer> updatedList = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
+                if (!updatedList.isEmpty()) {
+                    pId = updatedList.get(0);
+                }
 
                 if (pId != null) {
                     try {
