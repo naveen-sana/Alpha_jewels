@@ -347,13 +347,13 @@ public class AdminController {
                 Double rev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled'", Double.class);
                 overallRevenue = rev != null ? rev : 0.0;
 
-                Double tRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND DATE(created_at) = CURRENT_DATE()", Double.class);
+                Double tRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND DATE(created_at) = CURRENT_DATE", Double.class);
                 todayRevenue = tRev != null ? tRev : 0.0;
 
-                Double mRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())", Double.class);
+                Double mRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM CURRENT_DATE) AND EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)", Double.class);
                 monthlyRevenue = mRev != null ? mRev : 0.0;
 
-                Double yRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND YEAR(created_at) = YEAR(CURRENT_DATE())", Double.class);
+                Double yRev = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE status != 'Cancelled' AND EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)", Double.class);
                 yearlyRevenue = yRev != null ? yRev : 0.0;
             } catch (Exception ignored) {}
 
