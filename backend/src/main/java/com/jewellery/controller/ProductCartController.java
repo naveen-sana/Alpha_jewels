@@ -6,103 +6,82 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ProductCartController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private void ensureCartTableExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS cart_items (" +
-                     "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                     "user_id BIGINT NOT NULL, " +
-                     "product_id INT NOT NULL, " +
-                     "quantity INT NOT NULL DEFAULT 1, " +
-                     "UNIQUE KEY uk_user_cart_product (user_id, product_id)" +
-                     ")";
-        jdbcTemplate.execute(sql);
-    }
-
-    private String getColName(String table, String preferred, String fallback) {
+    private void executeQuietly(String sql, Object... params) {
         try {
-            List<Map<String, Object>> columns = jdbcTemplate.queryForList(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'ecommerce_db' AND TABLE_NAME = ?", table
-            );
-            for (Map<String, Object> col : columns) {
-                for (Object val : col.values()) {
-                    String name = String.valueOf(val);
-                    if (preferred.equalsIgnoreCase(name)) return preferred;
-                    if (fallback.equalsIgnoreCase(name)) return fallback;
-                }
+            if (params != null && params.length > 0) {
+                jdbcTemplate.update(sql, params);
+            } else {
+                jdbcTemplate.execute(sql);
             }
         } catch (Exception ignored) {}
-        return preferred;
     }
 
     private void ensureProductTablesExist() {
-        try {
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categories (" +
-                                 "category_id SERIAL PRIMARY KEY, " +
-                                 "category_name VARCHAR(100) NOT NULL UNIQUE, " +
-                                 "description TEXT, " +
-                                 "image_url VARCHAR(500), " +
-                                 "status VARCHAR(20) DEFAULT 'ACTIVE')");
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS products (" +
-                                 "product_id SERIAL PRIMARY KEY, " +
-                                 "name VARCHAR(255) NOT NULL, " +
-                                 "category_id INT, " +
-                                 "description TEXT, " +
-                                 "price DECIMAL(10, 2) NOT NULL, " +
-                                 "discount DECIMAL(5, 2) DEFAULT 0.00, " +
-                                 "stock INT DEFAULT 10, " +
-                                 "weight DECIMAL(8, 2), " +
-                                 "metal_type VARCHAR(50), " +
-                                 "gold_purity VARCHAR(50) DEFAULT '22K', " +
-                                 "diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color', " +
-                                 "stone_details VARCHAR(255) DEFAULT 'Natural Diamond', " +
-                                 "certificate_number VARCHAR(100), " +
-                                 "sku VARCHAR(100), " +
-                                 "status VARCHAR(20) DEFAULT 'ACTIVE')");
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS productimages (" +
-                                 "image_id SERIAL PRIMARY KEY, " +
-                                 "product_id INT NOT NULL, " +
-                                 "image_url TEXT NOT NULL, " +
-                                 "is_thumbnail BOOLEAN DEFAULT TRUE)");
+        executeQuietly("CREATE TABLE IF NOT EXISTS categories (" +
+                "category_id SERIAL PRIMARY KEY, " +
+                "category_name VARCHAR(100) NOT NULL UNIQUE, " +
+                "description TEXT, " +
+                "image_url VARCHAR(500), " +
+                "status VARCHAR(20) DEFAULT 'ACTIVE')");
 
-            String[] alters = {
-                "ALTER TABLE categories ADD COLUMN category_name VARCHAR(100)",
-                "ALTER TABLE products ADD COLUMN category_id INT",
-                "ALTER TABLE products ADD COLUMN description TEXT",
-                "ALTER TABLE products ADD COLUMN price DECIMAL(12, 2) DEFAULT 0.00",
-                "ALTER TABLE products ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0.00",
-                "ALTER TABLE products ADD COLUMN stock INT DEFAULT 10",
-                "ALTER TABLE products ADD COLUMN status VARCHAR(20) DEFAULT 'ACTIVE'"
-            };
-            for (String alterSql : alters) {
-                try { jdbcTemplate.execute(alterSql); } catch (Exception ignored) {}
-            }
+        executeQuietly("CREATE TABLE IF NOT EXISTS products (" +
+                "product_id SERIAL PRIMARY KEY, " +
+                "name VARCHAR(255) NOT NULL, " +
+                "category_id INT, " +
+                "description TEXT, " +
+                "price DECIMAL(12, 2) NOT NULL DEFAULT 0.00, " +
+                "discount DECIMAL(5, 2) DEFAULT 0.00, " +
+                "stock INT DEFAULT 10, " +
+                "weight DECIMAL(8, 2), " +
+                "metal_type VARCHAR(50), " +
+                "gold_purity VARCHAR(50) DEFAULT '22K', " +
+                "diamond_details VARCHAR(255) DEFAULT 'VS1 / G-H Color', " +
+                "stone_details VARCHAR(255) DEFAULT 'Natural Diamond', " +
+                "certificate_number VARCHAR(100), " +
+                "sku VARCHAR(100), " +
+                "status VARCHAR(20) DEFAULT 'ACTIVE')");
 
-            // Always seed any missing products from ecommerce_db
-            seedAllProducts();
+        executeQuietly("CREATE TABLE IF NOT EXISTS productimages (" +
+                "image_id SERIAL PRIMARY KEY, " +
+                "product_id INT NOT NULL, " +
+                "image_url TEXT NOT NULL, " +
+                "is_thumbnail BOOLEAN DEFAULT TRUE)");
 
-        } catch (Exception ignored) {}
+        executeQuietly("CREATE TABLE IF NOT EXISTS product_images (" +
+                "id SERIAL PRIMARY KEY, " +
+                "product_id INT NOT NULL, " +
+                "image_url TEXT NOT NULL, " +
+                "is_primary INT DEFAULT 1)");
+
+        executeQuietly("ALTER TABLE categories ADD COLUMN IF NOT EXISTS category_name VARCHAR(100)");
+        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS category_id INT");
+        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT");
+        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS price DECIMAL(12, 2) DEFAULT 0.00");
+        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS discount DECIMAL(5, 2) DEFAULT 0.00");
+        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 10");
+        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ACTIVE'");
+
+        seedAllProducts();
     }
 
     private void seedAllProducts() {
-        try {
-            jdbcTemplate.execute("INSERT INTO categories (category_id, id, category_name, name, status) VALUES " +
-                    "(1, 1, 'Diamond', 'Diamond', 'ACTIVE'), " +
-                    "(2, 2, 'Gold', 'Gold', 'ACTIVE'), " +
-                    "(3, 3, 'Platinum', 'Platinum', 'ACTIVE'), " +
-                    "(4, 4, 'Silver', 'Silver', 'ACTIVE') " +
-                    "ON CONFLICT DO NOTHING");
-        } catch (Exception ignored) {}
+        executeQuietly("INSERT INTO categories (category_id, category_name, name, status) VALUES " +
+                "(1, 'Diamond', 'Diamond', 'ACTIVE'), " +
+                "(2, 'Gold', 'Gold', 'ACTIVE'), " +
+                "(3, 'Platinum', 'Platinum', 'ACTIVE'), " +
+                "(4, 'Silver', 'Silver', 'ACTIVE') " +
+                "ON CONFLICT DO NOTHING");
 
         Object[][] products = {
             {"Nury Chevron Ring", 1, "Nury Chevron Ring", 55400.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"},
@@ -145,7 +124,6 @@ public class ProductCartController {
             {"Chain Bracelet", 4, "Clara Women's Evil Eye Bracelet", 35241.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image8.webp"},
             {"Rewa Bangles", 4, "Rounded Rewa Silver Bangles", 42516.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image9.webp"},
             {"Sterling Bangles", 4, "Sterling Silver Unique Bangles for Women", 39564.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image10.webp"},
-            // MySQL WorkBench items from user screenshot:
             {"Antique Jumkas", 2, "Gold Plated One Gram Gold Antique Jumkas", 5632.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"},
             {"Kemp-green Lakshmi Necklace", 2, "Antique gold tone kemp-green lakshmi necklace", 7986.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {"Stoned Diamond Necklace", 1, "Beautiful stoned Necklace for women", 9889.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
@@ -161,35 +139,25 @@ public class ProductCartController {
             int catId = (Integer) p[1];
             String desc = (String) p[2];
             double priceDouble = (Double) p[3];
-            java.math.BigDecimal price = java.math.BigDecimal.valueOf(priceDouble);
+            BigDecimal price = BigDecimal.valueOf(priceDouble);
             int stock = (Integer) p[4];
             String imgUrl = (String) p[5];
 
+            List<Integer> existing = null;
             try {
-                List<Integer> existing = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
-                if (existing == null || existing.isEmpty()) {
-                    try {
-                        jdbcTemplate.update(
-                                "INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')",
-                                name, catId, desc, price, stock
-                        );
-                    } catch (Exception e) {
-                        try {
-                            jdbcTemplate.update(
-                                    "INSERT INTO products (name, description, price, stock, status) VALUES (?, ?, ?, ?, 'ACTIVE')",
-                                    name, desc, price, stock
-                            );
-                        } catch (Exception ignored) {}
-                    }
-                }
+                existing = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
             } catch (Exception ignored) {}
+
+            if (existing == null || existing.isEmpty()) {
+                executeQuietly("INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')", name, catId, desc, price, stock);
+            }
 
             try {
                 List<Integer> pIds = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
                 if (!pIds.isEmpty() && pIds.get(0) != null) {
                     Integer pId = pIds.get(0);
-                    try { jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", pId, imgUrl); } catch (Exception ignored) {}
-                    try { jdbcTemplate.update("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?, ?, 1)", pId, imgUrl); } catch (Exception ignored) {}
+                    executeQuietly("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, TRUE)", pId, imgUrl);
+                    executeQuietly("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?, ?, 1)", pId, imgUrl);
                 }
             } catch (Exception ignored) {}
         }
@@ -250,7 +218,26 @@ public class ProductCartController {
         }
     }
 
-    // Get Cart Item Count: GET /api/cart/items/count
+    private void ensureCartTableExists() {
+        executeQuietly("CREATE TABLE IF NOT EXISTS cart_items (" +
+                "id SERIAL PRIMARY KEY, " +
+                "user_id BIGINT NOT NULL, " +
+                "product_id BIGINT NOT NULL, " +
+                "quantity INT NOT NULL DEFAULT 1)");
+    }
+
+    private Long getUserIdByEmail(String email) {
+        try {
+            return jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
+        } catch (Exception e) {
+            try {
+                return jdbcTemplate.queryForObject("SELECT id FROM \"user\" WHERE email = ?", Long.class, email);
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+    }
+
     @GetMapping("/cart/items/count")
     public ResponseEntity<Map<String, Object>> getCartItemCount() {
         ensureCartTableExists();
@@ -261,331 +248,104 @@ public class ProductCartController {
             err.put("count", 0);
             return ResponseEntity.ok(err);
         }
-
-        String sql = "SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("count", count != null ? count : 0);
-        return ResponseEntity.ok(response);
+        try {
+            Integer count = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?", Integer.class, userId);
+            Map<String, Object> res = new HashMap<>();
+            res.put("count", count != null ? count : 0);
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            Map<String, Object> res = new HashMap<>();
+            res.put("count", 0);
+            return ResponseEntity.ok(res);
+        }
     }
 
-    // Retrieve current user's cart items (Structured format for GET /api/cart/items & GET /api/cart)
-    @GetMapping({"/cart/items", "/cart"})
-    public ResponseEntity<?> getCart() {
+    @GetMapping("/cart/items")
+    public ResponseEntity<?> getCartItems() {
+        ensureCartTableExists();
+        ensureProductTablesExist();
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        Long userId = getUserIdByEmail(email);
+        if (userId == null) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+        try {
+            String sql = "SELECT c.id, c.product_id as \"productId\", c.quantity, p.name, p.price, " +
+                         "COALESCE(pi.image_url, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e') as \"imageUrl\" " +
+                         "FROM cart_items c " +
+                         "JOIN products p ON (c.product_id = p.product_id OR c.product_id = p.id) " +
+                         "LEFT JOIN productimages pi ON (p.product_id = pi.product_id OR p.id = pi.product_id) " +
+                         "WHERE c.user_id = ?";
+            List<Map<String, Object>> items = jdbcTemplate.queryForList(sql, userId);
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+    }
+
+    @PostMapping("/cart/add")
+    public ResponseEntity<?> addToCart(@RequestBody Map<String, Object> request) {
         ensureCartTableExists();
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        Map<String, Object> userInfo = getUserInfoByEmail(email);
-        if (userInfo == null) {
+        Long userId = getUserIdByEmail(email);
+        if (userId == null) {
             return ResponseEntity.badRequest().body("User not found");
         }
+        Long productId = Long.valueOf(request.get("productId").toString());
+        Integer quantity = request.get("quantity") != null ? Integer.valueOf(request.get("quantity").toString()) : 1;
 
-        Long userId = ((Number) userInfo.get("id")).longValue();
-        String username = (String) userInfo.get("full_name");
-        if (username == null || username.trim().isEmpty()) {
-            username = email;
-        }
-        String role = (String) userInfo.get("role");
-        if (role == null) role = "CUSTOMER";
-
-        String imgTable = "product_images";
         try {
-            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check == null || check.isEmpty()) imgTable = "productimages";
-        } catch (Exception ignored) { imgTable = "productimages"; }
-
-        String sql = "SELECT ci.id as cart_item_id, ci.product_id, ci.quantity, " +
-                     "p.name, p.description, p.price as price_per_unit, COALESCE(p.stock, 10) as stock, " +
-                     "pi.image_url " +
-                     "FROM cart_items ci " +
-                     "JOIN products p ON ci.product_id = p.product_id " +
-                     "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
-                     "WHERE ci.user_id = ?";
-
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, userId);
-
-        double overallTotalPrice = 0.0;
-        List<Map<String, Object>> productsList = new ArrayList<>();
-
-        for (Map<String, Object> row : rows) {
-            Map<String, Object> item = new HashMap<>();
-            int productId = ((Number) row.get("product_id")).intValue();
-            int quantity = ((Number) row.get("quantity")).intValue();
-            double pricePerUnit = row.get("price_per_unit") != null ? ((Number) row.get("price_per_unit")).doubleValue() : 0.0;
-            double totalPrice = Math.round(pricePerUnit * quantity * 100.0) / 100.0;
-
-            overallTotalPrice += totalPrice;
-
-            item.put("id", row.get("cart_item_id"));
-            item.put("productId", productId);
-            item.put("product_id", productId);
-            item.put("name", row.get("name"));
-            item.put("description", row.get("description"));
-            item.put("imageUrl", row.get("image_url"));
-            item.put("image_url", row.get("image_url"));
-            item.put("price", pricePerUnit);
-            item.put("price_per_unit", pricePerUnit);
-            item.put("quantity", quantity);
-            item.put("total_price", totalPrice);
-            item.put("stock", row.get("stock"));
-
-            productsList.add(item);
-        }
-
-        overallTotalPrice = Math.round(overallTotalPrice * 100.0) / 100.0;
-
-        Map<String, Object> cartDetails = new HashMap<>();
-        cartDetails.put("overall_total_price", overallTotalPrice);
-        cartDetails.put("products", productsList);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("role", role);
-        response.put("username", username);
-        response.put("cart", cartDetails);
-        response.put("items", productsList);
-
-        return ResponseEntity.ok(response);
-    }
-
-    // Add a product to the user's cart: POST /api/cart/add, POST /api/cart/items/add
-    @PostMapping({"/cart/add", "/cart/items/add"})
-    public ResponseEntity<?> addToCart(@RequestBody(required = false) Map<String, Object> request) {
-        if (request == null) {
-            return ResponseEntity.badRequest().body("Request body is required");
-        }
-        try {
-            ensureCartTableExists();
-            String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-            Long userId = getUserIdByEmail(email);
-            if (userId == null) {
-                return ResponseEntity.badRequest().body("User not found");
-            }
-
-            Integer productIdObj = null;
-            if (request.containsKey("productId") && request.get("productId") != null) {
-                productIdObj = ((Number) request.get("productId")).intValue();
-            } else if (request.containsKey("product_id") && request.get("product_id") != null) {
-                productIdObj = ((Number) request.get("product_id")).intValue();
-            } else if (request.containsKey("id") && request.get("id") != null) {
-                productIdObj = ((Number) request.get("id")).intValue();
-            }
-
-            if (productIdObj == null) {
-                return ResponseEntity.badRequest().body("productId is required");
-            }
-
-            int productId = productIdObj;
-            int requestedQuantity = request.containsKey("quantity") && request.get("quantity") != null 
-                    ? ((Number) request.get("quantity")).intValue() : 1;
-            if (requestedQuantity <= 0) {
-                requestedQuantity = 1;
-            }
-
-            // Fetch product stock with fallback for column names
-            int availableStock = 999;
-            try {
-                String stockSql = "SELECT stock FROM products WHERE product_id = ?";
-                List<Map<String, Object>> productRows = jdbcTemplate.queryForList(stockSql, productId);
-                if (productRows.isEmpty()) {
-                    stockSql = "SELECT stock FROM products WHERE id = ?";
-                    productRows = jdbcTemplate.queryForList(stockSql, productId);
-                }
-                if (!productRows.isEmpty() && productRows.get(0).get("stock") != null) {
-                    availableStock = ((Number) productRows.get(0).get("stock")).intValue();
-                }
-            } catch (Exception stockEx) {
-                availableStock = 999;
-            }
-
-            // Check existing quantity in cart
-            String checkSql = "SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?";
-            List<Map<String, Object>> existing = jdbcTemplate.queryForList(checkSql, userId, productId);
-
-            int currentQty = existing.isEmpty() ? 0 : ((Number) existing.get(0).get("quantity")).intValue();
-            int newTotalQty = currentQty + requestedQuantity;
-
-            if (availableStock <= 0 || newTotalQty > availableStock) {
-                Map<String, Object> err = new HashMap<>();
-                err.put("error", "Stock limit exceeded");
-                err.put("message", "Stock limit exceeded. Only " + availableStock + " products are available.");
-                err.put("availableStock", availableStock);
-                return ResponseEntity.badRequest().body(err);
-            }
-
+            List<Map<String, Object>> existing = jdbcTemplate.queryForList("SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?", userId, productId);
             if (!existing.isEmpty()) {
-                String updateSql = "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
-                jdbcTemplate.update(updateSql, newTotalQty, userId, productId);
+                Long cartId = Long.valueOf(existing.get(0).get("id").toString());
+                int newQty = Integer.parseInt(existing.get(0).get("quantity").toString()) + quantity;
+                executeQuietly("UPDATE cart_items SET quantity = ? WHERE id = ?", newQty, cartId);
             } else {
-                String insertSql = "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)";
-                jdbcTemplate.update(insertSql, userId, productId, requestedQuantity);
+                executeQuietly("INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)", userId, productId, quantity);
             }
-
-            // Get updated count
-            String countSql = "SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?";
-            Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, userId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Item added to cart successfully");
-            response.put("count", count != null ? count : 0);
-            return ResponseEntity.ok(response);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return ResponseEntity.internalServerError().body("Failed to add item to cart: " + ex.getMessage());
+            return ResponseEntity.ok(Map.of("message", "Product added to cart"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error adding to cart: " + e.getMessage());
         }
     }
 
-    // Update Quantity: PUT /api/cart/update
     @PutMapping("/cart/update")
-    public ResponseEntity<?> updateQuantity(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateCartQuantity(@RequestBody Map<String, Object> request) {
         ensureCartTableExists();
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
-        if (userId == null) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+        if (userId == null) return ResponseEntity.badRequest().body("User not found");
 
-        Integer productIdObj = null;
-        if (request.containsKey("productId")) {
-            productIdObj = ((Number) request.get("productId")).intValue();
-        } else if (request.containsKey("product_id")) {
-            productIdObj = ((Number) request.get("product_id")).intValue();
-        }
+        Long productId = Long.valueOf(request.get("productId").toString());
+        Integer quantity = request.get("quantity") != null ? Integer.valueOf(request.get("quantity").toString()) : null;
+        String action = request.get("action") != null ? request.get("action").toString() : null;
 
-        if (productIdObj == null) {
-            return ResponseEntity.badRequest().body("productId is required");
-        }
-
-        int productId = productIdObj;
-
-        // Check if existing item in cart
-        String checkSql = "SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?";
-        List<Map<String, Object>> existing = jdbcTemplate.queryForList(checkSql, userId, productId);
-
-        if (existing.isEmpty()) {
-            return ResponseEntity.badRequest().body("Item not found in cart");
-        }
-
-        int currentQty = ((Number) existing.get(0).get("quantity")).intValue();
-        int targetQty = currentQty;
-
-        if (request.containsKey("quantity")) {
-            targetQty = ((Number) request.get("quantity")).intValue();
-        } else if (request.containsKey("action")) {
-            String action = (String) request.get("action");
-            if ("increase".equalsIgnoreCase(action) || "increment".equalsIgnoreCase(action)) {
-                targetQty = currentQty + 1;
-            } else if ("decrease".equalsIgnoreCase(action) || "decrement".equalsIgnoreCase(action)) {
-                targetQty = currentQty - 1;
+        try {
+            if (quantity != null) {
+                executeQuietly("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?", quantity, userId, productId);
+            } else if ("increase".equalsIgnoreCase(action)) {
+                executeQuietly("UPDATE cart_items SET quantity = quantity + 1 WHERE user_id = ? AND product_id = ?", userId, productId);
+            } else if ("decrease".equalsIgnoreCase(action)) {
+                executeQuietly("UPDATE cart_items SET quantity = GREATEST(1, quantity - 1) WHERE user_id = ? AND product_id = ?", userId, productId);
             }
+            return ResponseEntity.ok(Map.of("message", "Cart updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating cart: " + e.getMessage());
         }
-
-        // If target quantity becomes 0 or less, remove item automatically
-        if (targetQty <= 0) {
-            String deleteSql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
-            jdbcTemplate.update(deleteSql, userId, productId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Product removed from cart");
-            response.put("quantity", 0);
-            return ResponseEntity.ok(response);
-        }
-
-        // Stock validation check
-        String stockSql = "SELECT stock FROM products WHERE product_id = ?";
-        List<Map<String, Object>> productRows = jdbcTemplate.queryForList(stockSql, productId);
-        if (productRows.isEmpty()) {
-            return ResponseEntity.badRequest().body("Product not found");
-        }
-        int availableStock = ((Number) productRows.get(0).get("stock")).intValue();
-
-        if (targetQty > availableStock) {
-            Map<String, Object> err = new HashMap<>();
-            err.put("error", "Stock limit exceeded");
-            err.put("message", "Stock limit exceeded. Only " + availableStock + " products are available.");
-            err.put("availableStock", availableStock);
-            return ResponseEntity.badRequest().body(err);
-        }
-
-        String updateSql = "UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?";
-        jdbcTemplate.update(updateSql, targetQty, userId, productId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Cart updated successfully");
-        response.put("quantity", targetQty);
-        return ResponseEntity.ok(response);
     }
 
-    // Delete a product from the user's cart: DELETE /api/cart/delete & DELETE /api/cart/delete/{productId} & DELETE /api/cart/{productId}
-    @DeleteMapping({"/cart/delete/{productId}", "/cart/{productId}", "/cart/delete"})
-    public ResponseEntity<?> deleteFromCart(
-            @PathVariable(required = false) Integer productId,
-            @RequestParam(required = false) Integer productIdParam,
-            @RequestBody(required = false) Map<String, Object> body) {
-        
+    @DeleteMapping("/cart/delete/{productId}")
+    public ResponseEntity<?> removeFromCart(@PathVariable Long productId) {
         ensureCartTableExists();
         String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
-        if (userId == null) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+        if (userId == null) return ResponseEntity.badRequest().body("User not found");
 
-        int targetProductId = -1;
-        if (productId != null) {
-            targetProductId = productId;
-        } else if (productIdParam != null) {
-            targetProductId = productIdParam;
-        } else if (body != null && body.containsKey("productId")) {
-            targetProductId = ((Number) body.get("productId")).intValue();
-        } else if (body != null && body.containsKey("product_id")) {
-            targetProductId = ((Number) body.get("product_id")).intValue();
-        }
-
-        if (targetProductId <= 0) {
-            return ResponseEntity.badRequest().body("Valid productId is required");
-        }
-
-        String deleteSql = "DELETE FROM cart_items WHERE user_id = ? AND product_id = ?";
-        jdbcTemplate.update(deleteSql, userId, targetProductId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Item removed from cart successfully");
-        response.put("productId", targetProductId);
-        return ResponseEntity.ok(response);
-    }
-
-    private Long getUserIdByEmail(String email) {
-        if (email == null) return null;
         try {
-            String sql = "SELECT id FROM user WHERE LOWER(email) = LOWER(?)";
-            List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
-            if (result.isEmpty()) {
-                sql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?)";
-                result = jdbcTemplate.queryForList(sql, email.trim());
-            }
-            if (result.isEmpty()) {
-                return null;
-            }
-            return ((Number) result.get(0).get("id")).longValue();
+            executeQuietly("DELETE FROM cart_items WHERE user_id = ? AND product_id = ?", userId, productId);
+            return ResponseEntity.ok(Map.of("message", "Item removed from cart"));
         } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Map<String, Object> getUserInfoByEmail(String email) {
-        if (email == null) return null;
-        try {
-            String sql = "SELECT id, full_name, role FROM user WHERE LOWER(email) = LOWER(?)";
-            List<Map<String, Object>> result = jdbcTemplate.queryForList(sql, email.trim());
-            if (result.isEmpty()) {
-                sql = "SELECT id, full_name, role FROM users WHERE LOWER(email) = LOWER(?)";
-                result = jdbcTemplate.queryForList(sql, email.trim());
-            }
-            if (result.isEmpty()) {
-                return null;
-            }
-            return result.get(0);
-        } catch (Exception e) {
-            return null;
+            return ResponseEntity.badRequest().body("Error removing item: " + e.getMessage());
         }
     }
 }
