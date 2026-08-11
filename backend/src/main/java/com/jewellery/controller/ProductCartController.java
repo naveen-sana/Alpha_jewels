@@ -211,12 +211,27 @@ public class ProductCartController {
     }
 
     private void seedAllProducts() {
-        executeQuietly("INSERT INTO categories (category_id, category_name, name, status) VALUES " +
-                "(1, 'Diamond', 'Diamond', 'ACTIVE'), " +
-                "(2, 'Gold', 'Gold', 'ACTIVE'), " +
-                "(3, 'Platinum', 'Platinum', 'ACTIVE'), " +
-                "(4, 'Silver', 'Silver', 'ACTIVE') " +
-                "ON CONFLICT DO NOTHING");
+        // Ensure Categories 1..10 exist to satisfy foreign key constraints
+        for (int i = 1; i <= 10; i++) {
+            String catName = i == 1 ? "Diamond" : i == 2 ? "Gold" : i == 3 ? "Platinum" : i == 4 ? "Silver" : "Collection " + i;
+            try {
+                jdbcTemplate.update("INSERT INTO categories (category_id, category_name, name, description, status) VALUES (?, ?, ?, ?, 'ACTIVE') ON CONFLICT DO NOTHING",
+                        i, catName, catName, catName + " Collection");
+            } catch (Exception e) {
+                try {
+                    jdbcTemplate.update("INSERT INTO categories (id, category_name, name, description, status) VALUES (?, ?, ?, ?, 'ACTIVE') ON CONFLICT DO NOTHING",
+                            i, catName, catName, catName + " Collection");
+                } catch (Exception ignored) {}
+            }
+        }
+
+        Integer defaultCatId = 1;
+        try {
+            List<Integer> validCats = jdbcTemplate.queryForList("SELECT COALESCE(category_id, id) FROM categories LIMIT 1", Integer.class);
+            if (!validCats.isEmpty() && validCats.get(0) != null) {
+                defaultCatId = validCats.get(0);
+            }
+        } catch (Exception ignored) {}
 
         Object[][] products = {
             {"Nury Chevron Ring", 1, "Nury Chevron Ring", 55400.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"},
@@ -284,7 +299,17 @@ public class ProductCartController {
             } catch (Exception ignored) {}
 
             if (existing == null || existing.isEmpty()) {
-                executeQuietly("INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')", name, catId, desc, price, stock);
+                try {
+                    jdbcTemplate.update("INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')", name, catId, desc, price, stock);
+                } catch (Exception e) {
+                    try {
+                        jdbcTemplate.update("INSERT INTO products (name, category_id, description, price, stock, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')", name, defaultCatId, desc, price, stock);
+                    } catch (Exception ex) {
+                        try {
+                            jdbcTemplate.update("INSERT INTO products (name, description, price, stock, status) VALUES (?, ?, ?, ?, 'ACTIVE')", name, desc, price, stock);
+                        } catch (Exception ignored) {}
+                    }
+                }
             }
 
             try {
