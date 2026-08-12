@@ -50,29 +50,36 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, String> body) {
+    public ResponseEntity<?> loginUser(@RequestBody(required = false) Object input) {
         try {
-            System.out.println("DEBUG LOGIN RECEIVED: " + body);
-            String email = body != null ? body.get("email") : null;
-            String password = body != null ? body.get("password") : null;
+            String email = "";
+            String password = "";
 
-            if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            if (input instanceof Map<?, ?> map) {
+                Object e = map.get("email");
+                Object p = map.get("password");
+                if (e != null) email = e.toString().trim();
+                if (p != null) password = p.toString().trim();
+            } else if (input instanceof LoginRequest req) {
+                if (req.getEmail() != null) email = req.getEmail().trim();
+                if (req.getPassword() != null) password = req.getPassword().trim();
+            }
+
+            if (email.isEmpty() || password.isEmpty()) {
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
             }
 
             LoginRequest req = new LoginRequest();
-            req.setEmail(email.trim());
-            req.setPassword(password.trim());
+            req.setEmail(email);
+            req.setPassword(password);
 
             String result = userService.loginUser(req);
-            System.out.println("DEBUG LOGIN RESULT: " + result);
             if (result != null && !result.toLowerCase().contains("invalid")) {
-                return ResponseEntity.ok(Map.of("token", result, "message", "Login Successful"));
+                return ResponseEntity.ok(Map.of("token", result, "jwt", result, "message", "Login Successful"));
             }
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         } catch (Throwable e) {
-            e.printStackTrace();
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage() != null ? e.getMessage() : "Login failed", "message", "Login failed"));
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         }
     }
 
