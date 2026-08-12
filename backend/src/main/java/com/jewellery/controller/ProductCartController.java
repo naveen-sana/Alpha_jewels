@@ -207,7 +207,24 @@ public class ProductCartController {
                         } catch (Exception ignored) {}
                     }
                 }
+            } else {
+                try {
+                    jdbcTemplate.update("UPDATE products SET price = ?, description = ?, stock = ?, category_id = ? WHERE LOWER(name) = LOWER(?)", price, desc, stock, catId, name);
+                } catch (Exception ignored) {}
             }
+
+            try {
+                List<Integer> pIds = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
+                if (pIds != null && !pIds.isEmpty()) {
+                    int pid = pIds.get(0);
+                    try {
+                        jdbcTemplate.update("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (?, ?, 1) ON CONFLICT DO NOTHING", pid, imgUrl);
+                    } catch (Exception ignored) {}
+                    try {
+                        jdbcTemplate.update("INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (?, ?, true) ON CONFLICT DO NOTHING", pid, imgUrl);
+                    } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
 
             try {
                 List<Integer> pIds = jdbcTemplate.queryForList("SELECT COALESCE(product_id, id) FROM products WHERE LOWER(name) = LOWER(?) LIMIT 1", Integer.class, name);
