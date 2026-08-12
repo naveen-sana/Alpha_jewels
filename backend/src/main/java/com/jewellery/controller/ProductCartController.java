@@ -330,80 +330,9 @@ public class ProductCartController {
         }
     }
 
-    @jakarta.annotation.PostConstruct
-    public void init() {
-        new Thread(() -> {
-            try {
-                ensureProductTablesExist();
-            } catch (Exception ignored) {}
-        }).start();
-    }
+    private static final List<Map<String, Object>> STATIC_CATALOG = new ArrayList<>();
 
-    @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
-        List<Map<String, Object>> result = new ArrayList<>();
-        boolean isAll = category == null || 
-                        category.trim().isEmpty() || 
-                        category.trim().equalsIgnoreCase("null") || 
-                        category.trim().equalsIgnoreCase("undefined") || 
-                        category.trim().equalsIgnoreCase("All") || 
-                        category.trim().equalsIgnoreCase("all");
-
-        try {
-            Map<Object, String> imageMap = new HashMap<>();
-            try {
-                List<Map<String, Object>> imgList = jdbcTemplate.queryForList("SELECT product_id, image_url FROM productimages WHERE image_url IS NOT NULL");
-                for (Map<String, Object> imgRow : imgList) {
-                    Object pIdObj = imgRow.get("product_id") != null ? imgRow.get("product_id") : imgRow.get("PRODUCT_ID");
-                    Object urlObj = imgRow.get("image_url") != null ? imgRow.get("image_url") : imgRow.get("IMAGE_URL");
-                    if (pIdObj != null && urlObj != null && !urlObj.toString().trim().isEmpty()) {
-                        imageMap.putIfAbsent(pIdObj.toString(), urlObj.toString().trim());
-                    }
-                }
-            } catch (Exception ignored) {}
-
-            List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
-            if (list != null && !list.isEmpty()) {
-                for (Map<String, Object> row : list) {
-                    Map<String, Object> map = new HashMap<>();
-                    Object pId = row.get("product_id") != null ? row.get("product_id") : row.get("id");
-                    if (pId == null) pId = row.get("PRODUCT_ID");
-                    if (pId == null) continue;
-
-                    map.put("id", pId);
-                    map.put("productId", pId);
-                    map.put("name", row.get("name") != null ? row.get("name") : row.get("NAME"));
-                    map.put("description", row.get("description") != null ? row.get("description") : row.get("DESCRIPTION"));
-                    map.put("price", row.get("price") != null ? row.get("price") : row.get("PRICE"));
-                    map.put("stock", row.get("stock") != null ? row.get("stock") : 10);
-                    map.put("status", row.get("status") != null ? row.get("status").toString() : "ACTIVE");
-
-                    Object catObj = row.get("category_id") != null ? row.get("category_id") : row.get("CATEGORY_ID");
-                    int catIdVal = catObj instanceof Number ? ((Number) catObj).intValue() : 1;
-                    String catName = catIdVal == 1 ? "Diamond" : catIdVal == 2 ? "Gold" : catIdVal == 3 ? "Platinum" : catIdVal == 4 ? "Silver" : "Diamond";
-                    map.put("categoryName", catName);
-                    map.put("category", catName);
-
-                    String imgUrl = imageMap.get(pId.toString());
-                    if (imgUrl == null || imgUrl.isEmpty()) {
-                        imgUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80";
-                    }
-                    map.put("imageUrl", imgUrl);
-
-                    if (isAll || (category != null && catName.equalsIgnoreCase(category.trim()))) {
-                        result.add(map);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (!result.isEmpty()) {
-            return ResponseEntity.ok(result);
-        }
-
-        // Guaranteed Fallback Catalog of all 48 products
+    static {
         Object[][] products = {
             {1, "Nury Chevron Ring", "Diamond", "Nury Chevron Ring", 55400.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"},
             {2, "The Trina Ring", "Diamond", "Beautifully Designed Trina", 67500.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring4-the%20trina%20ring(m).webp?updatedAt=1785154301792"},
@@ -465,22 +394,51 @@ public class ProductCartController {
             int stock = (Integer) p[5];
             String imgUrl = (String) p[6];
 
-            if (isAll || (category != null && catName.equalsIgnoreCase(category.trim()))) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("id", id);
-                item.put("productId", id);
-                item.put("name", name);
-                item.put("categoryName", catName);
-                item.put("category", catName);
-                item.put("description", desc);
-                item.put("price", price);
-                item.put("stock", stock);
-                item.put("imageUrl", imgUrl);
-                item.put("status", "ACTIVE");
-                result.add(item);
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", id);
+            item.put("productId", id);
+            item.put("name", name);
+            item.put("categoryName", catName);
+            item.put("category", catName);
+            item.put("description", desc);
+            item.put("price", price);
+            item.put("stock", stock);
+            item.put("imageUrl", imgUrl);
+            item.put("status", "ACTIVE");
+            STATIC_CATALOG.add(item);
+        }
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        new Thread(() -> {
+            try {
+                ensureProductTablesExist();
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
+    @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
+        boolean isAll = category == null || 
+                        category.trim().isEmpty() || 
+                        category.trim().equalsIgnoreCase("null") || 
+                        category.trim().equalsIgnoreCase("undefined") || 
+                        category.trim().equalsIgnoreCase("All") || 
+                        category.trim().equalsIgnoreCase("all");
+
+        if (isAll) {
+            return ResponseEntity.ok(STATIC_CATALOG);
+        }
+
+        List<Map<String, Object>> filtered = new ArrayList<>();
+        for (Map<String, Object> item : STATIC_CATALOG) {
+            String cat = (String) item.get("categoryName");
+            if (cat != null && cat.equalsIgnoreCase(category.trim())) {
+                filtered.add(item);
             }
         }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(filtered);
     }
 
     private void ensureCartTableExists() {
