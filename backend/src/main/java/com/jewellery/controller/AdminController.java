@@ -225,8 +225,12 @@ public class AdminController {
         }).start();
     }
 
+    private static boolean tablesInitialized = false;
+
     // Helper method to ensure required database tables and columns exist
-    public void ensureTablesExist() {
+    public synchronized void ensureTablesExist() {
+        if (tablesInitialized) return;
+        tablesInitialized = true;
         try {
             // Categories table
             try {
@@ -515,12 +519,6 @@ public class AdminController {
     }
 
     private List<Map<String, Object>> getProductsListInternal(int limit) {
-        String imgTable = "productimages";
-        try {
-            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='ecommerce_db' AND TABLE_NAME='product_images'");
-            if (check != null && !check.isEmpty()) imgTable = "product_images";
-        } catch (Exception ignored) {}
-
         String sql = "SELECT p.product_id as id, p.name, p.category_id as categoryId, COALESCE(c.category_name, 'Jewellery') as category, " +
                 "p.description, p.price, COALESCE(p.discount, 0.00) as discount, COALESCE(p.stock, 0) as stock, " +
                 "COALESCE(p.weight, '10g') as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
@@ -530,7 +528,7 @@ public class AdminController {
                 "COALESCE(p.status, 'ACTIVE') as status, pi.image_url as imageUrl " +
                 "FROM products p " +
                 "LEFT JOIN categories c ON p.category_id = c.category_id " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pi ON p.product_id = pi.product_id " +
                 "ORDER BY p.product_id DESC LIMIT " + limit;
         try {
             return jdbcTemplate.queryForList(sql);

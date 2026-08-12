@@ -70,27 +70,23 @@ const AdminProducts = () => {
 
   // Fetch Products & Categories from Backend REST API
   const fetchProducts = async () => {
-    setLoading(true)
-    localStorage.removeItem('alpha_jewels_admin_products')
+    if (products.length === 0) {
+      setLoading(true)
+    }
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     
     try {
-      const resProd = await adminApi.get('/api/admin/products', config)
+      const [resProd, resCat] = await Promise.all([
+        adminApi.get('/api/admin/products', config),
+        adminApi.get('/api/admin/categories', config),
+      ])
       const prodList = Array.isArray(resProd.data) ? resProd.data : []
-      setProducts(prodList)
-    } catch (err) {
-      console.error('Error fetching products from database:', err)
-      addToast('Error fetching products from MySQL database', 'error')
-      setProducts([])
-    }
-
-    try {
-      const resCat = await adminApi.get('/api/admin/categories', config)
       const catList = Array.isArray(resCat.data) ? resCat.data : []
+      setProducts(prodList)
       setCategories(catList)
     } catch (err) {
-      console.error('Error fetching categories from database:', err)
+      console.error('Error fetching inventory from database:', err)
     } finally {
       setLoading(false)
     }
