@@ -29,9 +29,16 @@ public class UserController {
         }
     }
     
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
+    @PostMapping(value = "/login", consumes = {"application/json", "*/*"})
+    public ResponseEntity<?> loginUser(@RequestBody(required = false) java.util.Map<String, Object> body) {
         try {
+            String email = (body != null && body.get("email") != null) ? body.get("email").toString() : "";
+            String password = (body != null && body.get("password") != null) ? body.get("password").toString() : "";
+
+            LoginRequest request = new LoginRequest();
+            request.setEmail(email);
+            request.setPassword(password);
+
             String result = userService.loginUser(request);
             if ("Invalid Email or Password".equalsIgnoreCase(result)) {
                 return ResponseEntity.status(401).body(java.util.Map.of("error", result, "message", result));
