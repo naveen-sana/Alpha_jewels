@@ -73,6 +73,10 @@ public class SecurityConfig {
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
 
+        if (!origins.contains("https://*.vercel.app")) {
+            origins.add("https://*.vercel.app");
+        }
+
         if (origins.contains("*")) {
             configuration.addAllowedOriginPattern("*");
         } else {
