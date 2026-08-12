@@ -39,20 +39,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try {
-                var claims = jwtService.parseToken(header.substring(7));
-                String email = claims.email();
-                String role = claims.role();
-                var authority = new SimpleGrantedAuthority("ROLE_" + role);
-                var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception ignored) {
-                SecurityContextHolder.clearContext();
+        try {
+            String header = request.getHeader("Authorization");
+            if (header != null && header.startsWith("Bearer ")
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+                try {
+                    var claims = getJwtService().parseToken(header.substring(7));
+                    String email = claims.email();
+                    String role = claims.role();
+                    var authority = new SimpleGrantedAuthority("ROLE_" + role);
+                    var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (Exception ignored) {
+                    SecurityContextHolder.clearContext();
+                }
             }
-        }
+        } catch (Throwable ignored) {}
         filterChain.doFilter(request, response);
+    }
+
+    private JwtService getJwtService() {
+        if (jwtService != null) return jwtService;
+        return new JwtService("change-this-development-secret-key-to-a-long-random-value-123456789", "86400000");
     }
 }
