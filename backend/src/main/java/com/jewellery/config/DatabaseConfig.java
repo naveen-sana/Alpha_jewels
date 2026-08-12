@@ -44,11 +44,44 @@ public class DatabaseConfig {
             String cleanUrl = url.trim();
             log.info("Configuring MySQL DataSource from SPRING_DATASOURCE_URL/DATABASE_URL environment variable");
 
+            // Handle user:pass@host format in mysql:// or jdbc:mysql:// URLs
+            if (cleanUrl.contains("@")) {
+                try {
+                    String raw = cleanUrl;
+                    if (raw.startsWith("jdbc:")) raw = raw.substring(5);
+                    if (raw.startsWith("mysql://")) raw = raw.substring(8);
+
+                    int atIdx = raw.indexOf("@");
+                    String userInfo = raw.substring(0, atIdx);
+                    String hostAndParams = raw.substring(atIdx + 1);
+
+                    String parsedUser = userInfo;
+                    String parsedPass = "";
+                    if (userInfo.contains(":")) {
+                        parsedUser = userInfo.substring(0, userInfo.indexOf(":"));
+                        parsedPass = userInfo.substring(userInfo.indexOf(":") + 1);
+                    }
+
+                    String formattedUrl = "jdbc:mysql://" + hostAndParams;
+                    formattedUrl = formattedUrl.replaceAll("(?i)sslmode=", "sslMode=")
+                                               .replaceAll("(?i)ssl-mode=", "sslMode=");
+
+                    log.info("Successfully parsed Aiven MySQL URL for user: {}", parsedUser);
+                    return DataSourceBuilder.create()
+                            .driverClassName("com.mysql.cj.jdbc.Driver")
+                            .url(formattedUrl)
+                            .username(parsedUser)
+                            .password(parsedPass)
+                            .build();
+                } catch (Exception ex) {
+                    log.error("Failed to parse credentials from database URL: {}", ex.getMessage());
+                }
+            }
+
             if (cleanUrl.startsWith("mysql://")) {
                 cleanUrl = "jdbc:" + cleanUrl;
             }
 
-            // Normalize SSL parameters for MySQL Connector/J (sslMode=REQUIRED / useSSL=true)
             cleanUrl = cleanUrl.replaceAll("(?i)sslmode=", "sslMode=")
                                .replaceAll("(?i)ssl-mode=", "sslMode=");
 
@@ -56,7 +89,7 @@ public class DatabaseConfig {
                     .driverClassName("com.mysql.cj.jdbc.Driver")
                     .url(cleanUrl);
 
-            if (username != null && !username.trim().isEmpty() && !"root".equalsIgnoreCase(username.trim())) {
+            if (username != null && !username.trim().isEmpty()) {
                 builder.username(username);
             }
             if (password != null && !password.trim().isEmpty()) {
