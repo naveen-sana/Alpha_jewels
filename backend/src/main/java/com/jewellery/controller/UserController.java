@@ -84,17 +84,17 @@ public class UserController {
 
                 if (match) {
                     Role r = "ADMIN".equalsIgnoreCase(dbRole) ? Role.ADMIN : Role.USER;
-                    String token = jwtService.generateToken(dbEmail, r, dbName);
+                    String token = getJwtService().generateToken(dbEmail, r, dbName);
                     return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
                 }
             }
 
             if ("admin@gmail.com".equalsIgnoreCase(cleanEmail) && "admin".equals(password)) {
-                String token = jwtService.generateToken("admin@gmail.com", Role.ADMIN, "System Admin");
+                String token = getJwtService().generateToken("admin@gmail.com", Role.ADMIN, "System Admin");
                 return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
             }
             if ("naveensana66028@gmail.com".equalsIgnoreCase(cleanEmail) && ("Naveen@0987".equals(password) || "Admin@123456".equals(password))) {
-                String token = jwtService.generateToken("naveensana66028@gmail.com", Role.ADMIN, "Naveen Sana");
+                String token = getJwtService().generateToken("naveensana66028@gmail.com", Role.ADMIN, "Naveen Sana");
                 return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
             }
 
@@ -102,11 +102,16 @@ public class UserController {
         } catch (Throwable e) {
             if (request != null && request.getEmail() != null) {
                 String email = request.getEmail().trim();
-                String token = jwtService.generateToken(email, Role.USER, "User");
+                String token = getJwtService().generateToken(email, Role.USER, "User");
                 return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
             }
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         }
+    }
+
+    private JwtService getJwtService() {
+        if (jwtService != null) return jwtService;
+        return new JwtService("change-this-development-secret-key-to-a-long-random-value-123456789", "86400000");
     }
 
     @PostMapping("/register")
