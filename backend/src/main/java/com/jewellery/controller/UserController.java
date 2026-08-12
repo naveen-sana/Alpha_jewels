@@ -56,10 +56,14 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody(required = false) LoginRequest request) {
+    public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, Object> body) {
         try {
-            String email = request != null && request.getEmail() != null ? request.getEmail().trim() : "";
-            String password = request != null && request.getPassword() != null ? request.getPassword().trim() : "";
+            String email = "";
+            String password = "";
+            if (body != null) {
+                if (body.get("email") != null) email = body.get("email").toString().trim();
+                if (body.get("password") != null) password = body.get("password").toString().trim();
+            }
 
             if (email.isEmpty() || password.isEmpty()) {
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
