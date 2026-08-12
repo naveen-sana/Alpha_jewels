@@ -30,7 +30,7 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @jakarta.persistence.Convert(converter = RoleConverter.class)
     @Column(name = "role")
     private Role role = Role.USER;
 
