@@ -1,7 +1,10 @@
 package com.jewellery.config;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.Customizer;
@@ -18,56 +21,72 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-	    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-	}
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-	    return new BCryptPasswordEncoder();
-	}
+    @Value("${cors.allowed-origins:https://alpha-jewels.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}")
+    private String allowedOriginsStr;
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
-	    http
-	        .csrf(csrf -> csrf.disable())
-	        .cors(Customizer.withDefaults())
-	        .authorizeHttpRequests(auth -> auth
-	        		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-	        		.requestMatchers("/api/users/register", "/api/users/login",
-	        		        "/api/users/forgot-password", "/api/users/reset-password", "/error", "/health", "/api/health", "/api/seed-now", "/api/seed-database-now").permitAll()
-	        		.requestMatchers("/api/products", "/api/products/**", "/api/categories", "/api/categories/**", "/api/reviews/product/**", "/api/orders", "/api/orders/**", "/api/payment", "/api/payment/**").permitAll()
-	        		.requestMatchers("/api/cart", "/api/cart/**", "/api/wishlist", "/api/wishlist/**", "/api/reviews", "/api/reviews/**").authenticated()
-	        		.requestMatchers("/api/admin/**").permitAll()
-	            .anyRequest().authenticated()
-	        )
-	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	        .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
-	            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
-	            response.setContentType("application/json");
-	            response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Please log in to perform this action.\"}");
-	        }))
-	        .formLogin(form -> form.disable())
-	        .httpBasic(basic -> basic.disable())
-	        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	    return http.build();
-	}
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-	    CorsConfiguration configuration = new CorsConfiguration();
-	    configuration.addAllowedOriginPattern("*");
-	    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-	    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-	    configuration.setExposedHeaders(List.of("Authorization"));
-	    configuration.setAllowCredentials(true);
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/users/register", "/api/users/login",
+                        "/api/users/forgot-password", "/api/users/reset-password", "/error", "/health", "/api/health", "/api/seed-now", "/api/seed-database-now").permitAll()
+                .requestMatchers("/api/products", "/api/products/**", "/api/categories", "/api/categories/**", "/api/reviews/product/**", "/api/orders", "/api/orders/**", "/api/payment", "/api/payment/**").permitAll()
+                .requestMatchers("/api/cart", "/api/cart/**", "/api/wishlist", "/api/wishlist/**", "/api/reviews", "/api/reviews/**").authenticated()
+                .requestMatchers("/api/admin/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Please log in to perform this action.\"}");
+            }))
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	    source.registerCorsConfiguration("/**", configuration);
-	    return source;
-	}
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        List<String> origins = Arrays.stream(allowedOriginsStr.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+
+        if (origins.contains("*")) {
+            configuration.addAllowedOriginPattern("*");
+        } else {
+            configuration.setAllowedOriginPatterns(origins);
+        }
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
+

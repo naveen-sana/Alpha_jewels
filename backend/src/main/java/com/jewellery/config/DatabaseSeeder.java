@@ -30,49 +30,35 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedUsers() {
         try {
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \"user\" (" +
-                    "id SERIAL PRIMARY KEY, " +
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS `users` (" +
+                    "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
                     "email VARCHAR(255) NOT NULL UNIQUE, " +
-                    "name VARCHAR(255), " +
                     "full_name VARCHAR(255), " +
+                    "phone VARCHAR(50), " +
                     "password VARCHAR(255) NOT NULL, " +
-                    "role VARCHAR(50) DEFAULT 'USER', " +
-                    "mobile_number VARCHAR(50), " +
-                    "phone VARCHAR(50)" +
-                    ")");
-        } catch (Exception ignored) {}
-
-        try {
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS users (" +
-                    "id SERIAL PRIMARY KEY, " +
-                    "email VARCHAR(255) NOT NULL UNIQUE, " +
-                    "name VARCHAR(255), " +
-                    "full_name VARCHAR(255), " +
-                    "password VARCHAR(255) NOT NULL, " +
-                    "role VARCHAR(50) DEFAULT 'USER', " +
-                    "mobile_number VARCHAR(50), " +
-                    "phone VARCHAR(50)" +
+                    "role VARCHAR(50) DEFAULT 'USER'" +
                     ")");
         } catch (Exception ignored) {}
 
         // Ensure admin@gmail.com exists as ADMIN
         try {
-            List<Integer> countAdmin = jdbcTemplate.queryForList("SELECT 1 FROM \"user\" WHERE LOWER(email) = LOWER('admin@gmail.com')", Integer.class);
+            List<Integer> countAdmin = jdbcTemplate.queryForList("SELECT 1 FROM `users` WHERE LOWER(email) = LOWER('admin@gmail.com')", Integer.class);
             if (countAdmin.isEmpty() && passwordEncoder != null) {
                 String hashedPass = passwordEncoder.encode("admin");
-                jdbcTemplate.update("INSERT INTO \"user\" (email, name, full_name, password, role) VALUES ('admin@gmail.com', 'System Admin', 'System Admin', ?, 'ADMIN')", hashedPass);
+                jdbcTemplate.update("INSERT INTO `users` (email, full_name, password, role) VALUES ('admin@gmail.com', 'System Admin', ?, 'ADMIN')", hashedPass);
             }
         } catch (Exception ignored) {}
 
         // Ensure naveensana66028@gmail.com exists as ADMIN
         String targetEmail = "naveensana66028@gmail.com";
         try {
-            List<Integer> count = jdbcTemplate.queryForList("SELECT 1 FROM \"user\" WHERE LOWER(email) = LOWER(?)", Integer.class, targetEmail);
+            List<Integer> count = jdbcTemplate.queryForList("SELECT 1 FROM `users` WHERE LOWER(email) = LOWER(?)", Integer.class, targetEmail);
             if (count.isEmpty() && passwordEncoder != null) {
-                String hashedPass = passwordEncoder.encode("Naveen@0987");
-                jdbcTemplate.update("INSERT INTO \"user\" (email, name, full_name, password, role) VALUES (?, 'Naveen Sana', 'Naveen Sana', ?, 'ADMIN')", targetEmail, hashedPass);
+                String defaultAdminPass = System.getenv("ADMIN_PASSWORD") != null ? System.getenv("ADMIN_PASSWORD") : "Admin@123456";
+                String hashedPass = passwordEncoder.encode(defaultAdminPass);
+                jdbcTemplate.update("INSERT INTO `users` (email, full_name, password, role) VALUES (?, 'Naveen Sana', ?, 'ADMIN')", targetEmail, hashedPass);
             } else if (!count.isEmpty()) {
-                jdbcTemplate.update("UPDATE \"user\" SET role = 'ADMIN' WHERE LOWER(email) = LOWER(?)", targetEmail);
+                jdbcTemplate.update("UPDATE `users` SET role = 'ADMIN' WHERE LOWER(email) = LOWER(?)", targetEmail);
             }
         } catch (Exception ignored) {}
     }
@@ -98,7 +84,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedTablesAndProducts() {
         try {
-            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("ecommerce_db_postgres.sql");
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("ecommerce_db_mysql.sql");
             if (resource.exists()) {
                 byte[] bytes = resource.getInputStream().readAllBytes();
                 String sql = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
@@ -109,14 +95,14 @@ public class DatabaseSeeder implements CommandLineRunner {
                         try {
                             jdbcTemplate.execute(trimmed);
                         } catch (Exception e) {
-                            // Ignore non-critical errors (e.g. duplicate key or table exists)
+                            // Ignore non-critical errors (e.g. table or row exists)
                         }
                     }
                 }
-                System.out.println("ecommerce_db_postgres.sql migrated successfully into PostgreSQL!");
+                System.out.println("ecommerce_db_mysql.sql migrated successfully into MySQL!");
             }
         } catch (Exception e) {
-            System.err.println("Error executing ecommerce_db_postgres.sql: " + e.getMessage());
+            System.err.println("Error executing ecommerce_db_mysql.sql: " + e.getMessage());
         }
     }
 }

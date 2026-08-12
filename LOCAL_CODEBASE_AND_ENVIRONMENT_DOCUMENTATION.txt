@@ -1,0 +1,253 @@
+====================================================================================================
+                        ALPHA JEWELS E-COMMERCE APPLICATION
+           LOCAL CODEBASE CONTENTS, ENVIRONMENT VARIABLES & CONNECTED TECH STACK SUMMARY
+====================================================================================================
+
+1. CONNECTED TECH STACK & SYSTEM ARCHITECTURE
+====================================================================================================
+• Frontend Framework:      React 18, Vite 8, React Router DOM (v6), Bootstrap 5, Lucide React Icons
+• Backend Framework:       Spring Boot 4.1.0 (Java 21 LTS), Spring Data JPA, Spring Security (JWT Auth)
+• Build Tooling:           Maven (mvnw wrapper for backend), Vite / npm (for frontend)
+• Databases:
+  - Local Machine:         MySQL Server 8.0 (Database: `ecommerce_db`, Port: 3306)
+  - Cloud Production:      Render PostgreSQL (Database: `ecommerce_db`)
+• Hosting & Deployments:
+  - Frontend Production:   Vercel (https://alpha-jewels.vercel.app)
+  - Backend Production:    Render (https://alpha-jewels-1.onrender.com)
+• CDN & Asset Management: ImageKit CDN (ik.imagekit.io) & Unsplash Jewelry Collection
+
+----------------------------------------------------------------------------------------------------
+
+2. ENVIRONMENT VARIABLES & CONFIGURATION
+====================================================================================================
+
+[A] Backend Configuration (`backend/src/main/resources/application.properties`):
+----------------------------------------------------------------------------------------------------
+# Server Configuration (Render automatically injects PORT, defaults to 9090 locally)
+server.port=${PORT:9090}
+
+# Cloud Database Connection String (Render / PostgreSQL)
+spring.datasource.url=${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ecommerce_db}?sslmode=require}}
+spring.datasource.username=${DB_USERNAME:avnadmin}
+spring.datasource.password=${DB_PASSWORD:}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Security & JWT Token Secrets
+app.jwt.secret=${JWT_SECRET:change-this-development-secret-key-to-a-long-random-value-123456789}
+app.jwt.expiration-ms=${JWT_EXPIRATION_MS:86400000}
+
+# CORS Allowed Origins
+cors.allowed-origins=${CORS_ALLOWED_ORIGINS:https://alpha-jewels.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
+
+# SMTP Email Sending Configuration
+spring.mail.host=${MAIL_HOST:smtp.gmail.com}
+spring.mail.port=${MAIL_PORT:587}
+spring.mail.username=${MAIL_USERNAME:}
+spring.mail.password=${MAIL_PASSWORD:}
+
+----------------------------------------------------------------------------------------------------
+
+[B] Local MySQL Server 8.0 Connection Parameters (`DatabaseConfig.java`):
+----------------------------------------------------------------------------------------------------
+Database Host:      localhost
+Database Port:      3306
+Database Name:      ecommerce_db
+Database Username:  root
+Database Password:  Naveen@0987
+JDBC Driver:        com.mysql.cj.jdbc.Driver
+JDBC URL:           jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+----------------------------------------------------------------------------------------------------
+
+[C] Frontend Environment & API Routing (`frontend/src/utils/constants.js`):
+----------------------------------------------------------------------------------------------------
+const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+export const API_BASE_URL = isLocalhost ? 'http://localhost:9090' : 'https://alpha-jewels-1.onrender.com';
+
+----------------------------------------------------------------------------------------------------
+
+3. LOCAL CODEBASE STRUCTURE & CRITICAL SOURCE FILES
+====================================================================================================
+
+[A] Database Configuration Bean (`backend/src/main/java/com/jewellery/config/DatabaseConfig.java`):
+----------------------------------------------------------------------------------------------------
+package com.jewellery.config;
+
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+@Configuration
+public class DatabaseConfig {
+
+    @Value("${SPRING_DATASOURCE_URL:${DATABASE_URL:}}")
+    private String databaseUrl;
+
+    @Bean
+    @Primary
+    public DataSource dataSource() {
+        if (databaseUrl != null && (databaseUrl.contains("postgresql") || databaseUrl.contains("onrender.com"))) {
+            return DataSourceBuilder.create()
+                    .driverClassName("org.postgresql.Driver")
+                    .url(databaseUrl)
+                    .build();
+        }
+
+        // Local MySQL Server 8.0 DataSource
+        return DataSourceBuilder.create()
+                .driverClassName("com.mysql.cj.jdbc.Driver")
+                .url("jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC")
+                .username("root")
+                .password("Naveen@0987")
+                .build();
+    }
+}
+
+----------------------------------------------------------------------------------------------------
+
+[B] Image Extractor (`frontend/src/utils/productImages.js`):
+----------------------------------------------------------------------------------------------------
+// Utility to resolve live database image URLs directly from the API response object.
+// STRICT REQUIREMENT: Single source of truth. No mock arrays, no hardcoded image maps.
+
+export const getProductImage = (product) => {
+  if (!product) return null;
+
+  const rawUrl = product.imageUrl1 || product.imageUrl || product.image_url || product.image || product.img;
+  if (rawUrl && typeof rawUrl === 'string' && rawUrl.trim().length > 0 && rawUrl.trim().startsWith('http')) {
+    return rawUrl.trim();
+  }
+
+  return null;
+};
+
+export default getProductImage;
+
+----------------------------------------------------------------------------------------------------
+
+[C] Single Source of Truth Shop View (`frontend/src/pages/Shop.jsx`):
+----------------------------------------------------------------------------------------------------
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import apiClient from '../api/client';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { ShoppingCart, Heart, ImageOff } from 'lucide-react';
+import { getProductImage } from '../utils/productImages';
+
+const Shop = () => {
+  const [searchParams] = useSearchParams();
+  const activeCategory = searchParams.get('category') || 'Diamond';
+  const searchQuery = searchParams.get('search') || '';
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError('');
+      setProducts([]); // 1. Clear previous category state immediately
+
+      try {
+        const response = await apiClient.get('/api/products', {
+          params: { category: activeCategory }
+        });
+
+        if (!isMounted) return;
+
+        const resData = response.data || [];
+        const uniqueProducts = [];
+        const seenIds = new Set();
+
+        for (const item of resData) {
+          const pId = item.id || item.productId || item.product_id;
+          if (pId && !seenIds.has(pId)) {
+            seenIds.add(pId);
+            uniqueProducts.push(item);
+          }
+        }
+
+        setProducts(uniqueProducts);
+      } catch (err) {
+        if (!isMounted) return;
+        setError('Unable to load products from database server.');
+        setProducts([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchProducts();
+    return () => { isMounted = false; };
+  }, [activeCategory]);
+
+  return (
+    <div className="shop-container py-5">
+      <div className="container">
+        {!loading && products.length > 0 && (
+          <div className="row g-4 justify-content-center">
+            {products.map((product) => {
+              const productId = product.id || product.productId || product.product_id;
+              const imgSrc = getProductImage(product);
+
+              return (
+                <div className="col-sm-6 col-md-4 col-lg-3" key={productId}>
+                  <div className="product-luxury-card">
+                    <div className="product-image-wrapper position-relative">
+                      {imgSrc ? (
+                        <img
+                          src={imgSrc}
+                          alt={product.name}
+                          className="product-display-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            const fallbackBadge = e.target.parentElement.querySelector('.img-unavailable-badge');
+                            if (fallbackBadge) fallbackBadge.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="img-unavailable-badge flex-column align-items-center justify-content-center text-muted"
+                        style={{ display: imgSrc ? 'none' : 'flex', height: '220px', backgroundColor: '#1a1a1a', borderRadius: '8px' }}
+                      >
+                        <ImageOff size={28} className="mb-2 text-gold opacity-75" />
+                        <span className="small text-gold-light opacity-75">Image Unavailable</span>
+                      </div>
+                    </div>
+                    <div className="product-details-content">
+                      <h3 className="product-name-title">{product.name}</h3>
+                      <p className="product-desc-text">{product.description || 'Exclusive luxury craftsmanship'}</p>
+                      <div className="product-footer-row">
+                        <span className="product-price-tag">
+                          ₹{Number(product.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Shop;
+
+====================================================================================================
+                                      END OF DOCUMENTATION
+====================================================================================================

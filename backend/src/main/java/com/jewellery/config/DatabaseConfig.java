@@ -20,16 +20,16 @@ public class DatabaseConfig {
     @Value("${DB_HOST:localhost}")
     private String dbHost;
 
-    @Value("${DB_PORT:5432}")
+    @Value("${DB_PORT:3306}")
     private String dbPort;
 
     @Value("${DB_NAME:ecommerce_db}")
     private String dbName;
 
-    @Value("${DB_USERNAME:postgres}")
+    @Value("${DB_USERNAME:root}")
     private String dbUsername;
 
-    @Value("${DB_PASSWORD:postgres}")
+    @Value("${DB_PASSWORD:}")
     private String dbPassword;
 
     @Bean
@@ -39,76 +39,36 @@ public class DatabaseConfig {
         String username = dbUsername;
         String password = dbPassword;
 
-        if (url != null && (url.contains("aivencloud.com") || url.contains("onrender.com") || url.contains("render.com") || url.contains("postgresql"))) {
-            log.info("Parsing cloud PostgreSQL database connection string");
-            
-            String clean = url.trim();
-            if (clean.startsWith("jdbc:postgresql://")) {
-                clean = clean.substring("jdbc:postgresql://".length());
-            } else if (clean.startsWith("postgres://")) {
-                clean = clean.substring("postgres://".length());
-            } else if (clean.startsWith("postgresql://")) {
-                clean = clean.substring("postgresql://".length());
+        // If cloud/Aiven MySQL URL is supplied via environment variable
+        if (url != null && !url.trim().isEmpty()) {
+            String cleanUrl = url.trim();
+            log.info("Configuring MySQL DataSource from SPRING_DATASOURCE_URL/DATABASE_URL environment variable");
+
+            if (cleanUrl.startsWith("mysql://")) {
+                cleanUrl = "jdbc:" + cleanUrl;
             }
 
-            if (clean.contains("@")) {
-                int lastAt = clean.lastIndexOf("@");
-                String creds = clean.substring(0, lastAt);
-                clean = clean.substring(lastAt + 1);
-
-                int colonIdx = creds.indexOf(":");
-                if (colonIdx != -1) {
-                    username = creds.substring(0, colonIdx);
-                    password = creds.substring(colonIdx + 1);
-                } else {
-                    username = creds;
-                }
-            }
-
-            String queryParams = "sslmode=require";
-            if (clean.contains("?")) {
-                int questionIdx = clean.indexOf("?");
-                queryParams = clean.substring(questionIdx + 1);
-                clean = clean.substring(0, questionIdx);
-            }
-
-            String host = dbHost;
-            String port = dbPort;
-            String db = dbName;
-
-            if (clean.contains("/")) {
-                int slashIdx = clean.indexOf("/");
-                String hostPort = clean.substring(0, slashIdx);
-                db = clean.substring(slashIdx + 1);
-
-                if (hostPort.contains(":")) {
-                    int colonIdx = hostPort.lastIndexOf(":");
-                    host = hostPort.substring(0, colonIdx);
-                    port = hostPort.substring(colonIdx + 1);
-                } else if (!hostPort.isBlank()) {
-                    host = hostPort;
-                    port = "5432";
-                }
-            }
-
-            url = "jdbc:postgresql://" + host + ":" + port + "/" + db + "?" + queryParams;
-            log.info("Configured PostgreSQL DataSource for host: {}", host);
+            // Normalize SSL parameters for MySQL Connector/J (sslMode=REQUIRED / useSSL=true)
+            cleanUrl = cleanUrl.replaceAll("(?i)sslmode=", "sslMode=")
+                               .replaceAll("(?i)ssl-mode=", "sslMode=");
 
             return DataSourceBuilder.create()
-                    .driverClassName("org.postgresql.Driver")
-                    .url(url)
+                    .driverClassName("com.mysql.cj.jdbc.Driver")
+                    .url(cleanUrl)
                     .username(username)
                     .password(password)
                     .build();
         }
 
-        // Local MySQL Server 8.0 configuration
-        log.info("Configuring local MySQL Server 8.0 DataSource for ecommerce_db on port 3306");
+        // Local MySQL Server 8.0 DataSource configuration
+        log.info("Configuring local MySQL Server 8.0 DataSource for ecommerce_db on port {}", dbPort);
+        String localUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         return DataSourceBuilder.create()
                 .driverClassName("com.mysql.cj.jdbc.Driver")
-                .url("jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC")
-                .username("root")
-                .password("Naveen@0987")
+                .url(localUrl)
+                .username(username)
+                .password(password)
                 .build();
     }
 }
+

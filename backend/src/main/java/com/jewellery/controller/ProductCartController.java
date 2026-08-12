@@ -34,7 +34,7 @@ public class ProductCartController {
         int count = 0;
 
         try {
-            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("ecommerce_db_postgres.sql");
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("ecommerce_db_mysql.sql");
             if (resource.exists()) {
                 byte[] bytes = resource.getInputStream().readAllBytes();
                 String sql = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
@@ -50,7 +50,7 @@ public class ProductCartController {
                         }
                     }
                 }
-                logs.add("ecommerce_db_postgres.sql executed successfully!");
+                logs.add("ecommerce_db_mysql.sql executed successfully!");
             }
         } catch (Exception e) {
             logs.add("Seed migration error: " + e.getMessage());
@@ -329,15 +329,17 @@ public class ProductCartController {
 
     @GetMapping("/products")
     public ResponseEntity<List<Map<String, Object>>> getPublicProducts(@RequestParam(value = "category", required = false) String category) {
-        String sql = "SELECT COALESCE(p.id, p.product_id) as id, COALESCE(p.product_id, p.id) as product_id, p.name, p.description, p.price, " +
+        String sql = "SELECT COALESCE(p.product_id, p.id) as id, COALESCE(p.product_id, p.id) as product_id, p.name, p.description, p.price, " +
                 "COALESCE(p.stock, p.stock_quantity, 10) as stock, COALESCE(p.stock_quantity, p.stock, 10) as stock_quantity, " +
-                "COALESCE(c.name, c.category_name, 'Diamond') as categoryName, COALESCE(c.name, c.category_name, 'Diamond') as category, " +
-                "pi.image_url as imageUrl " +
+                "COALESCE(c.category_name, c.name, 'Diamond') as categoryName, COALESCE(c.category_name, c.name, 'Diamond') as category, " +
+                "COALESCE(" +
+                "  (SELECT pi.image_url FROM productimages pi WHERE pi.product_id = COALESCE(p.product_id, p.id) LIMIT 1), " +
+                "  (SELECT img.image_url FROM product_images img WHERE img.product_id = COALESCE(p.product_id, p.id) LIMIT 1) " +
+                ") as imageUrl " +
                 "FROM products p " +
-                "LEFT JOIN categories c ON p.category_id = c.id OR p.category_id = c.category_id " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi ON p.id = pi.product_id OR p.product_id = pi.product_id " +
+                "LEFT JOIN categories c ON p.category_id = c.category_id OR p.category_id = c.id " +
                 "WHERE COALESCE(p.status, 'ACTIVE') = 'ACTIVE' " +
-                "ORDER BY COALESCE(p.id, p.product_id) ASC";
+                "ORDER BY COALESCE(p.product_id, p.id) ASC";
 
         List<Map<String, Object>> resultList = new ArrayList<>();
         try {
