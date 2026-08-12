@@ -87,7 +87,7 @@ public class SecurityConfig {
             );
 
         if (jwtAuthenticationFilter != null) {
-            http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.access.intercept.AuthorizationFilter.class);
+            http.addFilterAfter(jwtAuthenticationFilter, org.springframework.web.filter.CorsFilter.class);
         }
 
         return http.build();
