@@ -12,6 +12,7 @@ import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,8 @@ public class UserService {
 	private final Map<String, OtpEntry> otpStorage = new ConcurrentHashMap<>();
 	
 	@Autowired(required = false)
+	private JdbcTemplate jdbcTemplate;
+	@Autowired(required = false)
 	private JavaMailSender mailSender;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -39,12 +42,55 @@ public class UserService {
     private JwtService jwtService;
 
     public User registerUser(User user) {
-		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-			throw new IllegalArgumentException("Email is already registered");
-		}
-		user.setRole(Role.USER);
-    	user.setPassword(passwordEncoder.encode(user.getPassword()));
-    	return userRepository.save(user);
+        if (user == null || user.getEmail() == null || user.getPassword() == null) {
+            throw new IllegalArgumentException("Invalid user details");
+        }
+        String cleanEmail = user.getEmail().trim().toLowerCase();
+        String rawPassword = user.getPassword().trim();
+        String encodedPassword = passwordEncoder != null ? passwordEncoder.encode(rawPassword) : rawPassword;
+        String name = user.getFullName() != null ? user.getFullName().trim() : "User";
+
+        try {
+            if (userRepository != null && userRepository.findByEmail(cleanEmail).isPresent()) {
+                throw new IllegalArgumentException("Email is already registered");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Throwable ignored) {}
+
+        if (jdbcTemplate != null) {
+            try {
+                List<Map<String, Object>> existing = jdbcTemplate.queryForList("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", cleanEmail);
+                if (existing.isEmpty()) {
+                    existing = jdbcTemplate.queryForList("SELECT id FROM user WHERE LOWER(email) = LOWER(?)", cleanEmail);
+                }
+                if (!existing.isEmpty()) {
+                    throw new IllegalArgumentException("Email is already registered");
+                }
+
+                try {
+                    jdbcTemplate.update("INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
+                } catch (Exception e) {
+                    try {
+                        jdbcTemplate.update("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
+                    } catch (Exception ex) {
+                        jdbcTemplate.update("INSERT INTO user (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
+                    }
+                }
+                User savedUser = new User();
+                savedUser.setEmail(cleanEmail);
+                savedUser.setFullName(name);
+                savedUser.setRole(Role.USER);
+                return savedUser;
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Throwable ignored) {}
+        }
+
+        user.setEmail(cleanEmail);
+        user.setRole(Role.USER);
+        user.setPassword(encodedPassword);
+        return userRepository.save(user);
     }
 
     public String loginUser(LoginRequest request) {
@@ -62,6 +108,30 @@ public class UserService {
             }
             if ("naveensana66028@gmail.com".equalsIgnoreCase(cleanEmail) && ("Naveen@0987".equals(cleanPassword) || "Admin@123456".equals(cleanPassword))) {
                 return getJwtService().generateToken("naveensana66028@gmail.com", Role.ADMIN, "Naveen Sana");
+            }
+
+            // Check Aiven MySQL via JdbcTemplate first
+            if (jdbcTemplate != null) {
+                try {
+                    List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT id, email, password, COALESCE(full_name, name, 'User') as name, role FROM users WHERE LOWER(email) = LOWER(?)", cleanEmail);
+                    if (rows.isEmpty()) {
+                        rows = jdbcTemplate.queryForList("SELECT id, email, password, COALESCE(full_name, name, 'User') as name, role FROM user WHERE LOWER(email) = LOWER(?)", cleanEmail);
+                    }
+                    if (!rows.isEmpty()) {
+                        Map<String, Object> u = rows.get(0);
+                        String dbPass = (String) u.get("password");
+                        String dbName = (String) u.get("name");
+                        String dbRole = (String) u.get("role");
+                        Role role = Role.USER;
+                        if (dbRole != null && dbRole.toUpperCase().contains("ADMIN")) role = Role.ADMIN;
+
+                        if (checkPassword(cleanPassword, dbPass)) {
+                            return getJwtService().generateToken(cleanEmail, role, dbName != null ? dbName : "User");
+                        }
+                    }
+                } catch (Throwable e) {
+                    System.err.println("JdbcTemplate user lookup error: " + e.getMessage());
+                }
             }
 
             Optional<User> user = Optional.empty();
@@ -82,11 +152,6 @@ public class UserService {
             return "Invalid Email or Password";
         } catch (Throwable e) {
             System.err.println("Login error: " + e.getMessage());
-            try {
-                if (request != null && request.getEmail() != null) {
-                    return getJwtService().generateToken(request.getEmail().trim().toLowerCase(), Role.USER, "User");
-                }
-            } catch (Throwable ignored) {}
             return "Invalid Email or Password";
         }
     }
