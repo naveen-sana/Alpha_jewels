@@ -52,6 +52,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+            .addFilterBefore(customCorsFilter, org.springframework.security.web.access.channel.ChannelProcessingFilter.class)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
@@ -67,7 +68,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+        configuration.addAllowedOriginPattern("https://alpha-jewels-personal.vercel.app");
+        configuration.addAllowedOriginPattern("https://*.vercel.app");
+        configuration.addAllowedOriginPattern("http://localhost:*");
+        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
         configuration.addAllowedOriginPattern("*");
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
