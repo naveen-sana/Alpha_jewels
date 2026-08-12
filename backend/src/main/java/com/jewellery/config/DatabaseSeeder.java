@@ -3,6 +3,7 @@ package com.jewellery.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,14 +14,56 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired(required = false)
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public void run(String... args) throws Exception {
         try {
             seedTablesAndProducts();
+            seedUsers();
         } catch (Exception e) {
             System.err.println("DatabaseSeeder error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void seedUsers() {
+        try {
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS \"user\" (" +
+                    "id SERIAL PRIMARY KEY, " +
+                    "email VARCHAR(255) NOT NULL UNIQUE, " +
+                    "name VARCHAR(255), " +
+                    "full_name VARCHAR(255), " +
+                    "password VARCHAR(255) NOT NULL, " +
+                    "role VARCHAR(50) DEFAULT 'USER', " +
+                    "mobile_number VARCHAR(50), " +
+                    "phone VARCHAR(50)" +
+                    ")");
+        } catch (Exception ignored) {}
+
+        try {
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS users (" +
+                    "id SERIAL PRIMARY KEY, " +
+                    "email VARCHAR(255) NOT NULL UNIQUE, " +
+                    "name VARCHAR(255), " +
+                    "full_name VARCHAR(255), " +
+                    "password VARCHAR(255) NOT NULL, " +
+                    "role VARCHAR(50) DEFAULT 'USER', " +
+                    "mobile_number VARCHAR(50), " +
+                    "phone VARCHAR(50)" +
+                    ")");
+        } catch (Exception ignored) {}
+
+        // Ensure naveensana66028@gmail.com exists as ADMIN
+        String targetEmail = "naveensana66028@gmail.com";
+        try {
+            List<Integer> count = jdbcTemplate.queryForList("SELECT 1 FROM \"user\" WHERE LOWER(email) = LOWER(?)", Integer.class, targetEmail);
+            if (count.isEmpty() && passwordEncoder != null) {
+                String hashedPass = passwordEncoder.encode("Naveen@0987");
+                jdbcTemplate.update("INSERT INTO \"user\" (email, name, full_name, password, role) VALUES (?, 'Naveen Sana', 'Naveen Sana', ?, 'ADMIN')", targetEmail, hashedPass);
+            }
+        } catch (Exception ignored) {}
     }
 
     private Integer getOrCreateCategoryId(String catName) {

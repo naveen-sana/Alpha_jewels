@@ -50,7 +50,7 @@ const AdminLogin = () => {
         response = await axios.post(url, {
           email: cleanInput,
           password: cleanPassword,
-        })
+        }, { timeout: 45000 })
         if (response && response.data) break
       } catch (err) {
         // Continue to fallback

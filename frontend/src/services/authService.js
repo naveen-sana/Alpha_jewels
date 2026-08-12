@@ -75,6 +75,9 @@ export const changePassword = async ({ email, oldPassword, newPassword }) => {
 }
 
 export const extractErrorMessage = (error) => {
+  if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+    return 'Server connection warming up. Please click SIGN IN again.'
+  }
   if (error.response?.data) {
     const data = error.response.data
     if (typeof data === 'string') return data
