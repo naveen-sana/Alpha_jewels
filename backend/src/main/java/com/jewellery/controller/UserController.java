@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +38,16 @@ public class UserController {
 
     @Autowired(required = false)
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @GetMapping("/jwt-test")
+    public ResponseEntity<?> testJwt() {
+        try {
+            String token = jwtService.generateToken("test@gmail.com", Role.USER, "Test User");
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (Throwable e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, Object> body) {
