@@ -23,7 +23,8 @@ public class JwtService {
 
     public JwtService(@Value("${app.jwt.secret:change-this-development-secret-key-to-a-long-random-value-123456789}") String secret,
                       @Value("${app.jwt.expiration-ms:86400000}") long expirationMs) {
-        byte[] keyBytes = (secret != null ? secret : "change-this-development-secret-key-to-a-long-random-value-123456789").getBytes(StandardCharsets.UTF_8);
+        String safeSecret = (secret != null && !secret.trim().isEmpty()) ? secret.trim() : "change-this-development-secret-key-to-a-long-random-value-123456789";
+        byte[] keyBytes = safeSecret.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
             try {
                 MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -33,7 +34,7 @@ public class JwtService {
             }
         }
         this.signingKey = keyBytes;
-        this.expirationMs = expirationMs;
+        this.expirationMs = expirationMs > 0 ? expirationMs : 86400000L;
     }
 
     public String generateToken(String email, Role role, String name) {
