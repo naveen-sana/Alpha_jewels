@@ -237,22 +237,37 @@ const AdminProducts = () => {
     }
   }
 
-  // Filter products by search and dropdowns
-  const filteredProducts = products.filter((p) => {
-    const matchesSearch =
-      !searchTerm ||
-      p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory =
-      selectedCategory === 'ALL' ||
-      !p.category ||
-      p.category === 'Jewellery' ||
-      p.category.toLowerCase() === selectedCategory.toLowerCase()
-    const matchesStatus =
-      selectedStatus === 'ALL' || p.status === selectedStatus
-    return matchesSearch && matchesCategory && matchesStatus
-  })
+  // Filter products by search and dropdowns while enforcing SKU uniqueness
+  const filteredProducts = React.useMemo(() => {
+    const seenSkus = new Set()
+    const seenNames = new Set()
+
+    return products.filter((p) => {
+      const skuKey = p.sku ? String(p.sku).trim().toUpperCase() : null
+      const nameKey = p.name ? String(p.name).trim().toLowerCase() : null
+
+      if (skuKey && seenSkus.has(skuKey)) return false
+      if (nameKey && seenNames.has(nameKey)) return false
+
+      if (skuKey) seenSkus.add(skuKey)
+      if (nameKey) seenNames.add(nameKey)
+
+      const matchesSearch =
+        !searchTerm ||
+        p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory =
+        selectedCategory === 'ALL' ||
+        !p.category ||
+        p.category === 'Jewellery' ||
+        p.category.toLowerCase() === selectedCategory.toLowerCase()
+      const matchesStatus =
+        selectedStatus === 'ALL' || p.status === selectedStatus
+
+      return matchesSearch && matchesCategory && matchesStatus
+    })
+  }, [products, searchTerm, selectedCategory, selectedStatus])
 
   return (
     <AdminLayout>
@@ -385,15 +400,19 @@ const AdminProducts = () => {
                       <button
                         onClick={() => {
                           setQuickEditProduct(product)
-                          setQuickStock(product.stock)
+                          setQuickStock(product.stock ?? 0)
                           setQuickPrice(product.price)
                         }}
-                        className={`btn btn-sm py-1 px-2 rounded-2 border-0 fw-semibold fs-8 ${
-                          product.stock <= 5 ? 'bg-danger bg-opacity-10 text-danger' : 'bg-success bg-opacity-10 text-success'
+                        className={`btn btn-sm py-1 px-2.5 rounded-2 border-0 fw-semibold fs-8 ${
+                          Number(product.stock ?? 0) === 0
+                            ? 'bg-danger text-white'
+                            : Number(product.stock ?? 0) <= 5
+                            ? 'bg-warning bg-opacity-25 text-dark'
+                            : 'bg-success bg-opacity-10 text-success'
                         }`}
-                        title="Click to update stock"
+                        title="Click to update stock/price"
                       >
-                        {product.stock} in stock
+                        {Number(product.stock ?? 0) === 0 ? 'Out of Stock' : `${product.stock} in stock`}
                       </button>
                     </td>
                     <td>
