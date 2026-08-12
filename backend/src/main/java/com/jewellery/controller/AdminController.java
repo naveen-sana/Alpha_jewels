@@ -526,32 +526,24 @@ public class AdminController {
     }
 
     private List<Map<String, Object>> getProductsListInternal(int limit) {
-        // Purge test junk rows (SKU-23XX, SKU-0XX, or product_id > 200) that caused wrong categories and duplicate stock=10 rows
-        try {
-            jdbcTemplate.update("DELETE FROM products WHERE sku LIKE 'SKU-2%' OR sku LIKE 'SKU-0%' OR product_id > 200");
-        } catch (Exception ignored) {}
-
-        String sql = "SELECT p.product_id as id, p.name, p.category_id as categoryId, COALESCE(c.category_name, 'Jewellery') as category, " +
-                "p.description, p.price, COALESCE(p.discount, 0.00) as discount, COALESCE(p.stock, 0) as stock, " +
-                "COALESCE(p.weight, '10g') as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
+        String sql = "SELECT COALESCE(p.id, p.product_id) as id, COALESCE(p.product_id, p.id) as product_id, p.name, " +
+                "p.category_id as categoryId, COALESCE(c.name, c.category_name, 'Jewellery') as category, " +
+                "p.description, p.price, COALESCE(p.discount, 0.00) as discount, " +
+                "COALESCE(p.stock, p.stock_quantity, 10) as stock, COALESCE(p.stock_quantity, p.stock, 10) as stock_quantity, " +
+                "COALESCE(p.weight, 10) as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
                 "COALESCE(p.gold_purity, '22K') as goldPurity, COALESCE(p.diamond_details, 'VS1 / G-H Color') as diamondDetails, " +
                 "COALESCE(p.stone_details, 'Natural Diamond') as stoneDetails, " +
-                "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', p.product_id)) as sku, " +
+                "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', COALESCE(p.id, p.product_id))) as sku, " +
                 "COALESCE(p.status, 'ACTIVE') as status, pi.image_url as imageUrl " +
                 "FROM products p " +
-                "LEFT JOIN categories c ON p.category_id = c.category_id " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pi ON p.product_id = pi.product_id " +
-                "ORDER BY p.product_id ASC LIMIT " + limit;
+                "LEFT JOIN categories c ON p.category_id = c.id OR p.category_id = c.category_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi ON p.id = pi.product_id OR p.product_id = pi.product_id " +
+                "ORDER BY COALESCE(p.id, p.product_id) ASC LIMIT " + limit;
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
             e.printStackTrace();
-            try {
-                String simpleSql = "SELECT p.product_id as id, p.name, 'Jewellery' as category, p.description, p.price, 0 as discount, 10 as stock, 'ACTIVE' as status FROM products p LIMIT " + limit;
-                return jdbcTemplate.queryForList(simpleSql);
-            } catch (Exception ignored) {
-                return new ArrayList<>();
-            }
+            return new ArrayList<>();
         }
     }
 

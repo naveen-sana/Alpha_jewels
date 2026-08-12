@@ -242,10 +242,6 @@ const AdminProducts = () => {
       const skuKey = p.sku ? String(p.sku).trim().toUpperCase() : null
       const nameKey = p.name ? String(p.name).trim().toLowerCase() : null
 
-      // Filter out auto-generated junk testing rows
-      if (skuKey && (skuKey.startsWith('SKU-2') || skuKey.startsWith('SKU-0'))) return false
-      if (Number(p.id || p.productId || p.product_id) > 200) return false
-
       if (skuKey && seenSkus.has(skuKey)) return false
       if (nameKey && seenNames.has(nameKey)) return false
 
