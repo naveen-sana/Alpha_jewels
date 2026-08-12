@@ -394,22 +394,20 @@ public class ProductCartController {
     @GetMapping("/cart/items/count")
     public ResponseEntity<Map<String, Object>> getCartItemCount() {
         ensureCartTableExists();
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.ok(Map.of("count", 0));
+        }
+        String email = auth.getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
         if (userId == null) {
-            Map<String, Object> err = new HashMap<>();
-            err.put("count", 0);
-            return ResponseEntity.ok(err);
+            return ResponseEntity.ok(Map.of("count", 0));
         }
         try {
             Integer count = jdbcTemplate.queryForObject("SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE user_id = ?", Integer.class, userId);
-            Map<String, Object> res = new HashMap<>();
-            res.put("count", count != null ? count : 0);
-            return ResponseEntity.ok(res);
+            return ResponseEntity.ok(Map.of("count", count != null ? count : 0));
         } catch (Exception e) {
-            Map<String, Object> res = new HashMap<>();
-            res.put("count", 0);
-            return ResponseEntity.ok(res);
+            return ResponseEntity.ok(Map.of("count", 0));
         }
     }
 
@@ -417,7 +415,11 @@ public class ProductCartController {
     public ResponseEntity<?> getCartItems() {
         ensureCartTableExists();
         ensureProductTablesExist();
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+        String email = auth.getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
         if (userId == null) {
             return ResponseEntity.ok(new ArrayList<>());
@@ -442,7 +444,11 @@ public class ProductCartController {
     @PostMapping("/cart/add")
     public ResponseEntity<?> addToCart(@RequestBody Map<String, Object> request) {
         ensureCartTableExists();
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        String email = auth.getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
         if (userId == null) {
             return ResponseEntity.badRequest().body("User not found");
@@ -468,7 +474,11 @@ public class ProductCartController {
     @PutMapping("/cart/update")
     public ResponseEntity<?> updateCartQuantity(@RequestBody Map<String, Object> request) {
         ensureCartTableExists();
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        String email = auth.getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
         if (userId == null) return ResponseEntity.badRequest().body("User not found");
 
@@ -493,7 +503,11 @@ public class ProductCartController {
     @DeleteMapping("/cart/delete/{productId}")
     public ResponseEntity<?> removeFromCart(@PathVariable Long productId) {
         ensureCartTableExists();
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        String email = auth.getPrincipal().toString();
         Long userId = getUserIdByEmail(email);
         if (userId == null) return ResponseEntity.badRequest().body("User not found");
 
