@@ -323,6 +323,15 @@ public class ProductCartController {
         }
     }
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        new Thread(() -> {
+            try {
+                ensureProductTablesExist();
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
     @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -334,7 +343,6 @@ public class ProductCartController {
                         category.trim().equalsIgnoreCase("all");
 
         try {
-            ensureProductTablesExist();
             List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
             if (list != null && !list.isEmpty()) {
                 for (Map<String, Object> row : list) {
