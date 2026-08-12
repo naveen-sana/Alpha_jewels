@@ -154,9 +154,24 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    // Helper method to ensure required database tables and columns exist
     @PostConstruct
+    public void initAsync() {
+        new Thread(() -> {
+            try {
+                ensureTablesExist();
+            } catch (Exception ignored) {}
+        }).start();
+    }
+
+    // Helper method to ensure required database tables and columns exist
     public void ensureTablesExist() {
+        try {
+            Integer prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class);
+            if (prodCount != null && prodCount > 0) {
+                return;
+            }
+        } catch (Exception ignored) {}
+
         try {
             // Categories table
             try {
