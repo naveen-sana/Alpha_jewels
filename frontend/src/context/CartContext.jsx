@@ -45,7 +45,7 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, [fetchCart]);
 
-  const addToCart = async (productId, quantity = 1) => {
+  const addToCart = async (productId, quantity = 1, productObj = null) => {
     setCartError(null);
     if (!isAuthenticated) {
       const msg = 'Please log in to add products to your cart.';
@@ -65,11 +65,21 @@ export const CartProvider = ({ children }) => {
         const existingItem = updated[existingIdx];
         updated[existingIdx] = {
           ...existingItem,
+          name: productObj?.name || existingItem.name,
+          price: productObj?.price || existingItem.price,
+          imageUrl: productObj?.imageUrl || productObj?.image_url || existingItem.imageUrl,
           quantity: (existingItem.quantity || 1) + quantity
         };
         return updated;
       }
-      return [...prev, { id: productId, productId, quantity }];
+      return [...prev, {
+        id: productId,
+        productId,
+        quantity,
+        name: productObj?.name || `Jewellery Item #${productId}`,
+        price: productObj?.price || 0.00,
+        imageUrl: productObj?.imageUrl || productObj?.image_url || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e'
+      }];
     });
 
     if (showToast) showToast('Product added to cart!', 'success');

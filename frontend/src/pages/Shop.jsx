@@ -105,11 +105,12 @@ const Shop = () => {
     fetchProducts();
   }, [activeCategory]);
 
-  const handleAddToCart = async (productId) => {
-    setAddingId(productId);
+  const handleAddToCart = async (product) => {
+    const pId = typeof product === 'object' ? (product.id || product.productId) : product;
+    setAddingId(pId);
     setError('');
     try {
-      await addToCart(productId, 1);
+      await addToCart(pId, 1, typeof product === 'object' ? product : null);
       setTimeout(() => setAddingId(null), 800);
     } catch (err) {
       console.error(err);
@@ -200,7 +201,7 @@ const Shop = () => {
                         </span>
                         <button
                           className={`add-to-cart-action-btn ${addingId === product.id ? 'added' : ''}`}
-                          onClick={() => handleAddToCart(product.id)}
+                          onClick={() => handleAddToCart(product)}
                           disabled={addingId === product.id || isOutOfStock}
                         >
                           <ShoppingCart size={14} className="me-1" />

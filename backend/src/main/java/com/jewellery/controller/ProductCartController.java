@@ -416,11 +416,14 @@ public class ProductCartController {
             return ResponseEntity.ok(new ArrayList<>());
         }
         try {
-            String sql = "SELECT c.id, c.product_id as \"productId\", c.quantity, p.name, p.price, " +
-                         "COALESCE(pi.image_url, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e') as \"imageUrl\" " +
+            String sql = "SELECT c.id, COALESCE(c.product_id, 0) as \"productId\", c.quantity, " +
+                         "COALESCE(p.name, CONCAT('Jewellery Item #', c.product_id)) as name, " +
+                         "COALESCE(p.price, 0.00) as price, " +
+                         "COALESCE(pi.image_url, pii.image_url, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e') as \"imageUrl\" " +
                          "FROM cart_items c " +
-                         "JOIN products p ON (c.product_id = p.product_id OR c.product_id = p.id) " +
-                         "LEFT JOIN productimages pi ON (p.product_id = pi.product_id OR p.id = pi.product_id) " +
+                         "LEFT JOIN products p ON (c.product_id = p.id OR c.product_id = p.product_id) " +
+                         "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi ON (p.id = pi.product_id OR p.product_id = pi.product_id) " +
+                         "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pii ON (p.id = pii.product_id OR p.product_id = pii.product_id) " +
                          "WHERE c.user_id = ?";
             List<Map<String, Object>> items = jdbcTemplate.queryForList(sql, userId);
             return ResponseEntity.ok(items);
