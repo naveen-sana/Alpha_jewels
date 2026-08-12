@@ -96,13 +96,16 @@ public class SecurityConfig {
                     "/health",
                     "/api/products/**",
                     "/api/categories/**",
-                    "/api/users/login",
-                    "/api/users/register",
-                    "/api/users/forgot-password",
-                    "/api/users/reset-password",
+                    "/api/users/**",
                     "/api/seed-database-now"
                 ).permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers(
+                    "/api/cart/**",
+                    "/api/wishlist/**",
+                    "/api/orders/**",
+                    "/api/admin/**"
+                ).authenticated()
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
