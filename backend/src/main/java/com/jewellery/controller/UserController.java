@@ -77,10 +77,30 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody(required = false) Map<String, Object> body) {
         try {
+            if (body == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Request body is required"));
+            }
+            String email = body.get("email") != null ? body.get("email").toString().trim() : "";
+            String password = body.get("password") != null ? body.get("password").toString().trim() : "";
+            String fullName = body.get("fullName") != null ? body.get("fullName").toString().trim() : "";
+            if (fullName.isEmpty() && body.get("name") != null) {
+                fullName = body.get("name").toString().trim();
+            }
+
+            if (email.isEmpty() || password.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email and Password are required"));
+            }
+
+            User user = new User();
+            user.setEmail(email);
+            user.setPassword(password);
+            user.setFullName(fullName);
+            user.setRole(Role.USER);
+
             User registered = userService.registerUser(user);
-            return ResponseEntity.ok(registered);
+            return ResponseEntity.ok(Map.of("message", "User registered successfully", "email", registered.getEmail()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Throwable e) {
@@ -89,29 +109,48 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<?> changePassword(@RequestBody(required = false) Map<String, Object> body) {
         try {
-            return ResponseEntity.ok(userService.changePassword(request));
+            if (body == null) return ResponseEntity.badRequest().body(Map.of("error", "Request body is required"));
+            ChangePasswordRequest req = new ChangePasswordRequest();
+            if (body.get("email") != null) req.setEmail(body.get("email").toString().trim());
+            if (body.get("oldPassword") != null) req.setOldPassword(body.get("oldPassword").toString().trim());
+            if (body.get("newPassword") != null) req.setNewPassword(body.get("newPassword").toString().trim());
+            return ResponseEntity.ok(Map.of("message", userService.changePassword(req)));
         } catch (Throwable e) {
-            return ResponseEntity.status(500).body("Password change failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "Password change failed: " + e.getMessage()));
         }
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<?> forgotPassword(@RequestBody(required = false) Map<String, Object> body) {
         try {
-            return ResponseEntity.ok(userService.forgotPassword(request));
+            if (body == null || body.get("email") == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
+            }
+            ForgotPasswordRequest req = new ForgotPasswordRequest();
+            req.setEmail(body.get("email").toString().trim());
+            String res = userService.forgotPassword(req);
+            return ResponseEntity.ok(Map.of("message", res));
         } catch (Throwable e) {
-            return ResponseEntity.status(500).body("Forgot password failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "Forgot password failed: " + e.getMessage()));
         }
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<?> resetPassword(@RequestBody(required = false) Map<String, Object> body) {
         try {
-            return ResponseEntity.ok(userService.resetPassword(request));
+            if (body == null || body.get("email") == null || body.get("otp") == null || body.get("newPassword") == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid reset details"));
+            }
+            ResetPasswordRequest req = new ResetPasswordRequest();
+            req.setEmail(body.get("email").toString().trim());
+            req.setOtp(body.get("otp").toString().trim());
+            req.setNewPassword(body.get("newPassword").toString().trim());
+            String res = userService.resetPassword(req);
+            return ResponseEntity.ok(Map.of("message", res));
         } catch (Throwable e) {
-            return ResponseEntity.status(500).body("Reset password failed: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "Reset password failed: " + e.getMessage()));
         }
     }
 
