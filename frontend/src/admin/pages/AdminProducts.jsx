@@ -18,6 +18,7 @@ import {
 import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
+import { getProductImage } from '../../utils/productImages'
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([])
@@ -354,13 +355,13 @@ const AdminProducts = () => {
                     <td>
                       <div className="d-flex align-items-center gap-3">
                         <img
-                          src={product.imageUrl || 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=150&q=80'}
+                          src={getProductImage(product)}
                           alt={product.name}
                           className="rounded-3 border object-fit-cover"
                           style={{ width: '48px', height: '48px' }}
                           onError={(e) => {
                             e.target.onerror = null
-                            e.target.src = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=150&q=80'
+                            e.target.src = getProductImage(product)
                           }}
                         />
                         <div>

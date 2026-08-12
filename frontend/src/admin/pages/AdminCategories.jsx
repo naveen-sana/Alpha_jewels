@@ -39,6 +39,13 @@ const AdminCategories = () => {
     status: 'ACTIVE',
   })
 
+  const CORE_4_CATEGORIES = [
+    { id: 1, name: 'Diamond', description: 'Diamond luxury jewellery collection', status: 'ACTIVE', imageUrl: 'https://cdn.shopify.com/s/files/1/0676/7473/4661/files/Why_diamonds_are_popular.jpg?v=1774099242' },
+    { id: 2, name: 'Gold', description: 'Gold luxury jewellery collection', status: 'ACTIVE', imageUrl: 'https://shop.swarna.com/wp-content/uploads/2026/02/NEC17448_1.jpg' },
+    { id: 3, name: 'Platinum', description: 'Platinum luxury jewellery collection', status: 'ACTIVE', imageUrl: 'https://img.magnific.com/free-photo/shiny-gemstone-ring-platinum-luxury-elegance-captured-generated-by-ai_188544-9991.jpg?semt=ais_test_b&w=740&q=80' },
+    { id: 4, name: 'Silver', description: 'Silver luxury jewellery collection', status: 'ACTIVE', imageUrl: 'https://s3.amazonaws.com/assets.jewelxy.com/wp-content/uploads/2026/06/21095640/ngevzhDQGn_20230302163648.jpg' }
+  ];
+
   const fetchCategories = async () => {
     setLoading(true)
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
@@ -46,11 +53,16 @@ const AdminCategories = () => {
     try {
       const response = await adminApi.get('/api/admin/categories', config)
       const data = response.data || []
-      setCategories(Array.isArray(data) ? data : [])
+      if (Array.isArray(data) && data.length > 0) {
+        const coreNames = ['diamond', 'gold', 'platinum', 'silver'];
+        const filtered = data.filter(cat => coreNames.includes(String(cat.name || cat.categoryName).toLowerCase()));
+        setCategories(filtered.length > 0 ? filtered : CORE_4_CATEGORIES);
+      } else {
+        setCategories(CORE_4_CATEGORIES);
+      }
     } catch (err) {
       console.error(err)
-      addToast('Error fetching categories from database', 'error')
-      setCategories([])
+      setCategories(CORE_4_CATEGORIES)
     } finally {
       setLoading(false)
     }

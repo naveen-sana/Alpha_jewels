@@ -8,25 +8,27 @@ const WishlistContext = createContext();
 export const WishlistProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  // Clear legacy localStorage wishlist if present
-  useEffect(() => {
-    if (localStorage.getItem('alpha_wishlist')) {
-      localStorage.removeItem('alpha_wishlist');
+  const [wishlistItems, setWishlistItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('alpha_wishlist_items');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
     }
-  }, []);
+  });
+  const [loading, setLoading] = useState(false);
 
   const fetchWishlist = useCallback(async () => {
     if (!isAuthenticated) {
-      setWishlistItems([]);
       return;
     }
     setLoading(true);
     try {
       const response = await apiClient.get('/api/wishlist');
-      setWishlistItems(response.data || []);
+      if (Array.isArray(response.data)) {
+        setWishlistItems(response.data);
+        localStorage.setItem('alpha_wishlist_items', JSON.stringify(response.data));
+      }
     } catch (err) {
       console.error('Error fetching wishlist from database:', err);
     } finally {
@@ -40,27 +42,43 @@ export const WishlistProvider = ({ children }) => {
 
   const toggleWishlist = async (productOrId) => {
     if (!productOrId) return;
-    const productId = typeof productOrId === 'object' ? (productOrId.id || productOrId.productId) : productOrId;
-    if (!productId) return;
-    try {
-      const isAlreadyIn = isInWishlist(productId);
-      const res = await apiClient.post('/api/wishlist', { productId });
-      await fetchWishlist();
-      if (showToast) {
-        if (isAlreadyIn) {
-          showToast('Product removed from wishlist', 'wishlist');
-        } else {
-          showToast('Product added to wishlist successfully!', 'wishlist');
-        }
+    const item = typeof productOrId === 'object' ? productOrId : { id: productOrId, productId: productOrId };
+    const pId = item.id || item.productId;
+    if (!pId) return;
+
+    const isAlreadyIn = wishlistItems.some(
+      (w) => Number(w.id || w.productId) === Number(pId)
+    );
+
+    let updatedList = [];
+    if (isAlreadyIn) {
+      updatedList = wishlistItems.filter(
+        (w) => Number(w.id || w.productId) !== Number(pId)
+      );
+      if (showToast) showToast('Product removed from wishlist', 'wishlist');
+    } else {
+      updatedList = [...wishlistItems, item];
+      if (showToast) showToast('Product added to wishlist successfully!', 'wishlist');
+    }
+
+    setWishlistItems(updatedList);
+    localStorage.setItem('alpha_wishlist_items', JSON.stringify(updatedList));
+
+    if (isAuthenticated) {
+      try {
+        await apiClient.post('/api/wishlist', { productId: pId });
+        await fetchWishlist();
+      } catch (err) {
+        console.error('Error syncing wishlist with database:', err);
       }
-    } catch (err) {
-      console.error('Error toggling wishlist in database:', err);
     }
   };
 
   const isInWishlist = (productId) => {
     if (!productId) return false;
-    return wishlistItems.some((item) => Number(item.id) === Number(productId) || Number(item.productId) === Number(productId));
+    return wishlistItems.some(
+      (item) => Number(item.id || item.productId) === Number(productId)
+    );
   };
 
   const wishlistCount = wishlistItems.length;
