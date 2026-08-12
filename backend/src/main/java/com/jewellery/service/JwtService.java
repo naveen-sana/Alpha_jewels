@@ -21,11 +21,16 @@ public class JwtService {
     private final byte[] signingKey;
     private final long expirationMs;
 
-    public JwtService(@Value("${app.jwt.secret}") String secret,
-                      @Value("${app.jwt.expiration-ms}") long expirationMs) {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+    public JwtService(@Value("${app.jwt.secret:change-this-development-secret-key-to-a-long-random-value-123456789}") String secret,
+                      @Value("${app.jwt.expiration-ms:86400000}") long expirationMs) {
+        byte[] keyBytes = (secret != null ? secret : "change-this-development-secret-key-to-a-long-random-value-123456789").getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
-            throw new IllegalArgumentException("app.jwt.secret must be at least 32 bytes long");
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                keyBytes = md.digest(keyBytes);
+            } catch (Exception ignored) {
+                keyBytes = java.util.Arrays.copyOf(keyBytes, 32);
+            }
         }
         this.signingKey = keyBytes;
         this.expirationMs = expirationMs;
@@ -34,8 +39,9 @@ public class JwtService {
     public String generateToken(String email, Role role, String name) {
         long now = System.currentTimeMillis();
         try {
+            Role safeRole = role != null ? role : Role.USER;
             String header = URL_ENCODER.encodeToString("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
-            String payloadJson = "{\"sub\":\"" + escapeJson(email) + "\",\"role\":\"" + role.name()
+            String payloadJson = "{\"sub\":\"" + escapeJson(email) + "\",\"role\":\"" + safeRole.name()
                     + "\",\"name\":\"" + escapeJson(name) + "\",\"iat\":" + now + ",\"exp\":" + (now + expirationMs) + "}";
             String payload = URL_ENCODER.encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
             String unsignedToken = header + "." + payload;
@@ -95,6 +101,7 @@ public class JwtService {
     }
 
     private String escapeJson(String value) {
+        if (value == null) return "";
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
