@@ -22,11 +22,13 @@ export const loginUser = async ({ email, password }) => {
   const cleanPassword = (password || '').trim()
   const { data } = await apiClient.post('/api/users/login', { email: cleanEmail, password: cleanPassword })
 
-  if (typeof data === 'string' && !isJwtToken(data)) {
-    throw new Error(data)
+  const token = typeof data === 'string' ? data : (data?.token || data?.jwt)
+
+  if (typeof token === 'string' && !isJwtToken(token)) {
+    throw new Error(token)
   }
 
-  return data
+  return token || data
 }
 
 export const logoutUser = async () => {
