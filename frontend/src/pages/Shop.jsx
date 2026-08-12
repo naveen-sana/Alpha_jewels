@@ -107,7 +107,7 @@ const Shop = () => {
       "description": "Beautiful stoned Necklace for women",
       "price": 9889,
       "categoryName": "Diamond",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeg4gTnQNB8QwFa2NabGCY6GIyuk-O5YgHPh0lWk89FQ&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     },
     {
       "id": 160,
@@ -189,7 +189,7 @@ const Shop = () => {
       "description": "Beautifully crafted necklace for women",
       "price": 7886,
       "categoryName": "Gold",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     },
     {
       "id": 156,
@@ -205,7 +205,7 @@ const Shop = () => {
       "description": "Gold Plated One Gram Gold Antique Jhumkas",
       "price": 5632,
       "categoryName": "Gold",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGXcUrPc96aQ0Bkex6Iz88U2rtbIhTsRHaKhuIvqvBgfiiWOgJ680coY&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     },
     {
       "id": 158,
@@ -213,7 +213,7 @@ const Shop = () => {
       "description": "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii",
       "price": 7986,
       "categoryName": "Gold",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     }
   ],
   "Platinum": [
@@ -303,7 +303,7 @@ const Shop = () => {
       "description": "Rose Gold paltinum Necklace",
       "price": 6548,
       "categoryName": "Platinum",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsGuP29OiLm3h8E4bWxCr_6IkP3o_Pn86YyBk_3tqsAw&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     },
     {
       "id": 162,
@@ -385,7 +385,7 @@ const Shop = () => {
       "description": "Beautiful Rewa Bangles",
       "price": 8503.2,
       "categoryName": "Silver",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvNTouHpMaDkVQE0EBj9ACaFYTpdnjHseaPqkPxpqLQ&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     },
     {
       "id": 150,
@@ -409,7 +409,7 @@ const Shop = () => {
       "description": "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set",
       "price": 5469,
       "categoryName": "Silver",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtETkKAxYb9cdrBBVOBDlQMWvWmvMdaWGq2OvoOOXWbtVwR4zmQVLEPh8b&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     },
     {
       "id": 164,
@@ -417,7 +417,7 @@ const Shop = () => {
       "description": "Silver Necklace, Navratri Jewellery",
       "price": 4589,
       "categoryName": "Silver",
-      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_jhWvKIVjAe9n7QaDN6uMFMb_IPmbINqHvMHp7p9A9z2K_GiGMpDIiz8&s=10"
+      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
     }
   ]
 };
@@ -478,16 +478,6 @@ const Shop = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const uniqueProducts = [];
-  const seenNames = new Set();
-  filteredProducts.forEach(p => {
-    const key = (p.name || '').trim().toLowerCase();
-    if (!seenNames.has(key)) {
-      seenNames.add(key);
-      uniqueProducts.push(p);
-    }
-  });
-
   return (
     <div className="shop-container py-5">
       <div className="container">
@@ -503,7 +493,7 @@ const Shop = () => {
           </div>
         )}
 
-        {!loading && !uniqueProducts.length && (
+        {!loading && !filteredProducts.length && (
           <div className="text-center py-5 empty-shop-state">
             <h3>No Products Found</h3>
             <p className="text-muted">
@@ -514,9 +504,9 @@ const Shop = () => {
           </div>
         )}
 
-        {!loading && uniqueProducts.length > 0 && (
+        {!loading && filteredProducts.length > 0 && (
           <div className="row g-4 justify-content-center">
-            {uniqueProducts.map((product) => {
+            {filteredProducts.map((product) => {
               const isWishlisted = isInWishlist(product.id);
               const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 

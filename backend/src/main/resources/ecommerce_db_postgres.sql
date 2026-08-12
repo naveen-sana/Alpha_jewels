@@ -1,8 +1,8 @@
--- Full PostgreSQL Clean Migration & Sync Script for Render Database
--- Delete legacy broken test rows (1..50) so ONLY 100% correct MySQL data exists!
-DELETE FROM productimages WHERE product_id < 100;
-DELETE FROM product_images WHERE product_id < 100;
-DELETE FROM products WHERE id < 100;
+-- Clean Truncate and Reseed Script for Render PostgreSQL
+-- Deletes ALL legacy mock/test products so database contains 100% ONLY MySQL Workbench items!
+DELETE FROM productimages;
+DELETE FROM product_images;
+DELETE FROM products;
 
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
@@ -168,8 +168,8 @@ INSERT INTO products (id, product_id, category_id, name, description, price, sto
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES (148, 'https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg', 1);
 INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (148, 'https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (149, 149, 4, 'Rewa Bangles', 'Beautiful Rewa Bangles', 8503.2, 4, 4, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (149, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvNTouHpMaDkVQE0EBj9ACaFYTpdnjHseaPqkPxpqLQ&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (149, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvNTouHpMaDkVQE0EBj9ACaFYTpdnjHseaPqkPxpqLQ&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (149, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (149, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (150, 150, 4, 'Sterling Bangles', 'Beautiful Sterling Bangles', 7912.8, 4, 4, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES (150, 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp', 1);
 INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (150, 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp', TRUE);
@@ -177,32 +177,32 @@ INSERT INTO products (id, product_id, category_id, name, description, price, sto
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES (151, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f', 1);
 INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (151, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (155, 155, 2, 'Neckpice Necklace', 'Beautifully crafted necklace for women', 7886, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (155, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (155, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (155, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (155, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (156, 156, 2, 'Long Necklace', 'Antique Gold Necklace for women', 7896, 9, 9, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES (156, 'https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg', 1);
 INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (156, 'https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (157, 157, 2, 'Antique Jumkas', 'Gold Plated One Gram Gold Antique Jhumkas', 5632, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (157, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGXcUrPc96aQ0Bkex6Iz88U2rtbIhTsRHaKhuIvqvBgfiiWOgJ680coY&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (157, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGXcUrPc96aQ0Bkex6Iz88U2rtbIhTsRHaKhuIvqvBgfiiWOgJ680coY&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (157, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (157, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (158, 158, 2, 'Kemp-green Lakshmi Vankii', 'Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii', 7986, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (158, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (158, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (158, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (158, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (159, 159, 1, 'Stoned Diamond Necklace', 'Beautiful stoned Necklace for women', 9889, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (159, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeg4gTnQNB8QwFa2NabGCY6GIyuk-O5YgHPh0lWk89FQ&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (159, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeg4gTnQNB8QwFa2NabGCY6GIyuk-O5YgHPh0lWk89FQ&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (159, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (159, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (160, 160, 1, 'Stoned Ring', 'A Beautiful Diamond Ring Stands in a Store Window. Stock Photo - Image of anniversary, bride', 9563, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES (160, 'https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg', 1);
 INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (160, 'https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (161, 161, 3, 'Rose Gold paltinum Necklace', 'Rose Gold paltinum Necklace', 6548, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (161, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsGuP29OiLm3h8E4bWxCr_6IkP3o_Pn86YyBk_3tqsAw&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (161, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsGuP29OiLm3h8E4bWxCr_6IkP3o_Pn86YyBk_3tqsAw&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (161, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (161, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (162, 162, 3, 'Square Piece-Set Neckalce', 'Square Piece Step Necklace', 6541, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
 INSERT INTO product_images (product_id, image_url, is_primary) VALUES (162, 'https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg', 1);
 INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (162, 'https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (163, 163, 4, 'Ghungroo Jwellery Set', 'Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set', 5469, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (163, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtETkKAxYb9cdrBBVOBDlQMWvWmvMdaWGq2OvoOOXWbtVwR4zmQVLEPh8b&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (163, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtETkKAxYb9cdrBBVOBDlQMWvWmvMdaWGq2OvoOOXWbtVwR4zmQVLEPh8b&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (163, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (163, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);
 INSERT INTO products (id, product_id, category_id, name, description, price, stock, stock_quantity, status) VALUES (164, 164, 4, 'Navaratri Jewellery', 'Silver Necklace, Navratri Jewellery', 4589, 10, 10, 'ACTIVE') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price, description = EXCLUDED.description, category_id = EXCLUDED.category_id, stock = EXCLUDED.stock, stock_quantity = EXCLUDED.stock_quantity;
-INSERT INTO product_images (product_id, image_url, is_primary) VALUES (164, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_jhWvKIVjAe9n7QaDN6uMFMb_IPmbINqHvMHp7p9A9z2K_GiGMpDIiz8&s=10', 1);
-INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (164, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_jhWvKIVjAe9n7QaDN6uMFMb_IPmbINqHvMHp7p9A9z2K_GiGMpDIiz8&s=10', TRUE);
+INSERT INTO product_images (product_id, image_url, is_primary) VALUES (164, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', 1);
+INSERT INTO productimages (product_id, image_url, is_thumbnail) VALUES (164, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', TRUE);

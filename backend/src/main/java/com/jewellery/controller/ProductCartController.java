@@ -172,19 +172,19 @@ public class ProductCartController {
             {"GargiStone Necklace", 4, "Beautifully Crafted Stone Necklace", 9305.00, 4, "https://ik.imagekit.io/StringstackNaveen/silver%20necklace.webp"},
             {"Flexi Bracelet", 4, "Fleur Flexi Bracelet in Silver", 7936.29, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet.jpg"},
             {"Chain Bracelet", 4, "Clara Womens Evil Eye Bracelet", 7048.20, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg"},
-            {"Rewa Bangles", 4, "Beautiful Rewa Bangles", 8503.20, 4, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvNTouHpMaDkVQE0EBj9ACaFYTpdnjHseaPqkPxpqLQ&s=10"},
+            {"Rewa Bangles", 4, "Beautiful Rewa Bangles", 8503.20, 4, "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80"},
             {"Sterling Bangles", 4, "Beautiful Sterling Bangles", 7912.80, 4, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"},
             {"Royal Diamond Choker", 4, "Exquisite Royal Choker", 12000.00, 3, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"},
-            {"Neckpice Necklace", 2, "Beautifully crafted necklace for women", 7886.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10"},
+            {"Neckpice Necklace", 2, "Beautifully crafted necklace for women", 7886.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {"Long Necklace", 2, "Antique Gold Necklace for women", 7896.00, 9, "https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg"},
-            {"Antique Jumkas", 2, "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGXcUrPc96aQ0Bkex6Iz88U2rtbIhTsRHaKhuIvqvBgfiiWOgJ680coY&s=10"},
-            {"Kemp-green Lakshmi Vankii", 2, "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii", 7986.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10"},
-            {"Stoned Diamond Necklace", 1, "Beautiful stoned Necklace for women", 9889.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeg4gTnQNB8QwFa2NabGCY6GIyuk-O5YgHPh0lWk89FQ&s=10"},
+            {"Antique Jumkas", 2, "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80"},
+            {"Kemp-green Lakshmi Vankii", 2, "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii", 7986.00, 10, "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80"},
+            {"Stoned Diamond Necklace", 1, "Beautiful stoned Necklace for women", 9889.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {"Stoned Ring", 1, "A Beautiful Diamond Ring Stands in a Store Window. Stock Photo - Image of anniversary, bride", 9563.00, 10, "https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg"},
-            {"Rose Gold paltinum Necklace", 3, "Rose Gold paltinum Necklace", 6548.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsGuP29OiLm3h8E4bWxCr_6IkP3o_Pn86YyBk_3tqsAw&s=10"},
+            {"Rose Gold paltinum Necklace", 3, "Rose Gold paltinum Necklace", 6548.00, 10, "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=600&q=80"},
             {"Square Piece-Set Neckalce", 3, "Square Piece Step Necklace", 6541.00, 10, "https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg"},
-            {"Ghungroo Jwellery Set", 4, "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set", 5469.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtETkKAxYb9cdrBBVOBDlQMWvWmvMdaWGq2OvoOOXWbtVwR4zmQVLEPh8b&s=10"},
-            {"Navaratri Jewellery", 4, "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_jhWvKIVjAe9n7QaDN6uMFMb_IPmbINqHvMHp7p9A9z2K_GiGMpDIiz8&s=10"}
+            {"Ghungroo Jwellery Set", 4, "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set", 5469.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"},
+            {"Navaratri Jewellery", 4, "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80"}
         };
 
         for (Object[] p : products) {
@@ -287,19 +287,19 @@ public class ProductCartController {
             {146, "GargiStone Necklace", "Silver", "Beautifully Crafted Stone Necklace", 9305.00, 4, "https://ik.imagekit.io/StringstackNaveen/silver%20necklace.webp"},
             {147, "Flexi Bracelet", "Silver", "Fleur Flexi Bracelet in Silver", 7936.29, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet.jpg"},
             {148, "Chain Bracelet", "Silver", "Clara Womens Evil Eye Bracelet", 7048.20, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg"},
-            {149, "Rewa Bangles", "Silver", "Beautiful Rewa Bangles", 8503.20, 4, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvNTouHpMaDkVQE0EBj9ACaFYTpdnjHseaPqkPxpqLQ&s=10"},
+            {149, "Rewa Bangles", "Silver", "Beautiful Rewa Bangles", 8503.20, 4, "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80"},
             {150, "Sterling Bangles", "Silver", "Beautiful Sterling Bangles", 7912.80, 4, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"},
             {151, "Royal Diamond Choker", "Silver", "Exquisite Royal Choker", 12000.00, 3, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"},
-            {155, "Neckpice Necklace", "Gold", "Beautifully crafted necklace for women", 7886.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10"},
+            {155, "Neckpice Necklace", "Gold", "Beautifully crafted necklace for women", 7886.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {156, "Long Necklace", "Gold", "Antique Gold Necklace for women", 7896.00, 9, "https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg"},
-            {157, "Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGXcUrPc96aQ0Bkex6Iz88U2rtbIhTsRHaKhuIvqvBgfiiWOgJ680coY&s=10"},
-            {158, "Kemp-green Lakshmi Vankii", "Gold", "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii", 7986.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10"},
-            {159, "Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeg4gTnQNB8QwFa2NabGCY6GIyuk-O5YgHPh0lWk89FQ&s=10"},
+            {157, "Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80"},
+            {158, "Kemp-green Lakshmi Vankii", "Gold", "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii", 7986.00, 10, "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80"},
+            {159, "Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {160, "Stoned Ring", "Diamond", "A Beautiful Diamond Ring Stands in a Store Window. Stock Photo - Image of anniversary, bride", 9563.00, 10, "https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg"},
-            {161, "Rose Gold paltinum Necklace", "Platinum", "Rose Gold paltinum Necklace", 6548.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsGuP29OiLm3h8E4bWxCr_6IkP3o_Pn86YyBk_3tqsAw&s=10"},
+            {161, "Rose Gold paltinum Necklace", "Platinum", "Rose Gold paltinum Necklace", 6548.00, 10, "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=600&q=80"},
             {162, "Square Piece-Set Neckalce", "Platinum", "Square Piece Step Necklace", 6541.00, 10, "https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg"},
-            {163, "Ghungroo Jwellery Set", "Silver", "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set", 5469.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtETkKAxYb9cdrBBVOBDlQMWvWmvMdaWGq2OvoOOXWbtVwR4zmQVLEPh8b&s=10"},
-            {164, "Navaratri Jewellery", "Silver", "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_jhWvKIVjAe9n7QaDN6uMFMb_IPmbINqHvMHp7p9A9z2K_GiGMpDIiz8&s=10"}
+            {163, "Ghungroo Jwellery Set", "Silver", "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set", 5469.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"},
+            {164, "Navaratri Jewellery", "Silver", "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=600&q=80"}
         };
 
         for (Object[] p : products) {
