@@ -55,8 +55,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .addFilterBefore(customCorsFilter, org.springframework.security.web.access.channel.ChannelProcessingFilter.class)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .addFilterBefore(customCorsFilter, org.springframework.web.filter.CorsFilter.class)
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
