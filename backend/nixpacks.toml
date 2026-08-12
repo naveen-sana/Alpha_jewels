@@ -5,4 +5,4 @@ nixPkgs = ["mvn", "openjdk21"]
 cmds = ["rm -rf target ../target", "mvn clean package -DskipTests"]
 
 [start]
-cmd = "java -jar target/jewellery-backend-0.0.1-SNAPSHOT.jar"
+cmd = "java -jar target/jewellery-backend-0.0.2-SNAPSHOT.jar"
