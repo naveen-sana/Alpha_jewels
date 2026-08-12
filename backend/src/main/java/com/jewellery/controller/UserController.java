@@ -49,10 +49,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, Object> body) {
+    public ResponseEntity<?> loginUser(@RequestBody(required = false) com.jewellery.dto.LoginRequest request) {
         try {
-            String email = (body != null && body.get("email") != null) ? body.get("email").toString().trim() : "";
-            String password = (body != null && body.get("password") != null) ? body.get("password").toString().trim() : "";
+            String email = (request != null && request.getEmail() != null) ? request.getEmail().trim() : "";
+            String password = (request != null && request.getPassword() != null) ? request.getPassword().trim() : "";
 
             if (email.isEmpty() || password.isEmpty()) {
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
@@ -102,8 +102,8 @@ public class UserController {
 
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         } catch (Throwable e) {
-            if (body != null && body.get("email") != null) {
-                String email = body.get("email").toString().trim();
+            if (request != null && request.getEmail() != null) {
+                String email = request.getEmail().trim();
                 String token = jwtService.generateToken(email, Role.USER, "User");
                 return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
             }
