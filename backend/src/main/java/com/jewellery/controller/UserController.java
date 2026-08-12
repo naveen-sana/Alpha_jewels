@@ -50,9 +50,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, String> body) {
         try {
-            String result = userService.loginUser(request);
+            String email = body != null ? body.get("email") : null;
+            String password = body != null ? body.get("password") : null;
+
+            if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
+            }
+
+            LoginRequest req = new LoginRequest();
+            req.setEmail(email.trim());
+            req.setPassword(password.trim());
+
+            String result = userService.loginUser(req);
             if (result != null && !result.toLowerCase().contains("invalid")) {
                 return ResponseEntity.ok(Map.of("token", result, "message", "Login Successful"));
             }
