@@ -21,6 +21,10 @@ public class JwtService {
     private final byte[] signingKey;
     private final long expirationMs;
 
+    public JwtService() {
+        this("change-this-development-secret-key-to-a-long-random-value-123456789", "86400000");
+    }
+
     public JwtService(@Value("${app.jwt.secret:change-this-development-secret-key-to-a-long-random-value-123456789}") String secret,
                       @Value("${app.jwt.expiration-ms:86400000}") String expirationMsStr) {
         String safeSecret = (secret != null && !secret.trim().isEmpty()) ? secret.trim() : "change-this-development-secret-key-to-a-long-random-value-123456789";
