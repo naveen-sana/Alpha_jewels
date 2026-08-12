@@ -55,6 +55,15 @@ public class DatabaseSeeder implements CommandLineRunner {
                     ")");
         } catch (Exception ignored) {}
 
+        // Ensure admin@gmail.com exists as ADMIN
+        try {
+            List<Integer> countAdmin = jdbcTemplate.queryForList("SELECT 1 FROM \"user\" WHERE LOWER(email) = LOWER('admin@gmail.com')", Integer.class);
+            if (countAdmin.isEmpty() && passwordEncoder != null) {
+                String hashedPass = passwordEncoder.encode("admin");
+                jdbcTemplate.update("INSERT INTO \"user\" (email, name, full_name, password, role) VALUES ('admin@gmail.com', 'System Admin', 'System Admin', ?, 'ADMIN')", hashedPass);
+            }
+        } catch (Exception ignored) {}
+
         // Ensure naveensana66028@gmail.com exists as ADMIN
         String targetEmail = "naveensana66028@gmail.com";
         try {
@@ -62,6 +71,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             if (count.isEmpty() && passwordEncoder != null) {
                 String hashedPass = passwordEncoder.encode("Naveen@0987");
                 jdbcTemplate.update("INSERT INTO \"user\" (email, name, full_name, password, role) VALUES (?, 'Naveen Sana', 'Naveen Sana', ?, 'ADMIN')", targetEmail, hashedPass);
+            } else if (!count.isEmpty()) {
+                jdbcTemplate.update("UPDATE \"user\" SET role = 'ADMIN' WHERE LOWER(email) = LOWER(?)", targetEmail);
             }
         } catch (Exception ignored) {}
     }

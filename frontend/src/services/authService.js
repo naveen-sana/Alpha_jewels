@@ -18,7 +18,9 @@ export const registerUser = async ({ fullName, email, phone, password }) => {
  * Backend returns JWT string on success, or plain-text error message.
  */
 export const loginUser = async ({ email, password }) => {
-  const { data } = await apiClient.post('/api/users/login', { email, password })
+  const cleanEmail = (email || '').trim()
+  const cleanPassword = (password || '').trim()
+  const { data } = await apiClient.post('/api/users/login', { email: cleanEmail, password: cleanPassword })
 
   if (typeof data === 'string' && !isJwtToken(data)) {
     throw new Error(data)

