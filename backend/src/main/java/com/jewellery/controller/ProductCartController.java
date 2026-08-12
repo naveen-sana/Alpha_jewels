@@ -343,6 +343,18 @@ public class ProductCartController {
                         category.trim().equalsIgnoreCase("all");
 
         try {
+            Map<Object, String> imageMap = new HashMap<>();
+            try {
+                List<Map<String, Object>> imgList = jdbcTemplate.queryForList("SELECT product_id, image_url FROM productimages WHERE image_url IS NOT NULL");
+                for (Map<String, Object> imgRow : imgList) {
+                    Object pIdObj = imgRow.get("product_id") != null ? imgRow.get("product_id") : imgRow.get("PRODUCT_ID");
+                    Object urlObj = imgRow.get("image_url") != null ? imgRow.get("image_url") : imgRow.get("IMAGE_URL");
+                    if (pIdObj != null && urlObj != null && !urlObj.toString().trim().isEmpty()) {
+                        imageMap.putIfAbsent(pIdObj.toString(), urlObj.toString().trim());
+                    }
+                }
+            } catch (Exception ignored) {}
+
             List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
             if (list != null && !list.isEmpty()) {
                 for (Map<String, Object> row : list) {
@@ -365,13 +377,10 @@ public class ProductCartController {
                     map.put("categoryName", catName);
                     map.put("category", catName);
 
-                    String imgUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80";
-                    try {
-                        List<String> imgs = jdbcTemplate.queryForList("SELECT image_url FROM productimages WHERE product_id = ? LIMIT 1", String.class, pId);
-                        if (imgs != null && !imgs.isEmpty() && imgs.get(0) != null && !imgs.get(0).trim().isEmpty()) {
-                            imgUrl = imgs.get(0).trim();
-                        }
-                    } catch (Exception ignored) {}
+                    String imgUrl = imageMap.get(pId.toString());
+                    if (imgUrl == null || imgUrl.isEmpty()) {
+                        imgUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80";
+                    }
                     map.put("imageUrl", imgUrl);
 
                     if (isAll || (category != null && catName.equalsIgnoreCase(category.trim()))) {
