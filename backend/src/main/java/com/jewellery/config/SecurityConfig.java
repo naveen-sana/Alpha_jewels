@@ -70,25 +70,25 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        List<String> list = new ArrayList<>();
+        List<String> patterns = new ArrayList<>();
+        patterns.add("https://alpha-jewels-personal.vercel.app");
+        patterns.add("https://frontend-omega-pearl-7cy9ijnsyi.vercel.app");
+        patterns.add("https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app");
+        patterns.add("https://alpha-jewels.vercel.app");
+        patterns.add("https://*.vercel.app");
+        patterns.add("http://localhost:*");
+        patterns.add("http://127.0.0.1:*");
+
         if (allowedOriginsStr != null) {
             for (String s : allowedOriginsStr.split(",")) {
                 String trimmed = s.trim();
-                if (!trimmed.isEmpty()) list.add(trimmed);
+                if (!trimmed.isEmpty() && !patterns.contains(trimmed)) {
+                    patterns.add(trimmed);
+                }
             }
         }
-        list.add("https://alpha-jewels-personal.vercel.app");
-        list.add("https://frontend-omega-pearl-7cy9ijnsyi.vercel.app");
-        list.add("https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app");
-        list.add("https://alpha-jewels.vercel.app");
 
-        for (String item : list) {
-            configuration.addAllowedOrigin(item);
-        }
-
-        configuration.addAllowedOriginPattern("https://*.vercel.app");
-        configuration.addAllowedOriginPattern("http://localhost:*");
-        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
+        configuration.setAllowedOriginPatterns(patterns);
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
