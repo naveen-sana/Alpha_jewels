@@ -63,8 +63,7 @@ public class UserService {
                 System.err.println("UserRepository findByEmail error: " + e.getMessage());
             }
 
-            if (user.isPresent() && user.get().getPassword() != null &&
-                    passwordEncoder != null && passwordEncoder.matches(cleanPassword, user.get().getPassword())) {
+            if (user.isPresent() && checkPassword(cleanPassword, user.get().getPassword())) {
                 if (user.get().getRole() == null) {
                     user.get().setRole(Role.USER);
                     try { userRepository.save(user.get()); } catch (Exception ignored) {}
@@ -160,6 +159,21 @@ public class UserService {
             return userRepository.findAll().stream()
                     .map(user -> new UserSummary(user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.getRole()))
                     .toList();
+        }
+
+        private boolean checkPassword(String rawPassword, String encodedPassword) {
+            if (rawPassword == null || encodedPassword == null) {
+                return false;
+            }
+            if (rawPassword.equals(encodedPassword)) {
+                return true;
+            }
+            if (passwordEncoder != null && (encodedPassword.startsWith("$2a$") || encodedPassword.startsWith("$2b$") || encodedPassword.startsWith("$2y$"))) {
+                try {
+                    return passwordEncoder.matches(rawPassword, encodedPassword);
+                } catch (Exception ignored) {}
+            }
+            return false;
         }
 
         private record OtpEntry(String otp, long expiresAt) { }
