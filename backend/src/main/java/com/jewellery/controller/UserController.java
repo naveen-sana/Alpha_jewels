@@ -38,7 +38,7 @@ public class UserController {
     @Autowired(required = false)
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    @PostMapping(value = {"/login", "/login/"}, consumes = {"application/json", "*/*"})
+    @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, Object> body) {
         try {
             String email = (body != null && body.get("email") != null) ? body.get("email").toString().trim() : "";
