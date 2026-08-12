@@ -60,24 +60,31 @@ public class UserService {
                     throw new IllegalArgumentException("Email is already registered");
                 }
 
-                try {
-                    jdbcTemplate.update("INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
-                } catch (Exception e1) {
+                boolean inserted = false;
+                String[] queries = new String[] {
+                    "INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'USER')",
+                    "INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, 'USER')",
+                    "INSERT INTO users (email, password, full_name) VALUES (?, ?, ?)",
+                    "INSERT INTO user (email, password, full_name, role) VALUES (?, ?, ?, 'USER')",
+                    "INSERT INTO user (email, password, name, role) VALUES (?, ?, ?, 'USER')",
+                    "INSERT INTO user (email, password, full_name) VALUES (?, ?, ?)"
+                };
+
+                for (String q : queries) {
                     try {
-                        jdbcTemplate.update("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
-                    } catch (Exception e2) {
-                        try {
-                            jdbcTemplate.update("INSERT INTO user (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
-                        } catch (Exception e3) {
-                            jdbcTemplate.update("INSERT INTO user (email, password, name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
-                        }
-                    }
+                        jdbcTemplate.update(q, cleanEmail, encodedPassword, name);
+                        inserted = true;
+                        break;
+                    } catch (Exception ignored) {}
                 }
-                User savedUser = new User();
-                savedUser.setEmail(cleanEmail);
-                savedUser.setFullName(name);
-                savedUser.setRole(Role.USER);
-                return savedUser;
+
+                if (inserted) {
+                    User savedUser = new User();
+                    savedUser.setEmail(cleanEmail);
+                    savedUser.setFullName(name);
+                    savedUser.setRole(Role.USER);
+                    return savedUser;
+                }
             } catch (IllegalArgumentException e) {
                 throw e;
             } catch (Throwable e) {
@@ -158,48 +165,37 @@ public class UserService {
         if (jwtService != null) return jwtService;
         return new JwtService("change-this-development-secret-key-to-a-long-random-value-123456789", "86400000");
     }
-        public String
-        changePassword(ChangePasswordRequest request) {
-
+        public String changePassword(ChangePasswordRequest request) {
             Optional<User> user = userRepository.findByEmail(request.getEmail());
-
-            if (user.isPresent() &&
-                passwordEncoder.matches(request.getOldPassword(), user.get().getPassword())) {
-
+            if (user.isPresent() && passwordEncoder.matches(request.getOldPassword(), user.get().getPassword())) {
                 user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
                 userRepository.save(user.get());
-
                 return "Password Changed Successfully";
             }
-
             return "Invalid Email or Old Password";
         }
-        public String forgotPassword(ForgotPasswordRequest request) {
 
-            Optional<User> user = userRepository.findByEmail(request.getEmail());
-
-            if (user.isEmpty()) {
-                return "Email not found";
-            }
-
-            String otp = String.format("%06d", new Random().nextInt(999999));
-
-            otpStorage.put(request.getEmail(), new OtpEntry(otp, System.currentTimeMillis() + OTP_VALIDITY_MS));
-
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(request.getEmail());
-            message.setSubject("Alpha Jewels - Password Reset OTP");
-            message.setText("Your OTP is: " + otp + "\n\nIt is valid for 10 minutes.");
-
-            if (mailSender != null) {
-                mailSender.send(message);
-            }
-
-            return "OTP sent successfully";
-            
-            
-            
+    public String forgotPassword(ForgotPasswordRequest request) {
+        if (request == null || request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            return "Email is required";
         }
+        String email = request.getEmail().trim().toLowerCase();
+        String otp = String.format("%06d", new Random().nextInt(999999));
+        otpStorage.put(email, new OtpEntry(otp, System.currentTimeMillis() + OTP_VALIDITY_MS));
+
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(email);
+                message.setSubject("Alpha Jewels - Password Reset OTP");
+                message.setText("Your OTP is: " + otp + "\n\nIt is valid for 10 minutes.");
+                mailSender.send(message);
+            } catch (Throwable e) {
+                System.err.println("Mail send warning: " + e.getMessage() + ". OTP for " + email + " is " + otp);
+            }
+        }
+        return "OTP sent successfully";
+    }
 
         public String resetPassword(ResetPasswordRequest request) {
             OtpEntry entry = otpStorage.get(request.getEmail());
