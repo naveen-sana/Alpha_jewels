@@ -40,7 +40,7 @@ public class DatabaseConfig {
         String password = dbPassword;
 
         // If cloud/Aiven MySQL URL is supplied via environment variable
-        if (url != null && !url.trim().isEmpty()) {
+        if (url != null && !url.trim().isEmpty() && !url.toLowerCase().contains("postgres")) {
             String cleanUrl = url.trim();
             log.info("Configuring MySQL DataSource from SPRING_DATASOURCE_URL/DATABASE_URL environment variable");
 
