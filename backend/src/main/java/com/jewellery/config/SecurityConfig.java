@@ -92,14 +92,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
-                    "/api/users/**",
-                    "/api/health",
-                    "/health",
-                    "/api/products/**",
-                    "/api/categories/**",
-                    "/api/seed-database-now"
-                ).permitAll()
-                .requestMatchers(
                     "/api/cart/**",
                     "/api/wishlist/**",
                     "/api/orders/**",
