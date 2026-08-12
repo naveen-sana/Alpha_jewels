@@ -55,6 +55,19 @@ const PRODUCT_SPECIFIC_IMAGES = {
   148: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image8.webp',
   149: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image9.webp',
   150: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image10.webp',
+
+  // Extra MySQL Workbench items (151 - 164)
+  151: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
+  155: 'https://ik.imagekit.io/StringstackNaveen/necklace2.jpg',
+  156: 'https://ik.imagekit.io/StringstackNaveen/Lakshmi%20necklace-gold.avif',
+  157: 'https://ik.imagekit.io/StringstackNaveen/earings2.jpg',
+  158: 'https://ik.imagekit.io/StringstackNaveen/Lakshmi%20necklace-gold.avif',
+  159: 'https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171',
+  160: 'https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476',
+  161: 'https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp',
+  162: 'https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%202.webp',
+  163: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image5.webp',
+  164: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image6.webp',
 };
 
 export const getProductImage = (product) => {
