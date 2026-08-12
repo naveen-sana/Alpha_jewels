@@ -540,11 +540,14 @@ public class AdminController {
                 "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi ON p.id = pi.product_id OR p.product_id = pi.product_id " +
                 "ORDER BY COALESCE(p.id, p.product_id) ASC LIMIT " + limit;
         try {
-            return jdbcTemplate.queryForList(sql);
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+            if (list != null && !list.isEmpty()) {
+                return list;
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return new ArrayList<>();
         }
+        return ProductCartController.getStaticCatalog();
     }
 
     private double parseDoubleSafe(Object val, double defaultVal) {

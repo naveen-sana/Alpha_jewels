@@ -141,7 +141,7 @@ export const getProductImage = (product) => {
     return PRODUCT_NAME_IMAGES[pName];
   }
   for (const [key, url] of Object.entries(PRODUCT_NAME_IMAGES)) {
-    if (pName && (pName.includes(key) || key.includes(pName))) {
+    if (pName && pName.trim() === key.trim()) {
       return url;
     }
   }

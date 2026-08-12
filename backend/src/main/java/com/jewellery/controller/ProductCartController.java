@@ -235,6 +235,10 @@ public class ProductCartController {
 
     private static final List<Map<String, Object>> STATIC_CATALOG = new ArrayList<>();
 
+    public static List<Map<String, Object>> getStaticCatalog() {
+        return new ArrayList<>(STATIC_CATALOG);
+    }
+
     static {
         Object[][] products = {
             {111, "Nury Chevron Ring", "Diamond", "Nury Chevron Ring", 7914.29, 5, "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"},
