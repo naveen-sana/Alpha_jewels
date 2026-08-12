@@ -2,7 +2,7 @@
 nixPkgs = ["mvn", "openjdk21"]
 
 [phases.build]
-cmds = ["./mvnw clean package -DskipTests"]
+cmds = ["rm -rf target backend/target", "./mvnw clean package -DskipTests"]
 
 [start]
 cmd = "java -jar backend/target/jewellery-backend-0.0.1-SNAPSHOT.jar"
