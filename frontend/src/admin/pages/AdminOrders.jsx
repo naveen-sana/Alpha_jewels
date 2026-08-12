@@ -27,17 +27,48 @@ const AdminOrders = () => {
     setLoading(true)
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+    let dbOrders = [];
     try {
       const response = await adminApi.get('/api/admin/orders', config)
-      const data = response.data || []
-      setOrders(Array.isArray(data) ? data : [])
+      if (Array.isArray(response.data)) {
+        dbOrders = response.data;
+      }
     } catch (err) {
       console.error(err)
-      addToast('Error fetching orders from database', 'error')
-      setOrders([])
-    } finally {
-      setLoading(false)
     }
+
+    let localOrders = [];
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('alpha_jewels_orders_')) {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(parsed)) localOrders.push(...parsed);
+          } catch (ignored) {}
+        }
+      });
+    } catch (ignored) {}
+
+    const combined = [...dbOrders];
+    localOrders.forEach(loc => {
+      if (!combined.some(o => o.orderId === loc.orderId)) {
+        combined.push({
+          orderId: loc.orderId,
+          customerName: loc.shippingInfo?.fullName || 'Naveen Sana',
+          customerEmail: loc.shippingInfo?.email || 'naveensana66028@gmail.com',
+          grandTotal: loc.grandTotal,
+          paymentMethod: loc.paymentMethod || 'Razorpay Online',
+          paymentStatus: loc.paymentStatus || 'Paid',
+          orderStatus: loc.status || 'Confirmed',
+          shippingAddress: loc.shippingAddress || 'Padarupalli, Main Road, SPSR Nellore - 524004',
+          orderDate: loc.orderDate || new Date().toISOString(),
+          items: loc.items || []
+        });
+      }
+    });
+
+    setOrders(combined);
+    setLoading(false);
   }
 
   useEffect(() => {

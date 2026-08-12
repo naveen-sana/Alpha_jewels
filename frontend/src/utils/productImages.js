@@ -69,20 +69,17 @@ const PRODUCT_SPECIFIC_IMAGES = {
 
 export const getProductImage = (product) => {
   if (!product) return DEFAULT_IMAGES.Diamond;
-  
-  // 1. ALWAYS PRIORITIZE LIVE DATABASE URL FROM MYSQL (product.imageUrl / product.image_url)
-  const dbImg = product.imageUrl || product.image_url;
-  if (dbImg && typeof dbImg === 'string' && dbImg.trim().startsWith('http') && !dbImg.includes('unsplash.com')) {
-    return dbImg.trim();
-  }
 
-  // 2. Fallback to product-specific map if database image is missing
   const pid = Number(product.id || product.productId || product.product_id);
   if (pid && PRODUCT_SPECIFIC_IMAGES[pid]) {
     return PRODUCT_SPECIFIC_IMAGES[pid];
   }
 
-  // 3. Fallback by Category Name
+  const dbImg = product.imageUrl || product.image_url || product.image;
+  if (dbImg && typeof dbImg === 'string' && dbImg.trim().startsWith('http')) {
+    return dbImg.trim();
+  }
+
   const cat = product.categoryName || product.category || 'Diamond';
   return DEFAULT_IMAGES[cat] || DEFAULT_IMAGES.Diamond;
 };

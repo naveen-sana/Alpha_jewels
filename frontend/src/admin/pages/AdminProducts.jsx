@@ -360,8 +360,8 @@ const AdminProducts = () => {
                           className="rounded-3 border object-fit-cover"
                           style={{ width: '48px', height: '48px' }}
                           onError={(e) => {
-                            e.target.onerror = null
-                            e.target.src = getProductImage(product)
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=150';
                           }}
                         />
                         <div>
