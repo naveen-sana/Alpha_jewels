@@ -44,8 +44,7 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/users/register", "/api/users/login",
-                        "/api/users/forgot-password", "/api/users/reset-password", "/error", "/health", "/api/health", "/api/seed-now", "/api/seed-database-now").permitAll()
+                .requestMatchers("/api/users/**", "/error", "/health", "/api/health", "/api/seed-now", "/api/seed-database-now").permitAll()
                 .requestMatchers("/api/products", "/api/products/**", "/api/categories", "/api/categories/**", "/api/reviews/product/**", "/api/orders", "/api/orders/**", "/api/payment", "/api/payment/**").permitAll()
                 .requestMatchers("/api/cart", "/api/cart/**", "/api/wishlist", "/api/wishlist/**", "/api/reviews", "/api/reviews/**").authenticated()
                 .requestMatchers("/api/admin/**").permitAll()
@@ -73,11 +72,8 @@ public class SecurityConfig {
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
 
-        if (origins.contains("*")) {
-            configuration.addAllowedOriginPattern("*");
-        } else {
-            configuration.setAllowedOriginPatterns(origins);
-        }
+        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOriginPatterns(List.of("*"));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
