@@ -92,11 +92,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
+                    "/api/users/**",
                     "/api/health",
                     "/health",
                     "/api/products/**",
                     "/api/categories/**",
-                    "/api/users/**",
                     "/api/seed-database-now"
                 ).permitAll()
                 .requestMatchers(
@@ -107,6 +107,10 @@ public class SecurityConfig {
                 ).authenticated()
                 .anyRequest().permitAll()
             );
+
+        if (jwtAuthenticationFilter != null) {
+            http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        }
 
         return http.build();
     }

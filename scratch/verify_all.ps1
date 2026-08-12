@@ -45,3 +45,10 @@ Test-Api -name "4. REGISTER" -url "$baseUrl/api/users/register" -method "Post" -
 
 $forgotObj = @{ email = "naveensana66028@gmail.com" }
 Test-Api -name "5. FORGOT PASSWORD" -url "$baseUrl/api/users/forgot-password" -method "Post" -body ($forgotObj | ConvertTo-Json)
+
+if ($jwtToken) {
+    $authHeader = @{ "Authorization" = "Bearer $jwtToken" }
+    Test-Api -name "6. CART" -url "$baseUrl/api/cart/items" -headers $authHeader
+    Test-Api -name "7. WISHLIST" -url "$baseUrl/api/wishlist" -headers $authHeader
+    Test-Api -name "8. ORDERS" -url "$baseUrl/api/orders" -headers $authHeader
+}
