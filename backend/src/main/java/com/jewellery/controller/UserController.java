@@ -52,6 +52,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody(required = false) Map<String, String> body) {
         try {
+            System.out.println("DEBUG LOGIN RECEIVED: " + body);
             String email = body != null ? body.get("email") : null;
             String password = body != null ? body.get("password") : null;
 
@@ -64,12 +65,14 @@ public class UserController {
             req.setPassword(password.trim());
 
             String result = userService.loginUser(req);
+            System.out.println("DEBUG LOGIN RESULT: " + result);
             if (result != null && !result.toLowerCase().contains("invalid")) {
                 return ResponseEntity.ok(Map.of("token", result, "message", "Login Successful"));
             }
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         } catch (Throwable e) {
-            return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
+            e.printStackTrace();
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage() != null ? e.getMessage() : "Login failed", "message", "Login failed"));
         }
     }
 
