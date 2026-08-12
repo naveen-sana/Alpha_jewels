@@ -58,9 +58,9 @@ public class UserService {
 
             Optional<User> user = Optional.empty();
             try {
-                user = userRepository.findByEmail(cleanEmail);
+                user = userRepository.findFirstByEmailOrderByIdAsc(cleanEmail);
             } catch (Exception e) {
-                System.err.println("UserRepository findByEmail error: " + e.getMessage());
+                System.err.println("UserRepository findFirstByEmailOrderByIdAsc error: " + e.getMessage());
             }
 
             if (user.isPresent() && checkPassword(cleanPassword, user.get().getPassword())) {

@@ -11,9 +11,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findFirstByEmailOrderByIdAsc(String email);
 
-    default Optional<User> findByEmail(String email) {
-        if (email == null) return Optional.empty();
-        return findFirstByEmailOrderByIdAsc(email.trim().toLowerCase());
-    }
+    Optional<User> findByEmail(String email);
 
 }
