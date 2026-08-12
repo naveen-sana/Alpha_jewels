@@ -41,6 +41,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             try { jdbcTemplate.execute("ALTER TABLE `users` ADD COLUMN `full_name` VARCHAR(255)"); } catch (Exception ignored) {}
             try { jdbcTemplate.execute("ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(50)"); } catch (Exception ignored) {}
             try { jdbcTemplate.execute("ALTER TABLE `users` ADD COLUMN `role` VARCHAR(50) DEFAULT 'USER'"); } catch (Exception ignored) {}
+            try { jdbcTemplate.execute("DELETE t1 FROM `users` t1 INNER JOIN `users` t2 WHERE t1.id > t2.id AND LOWER(t1.email) = LOWER(t2.email)"); } catch (Exception ignored) {}
         } catch (Exception ignored) {}
 
         // Ensure admin@gmail.com exists as ADMIN
