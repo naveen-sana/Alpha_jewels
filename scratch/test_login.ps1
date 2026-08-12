@@ -1,0 +1,24 @@
+try {
+    $body = @{
+        email = "naveensana66028@gmail.com"
+        password = "Naveen@0987"
+    } | ConvertTo-Json
+
+    $headers = @{
+        "Origin" = "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app"
+    }
+
+    $response = Invoke-RestMethod -Uri "https://alphajewels-production.up.railway.app/api/users/login" -Method Post -Headers $headers -ContentType "application/json" -Body $body
+    Write-Output "SUCCESS:"
+    Write-Output ($response | ConvertTo-Json)
+} catch {
+    Write-Output "ERROR STATUS: "$_.Exception.Response.StatusCode
+    $stream = $_.Exception.Response.GetResponseStream()
+    if ($stream) {
+        $reader = [System.IO.StreamReader]::new($stream)
+        Write-Output "ERROR BODY:"
+        Write-Output $reader.ReadToEnd()
+    } else {
+        Write-Output $_.Exception.Message
+    }
+}
