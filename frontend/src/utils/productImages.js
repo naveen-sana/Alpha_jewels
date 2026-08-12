@@ -126,6 +126,11 @@ const PRODUCT_NAME_IMAGES = {
 export const getProductImage = (product) => {
   if (!product) return DEFAULT_IMAGES.Diamond;
 
+  const dbImg = product.imageUrl || product.image_url || product.image;
+  if (dbImg && typeof dbImg === 'string' && dbImg.trim().startsWith('http')) {
+    return dbImg.trim();
+  }
+
   const pid = Number(product.id || product.productId || product.product_id);
   if (pid && PRODUCT_SPECIFIC_IMAGES[pid]) {
     return PRODUCT_SPECIFIC_IMAGES[pid];
@@ -139,11 +144,6 @@ export const getProductImage = (product) => {
     if (pName && (pName.includes(key) || key.includes(pName))) {
       return url;
     }
-  }
-
-  const dbImg = product.imageUrl || product.image_url || product.image;
-  if (dbImg && typeof dbImg === 'string' && dbImg.trim().startsWith('http')) {
-    return dbImg.trim();
   }
 
   const cat = product.categoryName || product.category || 'Diamond';

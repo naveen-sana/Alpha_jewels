@@ -228,13 +228,6 @@ public class AdminController {
     // Helper method to ensure required database tables and columns exist
     public void ensureTablesExist() {
         try {
-            Integer prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class);
-            if (prodCount != null && prodCount > 0) {
-                return;
-            }
-        } catch (Exception ignored) {}
-
-        try {
             // Categories table
             try {
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS categories (" +
