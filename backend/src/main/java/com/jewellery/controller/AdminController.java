@@ -136,7 +136,7 @@ public class AdminController {
             String imgUrl = (String) p[5];
 
             try {
-                jdbcTemplate.update("UPDATE products SET price = ?, stock = ? WHERE LOWER(name) = LOWER(?)", price, stock, name);
+                jdbcTemplate.update("UPDATE products SET price = ?, stock = ? WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) OR LOWER(name) LIKE LOWER(?)", price, stock, name, "%" + name + "%");
             } catch (Exception ignored) {}
 
             try {
@@ -149,6 +149,25 @@ public class AdminController {
                 logs.add("Insert error for " + name + ": " + e.getMessage());
             }
         }
+
+        // Force cleanup of old prices
+        try {
+            jdbcTemplate.update("UPDATE products SET price = 9162.40 WHERE LOWER(name) LIKE '%beaded bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 12698.29 WHERE LOWER(name) LIKE '%lakshmi gold necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 11111.00 WHERE LOWER(name) LIKE '%lakshmi temple necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 9563.00 WHERE LOWER(name) LIKE '%stoned ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 9889.00 WHERE LOWER(name) LIKE '%stoned diamond necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 7914.29 WHERE LOWER(name) LIKE '%nury chevron%'");
+            jdbcTemplate.update("UPDATE products SET price = 9642.86 WHERE LOWER(name) LIKE '%trina ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 7743.29 WHERE LOWER(name) LIKE '%ozo stud%'");
+            jdbcTemplate.update("UPDATE products SET price = 9287.00 WHERE LOWER(name) LIKE '%nuray earings%'");
+            jdbcTemplate.update("UPDATE products SET price = 12785.71 WHERE LOWER(name) LIKE '%mazikeen necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 14285.57 WHERE LOWER(name) LIKE '%ryck princess%'");
+            jdbcTemplate.update("UPDATE products SET price = 9000.00 WHERE LOWER(name) LIKE '%bracelite%'");
+            jdbcTemplate.update("UPDATE products SET price = 9200.00 WHERE LOWER(name) LIKE '%resilent bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 9571.43 WHERE LOWER(name) LIKE '%line bangles%'");
+            jdbcTemplate.update("UPDATE products SET price = 10000.00 WHERE LOWER(name) LIKE '%set bangles%'");
+        } catch (Exception ignored) {}
 
         Integer totalProducts = 0;
         try { totalProducts = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class); } catch (Exception ignored) {}
