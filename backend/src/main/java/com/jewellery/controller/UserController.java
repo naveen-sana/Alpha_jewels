@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,7 +56,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody(required = false) Object input) {
+    public ResponseEntity<?> loginUser(
+            @RequestBody(required = false) Object input,
+            @RequestParam(value = "email", required = false) String emailParam,
+            @RequestParam(value = "password", required = false) String passwordParam) {
         try {
             String email = "";
             String password = "";
@@ -69,6 +73,9 @@ public class UserController {
                 if (req.getEmail() != null) email = req.getEmail().trim();
                 if (req.getPassword() != null) password = req.getPassword().trim();
             }
+
+            if (email.isEmpty() && emailParam != null) email = emailParam.trim();
+            if (password.isEmpty() && passwordParam != null) password = passwordParam.trim();
 
             if (email.isEmpty() || password.isEmpty()) {
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
