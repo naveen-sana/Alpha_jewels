@@ -35,7 +35,7 @@ const Shop = () => {
       "description": "beautifuly designed Trina",
       "price": 9642.86,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring4-the%20trina%20ring(m).webp?updatedAt=1785154301792"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 113,
@@ -43,7 +43,7 @@ const Shop = () => {
       "description": "Handmade Ozo earrings for women",
       "price": 7743.29,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/earring1.webp?updatedAt=1785154351435"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 114,
@@ -51,7 +51,7 @@ const Shop = () => {
       "description": "N-shaped Rings with pure gold",
       "price": 9287,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/earring2-nuray%20earring.webp?updatedAt=1785154471167"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 115,
@@ -59,7 +59,7 @@ const Shop = () => {
       "description": "Mazi-Queen Royal look Necklace",
       "price": 12785.71,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 116,
@@ -67,7 +67,7 @@ const Shop = () => {
       "description": "The ryck Princess Necklace",
       "price": 14285.57,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/necklace-2%20the%20ryck%20princess%20necklace.webp?updatedAt=1785154594402"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 117,
@@ -75,7 +75,7 @@ const Shop = () => {
       "description": "The Aelric Bracelet",
       "price": 9000,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/bracelete1-the%20aelric%20link.webp?updatedAt=1785154656778"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 118,
@@ -83,7 +83,7 @@ const Shop = () => {
       "description": "The Chain-typed Bracelet",
       "price": 9200,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/bracelet2-%20the%20resilent%20chain%20bracelet.webp?updatedAt=1785154688366"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 119,
@@ -91,7 +91,7 @@ const Shop = () => {
       "description": "Royal elegent Bangles for women",
       "price": 9571.43,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 120,
@@ -99,7 +99,7 @@ const Shop = () => {
       "description": "The Bazel-Set Bangles",
       "price": 10000,
       "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/bangle%202.webp?updatedAt=1785155972034"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 159,
@@ -107,7 +107,7 @@ const Shop = () => {
       "description": "Beautiful stoned Necklace for women",
       "price": 9889,
       "categoryName": "Diamond",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     },
     {
       "id": 160,
@@ -115,7 +115,7 @@ const Shop = () => {
       "description": "A Beautiful Diamond Ring Stands in a Store Window. Stock Photo - Image of anniversary, bride",
       "price": 9563,
       "categoryName": "Diamond",
-      "imageUrl": "https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
     }
   ],
   "Gold": [
@@ -133,7 +133,7 @@ const Shop = () => {
       "description": "Elegant Leaf Design Gold Ring",
       "price": 6600,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring1.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 123,
@@ -141,7 +141,7 @@ const Shop = () => {
       "description": "Temple Gold Stud Earrings",
       "price": 8800,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/earrings.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 124,
@@ -149,7 +149,7 @@ const Shop = () => {
       "description": "Indriya Necklace by Aditya Birla",
       "price": 9285.71,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/earings2.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 125,
@@ -157,7 +157,7 @@ const Shop = () => {
       "description": "Beautifully designed Necklace",
       "price": 11111,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/Lakshmi%20necklace-gold.avif"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 126,
@@ -165,7 +165,7 @@ const Shop = () => {
       "description": "Wonderfully designed Necklace",
       "price": 12698.29,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/necklace2.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 127,
@@ -173,7 +173,7 @@ const Shop = () => {
       "description": "Handicrafted Bracelet for Women",
       "price": 9162.4,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/bracelite1.webp"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 128,
@@ -181,7 +181,7 @@ const Shop = () => {
       "description": "Men Stylish and elogant look Bracelet",
       "price": 7712.4,
       "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20bracelet2.avif"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 155,
@@ -189,7 +189,7 @@ const Shop = () => {
       "description": "Beautifully crafted necklace for women",
       "price": 7886,
       "categoryName": "Gold",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 156,
@@ -197,7 +197,7 @@ const Shop = () => {
       "description": "Antique Gold Necklace for women",
       "price": 7896,
       "categoryName": "Gold",
-      "imageUrl": "https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 157,
@@ -205,7 +205,7 @@ const Shop = () => {
       "description": "Gold Plated One Gram Gold Antique Jhumkas",
       "price": 5632,
       "categoryName": "Gold",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     },
     {
       "id": 158,
@@ -213,7 +213,7 @@ const Shop = () => {
       "description": "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii",
       "price": 7986,
       "categoryName": "Gold",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
     }
   ],
   "Platinum": [
@@ -231,7 +231,7 @@ const Shop = () => {
       "description": "Elegant floral Platinum Ring",
       "price": 9391.57,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%202.webp"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 133,
@@ -239,7 +239,7 @@ const Shop = () => {
       "description": "Circular Earrings",
       "price": 6650.8,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/ear%201.jpeg"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 134,
@@ -247,7 +247,7 @@ const Shop = () => {
       "description": "Flower Stud Earrings",
       "price": 6509.2,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/ear%202.webp"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 135,
@@ -255,7 +255,7 @@ const Shop = () => {
       "description": "Wonderfully Crafted Necklace for Women",
       "price": 12842.71,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%202.webp"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 136,
@@ -263,7 +263,7 @@ const Shop = () => {
       "description": "Looking Gorgeous",
       "price": 12556.86,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/necklace1.jpeg"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 137,
@@ -271,7 +271,7 @@ const Shop = () => {
       "description": "Start Bracelet",
       "price": 9353.57,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/bracelet.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 138,
@@ -279,7 +279,7 @@ const Shop = () => {
       "description": "Floral Two-Tone Platinum Bracelet",
       "price": 8124.86,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/WhatsApp%20Image%202026-07-28%20at%2010.02.17%20AM.jpeg"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 139,
@@ -287,7 +287,7 @@ const Shop = () => {
       "description": "Floral Two-Tone Platinum Bracelet",
       "price": 9353.86,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/braclet%201.webp"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 140,
@@ -295,7 +295,7 @@ const Shop = () => {
       "description": "Premium Bangles",
       "price": 7807.86,
       "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/platinum%20bangle.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 161,
@@ -303,7 +303,7 @@ const Shop = () => {
       "description": "Rose Gold paltinum Necklace",
       "price": 6548,
       "categoryName": "Platinum",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     },
     {
       "id": 162,
@@ -311,7 +311,7 @@ const Shop = () => {
       "description": "Square Piece Step Necklace",
       "price": 6541,
       "categoryName": "Platinum",
-      "imageUrl": "https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
     }
   ],
   "Silver": [
@@ -329,7 +329,7 @@ const Shop = () => {
       "description": "Adjustable silver Butterfly Ring",
       "price": 4542.4,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image2.webp"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 143,
@@ -337,7 +337,7 @@ const Shop = () => {
       "description": "Silver Flower Dangler Earrings",
       "price": 4917.8,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image3.webp"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 144,
@@ -345,7 +345,7 @@ const Shop = () => {
       "description": "Beautiful Eearings for Women",
       "price": 5517.2,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image4.webp"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 145,
@@ -353,7 +353,7 @@ const Shop = () => {
       "description": "Infinite Wisdom Sterling Silver Necklace",
       "price": 9164.2,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image5.webp"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 146,
@@ -361,7 +361,7 @@ const Shop = () => {
       "description": "Beautifully Crafted Stone Necklace",
       "price": 9305,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/silver%20necklace.webp"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 147,
@@ -369,7 +369,7 @@ const Shop = () => {
       "description": "Fleur Flexi Bracelet in Silver",
       "price": 7936.29,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 148,
@@ -377,7 +377,7 @@ const Shop = () => {
       "description": "Clara Womens Evil Eye Bracelet",
       "price": 7048.2,
       "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 149,
@@ -385,7 +385,7 @@ const Shop = () => {
       "description": "Beautiful Rewa Bangles",
       "price": 8503.2,
       "categoryName": "Silver",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 150,
@@ -401,7 +401,7 @@ const Shop = () => {
       "description": "Exquisite Royal Choker",
       "price": 12000,
       "categoryName": "Silver",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 163,
@@ -409,7 +409,7 @@ const Shop = () => {
       "description": "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set",
       "price": 5469,
       "categoryName": "Silver",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     },
     {
       "id": 164,
@@ -417,7 +417,7 @@ const Shop = () => {
       "description": "Silver Necklace, Navratri Jewellery",
       "price": 4589,
       "categoryName": "Silver",
-      "imageUrl": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"
+      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
     }
   ]
 };
