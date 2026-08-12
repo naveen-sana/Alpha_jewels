@@ -135,14 +135,14 @@ public class DatabaseSeeder implements CommandLineRunner {
             {"Rewa Bangles", "Silver", "Rounded Rewa Silver Bangles", 42516.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image9.webp"},
             {"Sterling Bangles", "Silver", "Sterling Silver Unique Bangles for Women", 39564.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image10.webp"},
             // MySQL WorkBench items from user screenshot:
-            {"Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jumkas", 5632.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"},
-            {"Kemp-green Lakshmi Necklace", "Gold", "Antique gold tone kemp-green lakshmi necklace", 7986.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
-            {"Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
-            {"Stoned Ring", "Diamond", "A Beautiful Diamond Ring Stands in solitaire", 9563.00, 10, "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80"},
-            {"Rose Gold Platinum Set", "Platinum", "Rose Gold Platinum Collection", 6548.00, 10, "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=600&q=80"},
-            {"Square Piece-Set Necklace", "Platinum", "Square Piece Step Necklace", 6541.00, 10, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
-            {"Ghungroo Jewellery Set", "Silver", "Ghungroo Studded Filigree Work Silver Set", 5469.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"},
-            {"Navaratri Jewellery", "Silver", "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80"}
+            {"Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jumkas", 5632.00, 10, "https://ik.imagekit.io/StringstackNaveen/earings2.jpg"},
+            {"Kemp-green Lakshmi Necklace", "Gold", "Antique gold tone kemp-green lakshmi necklace", 7986.00, 10, "https://ik.imagekit.io/StringstackNaveen/Lakshmi%20necklace-gold.avif"},
+            {"Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171"},
+            {"Stoned Ring", "Diamond", "A Beautiful Diamond Ring Stands in solitaire", 9563.00, 10, "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"},
+            {"Rose Gold Platinum Set", "Platinum", "Rose Gold Platinum Collection", 6548.00, 10, "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"},
+            {"Square Piece-Set Necklace", "Platinum", "Square Piece Step Necklace", 6541.00, 10, "https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%202.webp"},
+            {"Ghungroo Jewellery Set", "Silver", "Ghungroo Studded Filigree Work Silver Set", 5469.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image5.webp"},
+            {"Navaratri Jewellery", "Silver", "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image6.webp"}
         };
 
         for (Object[] p : products) {
