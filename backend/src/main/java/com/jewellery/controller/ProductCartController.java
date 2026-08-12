@@ -22,7 +22,7 @@ public class ProductCartController {
     @Autowired(required = false)
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    @PostMapping(value = "/users/login")
+    @RequestMapping(value = "/users/login", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
     public ResponseEntity<?> productCartUserLogin(@RequestBody(required = false) com.jewellery.dto.LoginRequest request) {
         try {
             String email = (request != null && request.getEmail() != null) ? request.getEmail().trim() : "";
