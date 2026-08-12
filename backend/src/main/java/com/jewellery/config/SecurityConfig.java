@@ -55,7 +55,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .addFilterBefore(corsFilter(), org.springframework.security.web.access.channel.ChannelProcessingFilter.class)
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -67,29 +67,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public org.springframework.web.filter.CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        List<String> patterns = new ArrayList<>();
-        patterns.add("https://alpha-jewels-personal.vercel.app");
-        patterns.add("https://frontend-omega-pearl-7cy9ijnsyi.vercel.app");
-        patterns.add("https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app");
-        patterns.add("https://alpha-jewels.vercel.app");
-        patterns.add("https://*.vercel.app");
-        patterns.add("http://localhost:*");
-        patterns.add("http://127.0.0.1:*");
-
-        if (allowedOriginsStr != null) {
-            for (String s : allowedOriginsStr.split(",")) {
-                String trimmed = s.trim();
-                if (!trimmed.isEmpty() && !patterns.contains(trimmed)) {
-                    patterns.add(trimmed);
-                }
-            }
-        }
-
-        configuration.setAllowedOriginPatterns(patterns);
-
+        configuration.addAllowedOriginPattern("*");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
@@ -97,7 +78,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        return source;
+        return new org.springframework.web.filter.CorsFilter(source);
     }
 }
 
