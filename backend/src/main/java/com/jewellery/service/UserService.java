@@ -50,14 +50,6 @@ public class UserService {
         String encodedPassword = passwordEncoder != null ? passwordEncoder.encode(rawPassword) : rawPassword;
         String name = user.getFullName() != null ? user.getFullName().trim() : "User";
 
-        try {
-            if (userRepository != null && userRepository.findByEmail(cleanEmail).isPresent()) {
-                throw new IllegalArgumentException("Email is already registered");
-            }
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (Throwable ignored) {}
-
         if (jdbcTemplate != null) {
             try {
                 List<Map<String, Object>> existing = jdbcTemplate.queryForList("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", cleanEmail);
@@ -70,11 +62,15 @@ public class UserService {
 
                 try {
                     jdbcTemplate.update("INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
-                } catch (Exception e) {
+                } catch (Exception e1) {
                     try {
                         jdbcTemplate.update("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
-                    } catch (Exception ex) {
-                        jdbcTemplate.update("INSERT INTO user (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
+                    } catch (Exception e2) {
+                        try {
+                            jdbcTemplate.update("INSERT INTO user (email, password, full_name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
+                        } catch (Exception e3) {
+                            jdbcTemplate.update("INSERT INTO user (email, password, name, role) VALUES (?, ?, ?, 'USER')", cleanEmail, encodedPassword, name);
+                        }
                     }
                 }
                 User savedUser = new User();
@@ -84,7 +80,9 @@ public class UserService {
                 return savedUser;
             } catch (IllegalArgumentException e) {
                 throw e;
-            } catch (Throwable ignored) {}
+            } catch (Throwable e) {
+                System.err.println("JdbcTemplate register error: " + e.getMessage());
+            }
         }
 
         user.setEmail(cleanEmail);
@@ -113,24 +111,24 @@ public class UserService {
             // Check Aiven MySQL via JdbcTemplate first
             if (jdbcTemplate != null) {
                 try {
-                    List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT id, email, password, COALESCE(full_name, name, 'User') as name, role FROM users WHERE LOWER(email) = LOWER(?)", cleanEmail);
+                    List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT id, email, password, role FROM users WHERE LOWER(email) = LOWER(?)", cleanEmail);
                     if (rows.isEmpty()) {
-                        rows = jdbcTemplate.queryForList("SELECT id, email, password, COALESCE(full_name, name, 'User') as name, role FROM user WHERE LOWER(email) = LOWER(?)", cleanEmail);
+                        rows = jdbcTemplate.queryForList("SELECT id, email, password, role FROM user WHERE LOWER(email) = LOWER(?)", cleanEmail);
                     }
                     if (!rows.isEmpty()) {
                         Map<String, Object> u = rows.get(0);
                         String dbPass = (String) u.get("password");
-                        String dbName = (String) u.get("name");
-                        String dbRole = (String) u.get("role");
+                        Object rawRole = u.get("role");
+                        String dbRole = rawRole != null ? rawRole.toString() : "USER";
                         Role role = Role.USER;
-                        if (dbRole != null && dbRole.toUpperCase().contains("ADMIN")) role = Role.ADMIN;
+                        if (dbRole.toUpperCase().contains("ADMIN")) role = Role.ADMIN;
 
                         if (checkPassword(cleanPassword, dbPass)) {
-                            return getJwtService().generateToken(cleanEmail, role, dbName != null ? dbName : "User");
+                            return getJwtService().generateToken(cleanEmail, role, "User");
                         }
                     }
                 } catch (Throwable e) {
-                    System.err.println("JdbcTemplate user lookup error: " + e.getMessage());
+                    System.err.println("JdbcTemplate login error: " + e.getMessage());
                 }
             }
 
