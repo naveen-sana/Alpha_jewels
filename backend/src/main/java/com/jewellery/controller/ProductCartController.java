@@ -338,36 +338,32 @@ public class ProductCartController {
             List<Map<String, Object>> list = jdbcTemplate.queryForList("SELECT * FROM products");
             if (list != null && !list.isEmpty()) {
                 for (Map<String, Object> row : list) {
-                    Map<String, Object> map = new HashMap<>(row);
+                    Map<String, Object> map = new HashMap<>();
                     Object pId = row.get("product_id") != null ? row.get("product_id") : row.get("id");
+                    if (pId == null) pId = row.get("PRODUCT_ID");
+                    if (pId == null) continue;
+
                     map.put("id", pId);
                     map.put("productId", pId);
+                    map.put("name", row.get("name") != null ? row.get("name") : row.get("NAME"));
+                    map.put("description", row.get("description") != null ? row.get("description") : row.get("DESCRIPTION"));
+                    map.put("price", row.get("price") != null ? row.get("price") : row.get("PRICE"));
+                    map.put("stock", row.get("stock") != null ? row.get("stock") : 10);
+                    map.put("status", row.get("status") != null ? row.get("status").toString() : "ACTIVE");
 
-                    Object catId = row.get("category_id");
-                    String catName = "Diamond";
-                    if (catId != null) {
-                        try {
-                            List<String> catList = jdbcTemplate.queryForList("SELECT COALESCE(category_name, name) FROM categories WHERE category_id = ? OR id = ? LIMIT 1", String.class, catId, catId);
-                            if (!catList.isEmpty() && catList.get(0) != null) {
-                                catName = catList.get(0);
-                            }
-                        } catch (Exception ignored) {}
-                    }
+                    Object catObj = row.get("category_id") != null ? row.get("category_id") : row.get("CATEGORY_ID");
+                    int catIdVal = catObj instanceof Number ? ((Number) catObj).intValue() : 1;
+                    String catName = catIdVal == 1 ? "Diamond" : catIdVal == 2 ? "Gold" : catIdVal == 3 ? "Platinum" : catIdVal == 4 ? "Silver" : "Diamond";
                     map.put("categoryName", catName);
                     map.put("category", catName);
 
                     String imgUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80";
-                    if (pId != null) {
-                        try {
-                            List<String> imgs = jdbcTemplate.queryForList("SELECT image_url FROM productimages WHERE product_id = ? AND image_url IS NOT NULL LIMIT 1", String.class, pId);
-                            if (imgs.isEmpty()) {
-                                imgs = jdbcTemplate.queryForList("SELECT image_url FROM product_images WHERE product_id = ? AND image_url IS NOT NULL LIMIT 1", String.class, pId);
-                            }
-                            if (!imgs.isEmpty() && imgs.get(0) != null && !imgs.get(0).trim().isEmpty()) {
-                                imgUrl = imgs.get(0).trim();
-                            }
-                        } catch (Exception ignored) {}
-                    }
+                    try {
+                        List<String> imgs = jdbcTemplate.queryForList("SELECT image_url FROM productimages WHERE product_id = ? LIMIT 1", String.class, pId);
+                        if (imgs != null && !imgs.isEmpty() && imgs.get(0) != null && !imgs.get(0).trim().isEmpty()) {
+                            imgUrl = imgs.get(0).trim();
+                        }
+                    } catch (Exception ignored) {}
                     map.put("imageUrl", imgUrl);
 
                     if (isAll || (category != null && catName.equalsIgnoreCase(category.trim()))) {
