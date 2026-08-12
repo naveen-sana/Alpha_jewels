@@ -319,20 +319,15 @@ public class ProductCartController {
 
     @GetMapping("/products")
     public ResponseEntity<List<Map<String, Object>>> getPublicProducts(@RequestParam(value = "category", required = false) String category) {
-        String imgTable = "productimages";
-        try {
-            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME)='product_images'");
-            if (check != null && !check.isEmpty()) imgTable = "product_images";
-        } catch (Exception ignored) {}
-
-        String sql = "SELECT p.product_id as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, " +
-                "COALESCE(c.category_name, 'Diamond') as categoryName, COALESCE(c.category_name, 'Diamond') as category, " +
+        String sql = "SELECT COALESCE(p.id, p.product_id) as id, COALESCE(p.product_id, p.id) as product_id, p.name, p.description, p.price, " +
+                "COALESCE(p.stock, p.stock_quantity, 10) as stock, COALESCE(p.stock_quantity, p.stock, 10) as stock_quantity, " +
+                "COALESCE(c.name, c.category_name, 'Diamond') as categoryName, COALESCE(c.name, c.category_name, 'Diamond') as category, " +
                 "pi.image_url as imageUrl " +
                 "FROM products p " +
-                "LEFT JOIN categories c ON p.category_id = c.category_id " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                "LEFT JOIN categories c ON p.category_id = c.id OR p.category_id = c.category_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi ON p.id = pi.product_id OR p.product_id = pi.product_id " +
                 "WHERE COALESCE(p.status, 'ACTIVE') = 'ACTIVE' " +
-                "ORDER BY p.product_id DESC";
+                "ORDER BY COALESCE(p.id, p.product_id) ASC";
 
         try {
             List<Map<String, Object>> dbProducts = jdbcTemplate.queryForList(sql);
