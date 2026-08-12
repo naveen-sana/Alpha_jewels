@@ -18,15 +18,20 @@ public class User {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "phone")
     private String phone;
 
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role")
     private Role role = Role.USER;
 
     public User() {

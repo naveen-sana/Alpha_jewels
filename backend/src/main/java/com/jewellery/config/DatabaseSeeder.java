@@ -38,6 +38,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                     "password VARCHAR(255) NOT NULL, " +
                     "role VARCHAR(50) DEFAULT 'USER'" +
                     ")");
+            try { jdbcTemplate.execute("ALTER TABLE `users` ADD COLUMN `full_name` VARCHAR(255)"); } catch (Exception ignored) {}
+            try { jdbcTemplate.execute("ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(50)"); } catch (Exception ignored) {}
+            try { jdbcTemplate.execute("ALTER TABLE `users` ADD COLUMN `role` VARCHAR(50) DEFAULT 'USER'"); } catch (Exception ignored) {}
         } catch (Exception ignored) {}
 
         // Ensure admin@gmail.com exists as ADMIN
