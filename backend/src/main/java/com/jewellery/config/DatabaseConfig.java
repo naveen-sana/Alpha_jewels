@@ -39,10 +39,9 @@ public class DatabaseConfig {
         String username = dbUsername;
         String password = dbPassword;
 
-        if (url != null && !url.isBlank()) {
-            log.info("Parsing database connection string from environment variable");
+        if (url != null && (url.contains("aivencloud.com") || url.contains("onrender.com") || url.contains("render.com") || url.contains("postgresql"))) {
+            log.info("Parsing cloud PostgreSQL database connection string");
             
-            // Strip any leading scheme
             String clean = url.trim();
             if (clean.startsWith("jdbc:postgresql://")) {
                 clean = clean.substring("jdbc:postgresql://".length());
@@ -50,11 +49,8 @@ public class DatabaseConfig {
                 clean = clean.substring("postgres://".length());
             } else if (clean.startsWith("postgresql://")) {
                 clean = clean.substring("postgresql://".length());
-            } else if (clean.startsWith("jdbc:")) {
-                clean = clean.substring("jdbc:".length());
             }
 
-            // Extract credentials if user:pass@ is present
             if (clean.contains("@")) {
                 int lastAt = clean.lastIndexOf("@");
                 String creds = clean.substring(0, lastAt);
@@ -69,7 +65,6 @@ public class DatabaseConfig {
                 }
             }
 
-            // Extract query parameters
             String queryParams = "sslmode=require";
             if (clean.contains("?")) {
                 int questionIdx = clean.indexOf("?");
@@ -77,7 +72,6 @@ public class DatabaseConfig {
                 clean = clean.substring(0, questionIdx);
             }
 
-            // Extract host, port, dbName
             String host = dbHost;
             String port = dbPort;
             String db = dbName;
@@ -95,35 +89,26 @@ public class DatabaseConfig {
                     host = hostPort;
                     port = "5432";
                 }
-            } else if (!clean.isBlank()) {
-                if (clean.contains(":")) {
-                    int colonIdx = clean.lastIndexOf(":");
-                    host = clean.substring(0, colonIdx);
-                    port = clean.substring(colonIdx + 1);
-                } else {
-                    host = clean;
-                }
             }
 
-            if (db.isBlank()) {
-                db = "defaultdb";
-            }
+            url = "jdbc:postgresql://" + host + ":" + port + "/" + db + "?" + queryParams;
+            log.info("Configured PostgreSQL DataSource for host: {}", host);
 
-            url = "jdbc:postgresql://" + host + ":" + port + "/" + db;
-            if (!queryParams.isBlank()) {
-                url += "?" + queryParams;
-            }
-        } else {
-            url = "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName;
+            return DataSourceBuilder.create()
+                    .driverClassName("org.postgresql.Driver")
+                    .url(url)
+                    .username(username)
+                    .password(password)
+                    .build();
         }
 
-        log.info("Configured PostgreSQL DataSource cleanly for host: {}", url.replaceAll(":[^/@]+@", ":****@"));
-
+        // Local MySQL Server 8.0 configuration
+        log.info("Configuring local MySQL Server 8.0 DataSource for ecommerce_db on port 3306");
         return DataSourceBuilder.create()
-                .driverClassName("org.postgresql.Driver")
-                .url(url)
-                .username(username)
-                .password(password)
+                .driverClassName("com.mysql.cj.jdbc.Driver")
+                .url("jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC")
+                .username("root")
+                .password("Naveen@0987")
                 .build();
     }
 }

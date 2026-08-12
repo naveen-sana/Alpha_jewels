@@ -1,5 +1,6 @@
-// Production Render API Endpoint
-export const API_BASE_URL = 'https://alpha-jewels-1.onrender.com'
+const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+export const API_BASE_URL = isLocalhost ? 'http://localhost:9090' : 'https://alpha-jewels-1.onrender.com';
 
 export const STORAGE_KEYS = {
   TOKEN: 'jewellery_token',
