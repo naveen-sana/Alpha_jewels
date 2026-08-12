@@ -150,57 +150,51 @@ public class AdminController {
             }
         }
 
-        // Force cleanup of old prices, stocks, and SKUs from user's exact database export
+        // Force cleanup of prices, stocks, and SKUs to match user's exact ecommerce_db.sql database export
         try {
-            jdbcTemplate.update("UPDATE products SET price = 7914.29, stock = 5, sku = 'SKU-111' WHERE LOWER(name) LIKE '%nury chevron%'");
-            jdbcTemplate.update("UPDATE products SET price = 9642.86, stock = 5, sku = 'SKU-112' WHERE LOWER(name) LIKE '%trina ring%'");
-            jdbcTemplate.update("UPDATE products SET price = 7743.29, stock = 7, sku = 'SKU-113' WHERE LOWER(name) LIKE '%ozo stud%'");
-            jdbcTemplate.update("UPDATE products SET price = 9287.00, stock = 7, sku = 'SKU-114' WHERE LOWER(name) LIKE '%nuray earings%'");
-            jdbcTemplate.update("UPDATE products SET price = 12785.71, stock = 6, sku = 'SKU-115' WHERE LOWER(name) LIKE '%mazikeen necklace%'");
-            jdbcTemplate.update("UPDATE products SET price = 14285.57, stock = 6, sku = 'SKU-116' WHERE LOWER(name) LIKE '%ryck princess%'");
-            jdbcTemplate.update("UPDATE products SET price = 9000.00, stock = 8, sku = 'SKU-117' WHERE LOWER(name) LIKE '%bracelite%'");
-            jdbcTemplate.update("UPDATE products SET price = 9200.00, stock = 8, sku = 'SKU-118' WHERE LOWER(name) LIKE '%resilent bracelet%'");
-            jdbcTemplate.update("UPDATE products SET price = 9571.43, stock = 4, sku = 'SKU-119' WHERE LOWER(name) LIKE '%line bangles%'");
-            jdbcTemplate.update("UPDATE products SET price = 10000.00, stock = 4, sku = 'SKU-120' WHERE LOWER(name) LIKE '%set bangles%'");
-            jdbcTemplate.update("UPDATE products SET price = 9000.00, stock = 6, sku = 'SKU-121' WHERE LOWER(name) LIKE '%spiral ring%'");
-            jdbcTemplate.update("UPDATE products SET price = 6600.00, stock = 6, sku = 'SKU-122' WHERE LOWER(name) LIKE '%leaf design ring%'");
-            jdbcTemplate.update("UPDATE products SET price = 8800.00, stock = 4, sku = 'SKU-123' WHERE LOWER(name) LIKE '%stud earrings%'");
-            jdbcTemplate.update("UPDATE products SET price = 9285.71, stock = 8, sku = 'SKU-124' WHERE LOWER(name) LIKE '%mahroosh%'");
-            jdbcTemplate.update("UPDATE products SET price = 11111.00, stock = 3, sku = 'SKU-125' WHERE LOWER(name) LIKE '%lakshmi temple necklace%'");
-            jdbcTemplate.update("UPDATE products SET price = 12698.29, stock = 3, sku = 'SKU-126' WHERE LOWER(name) LIKE '%lakshmi gold necklace%'");
-            jdbcTemplate.update("UPDATE products SET price = 9162.40, stock = 2, sku = 'SKU-127' WHERE LOWER(name) LIKE '%beaded bracelet%'");
-            jdbcTemplate.update("UPDATE products SET price = 7712.40, stock = 8, sku = 'SKU-128' WHERE LOWER(name) LIKE '%textured gold bracelet%'");
-            jdbcTemplate.update("UPDATE products SET price = 9004.20, stock = 8, sku = 'SKU-131' WHERE LOWER(name) LIKE '%vidh platinum%'");
-            jdbcTemplate.update("UPDATE products SET price = 9391.57, stock = 8, sku = 'SKU-132' WHERE LOWER(name) LIKE '%elegant floral ring%'");
-            jdbcTemplate.update("UPDATE products SET price = 6650.80, stock = 7, sku = 'SKU-133' WHERE LOWER(name) LIKE '%swirl stud%'");
-            jdbcTemplate.update("UPDATE products SET price = 6509.20, stock = 7, sku = 'SKU-134' WHERE LOWER(name) LIKE '%floral stud%'");
-            jdbcTemplate.update("UPDATE products SET price = 12842.71, stock = 1, sku = 'SKU-135' WHERE LOWER(name) LIKE '%emerald drop%'");
-            jdbcTemplate.update("UPDATE products SET price = 12556.86, stock = 1, sku = 'SKU-136' WHERE LOWER(name) LIKE '%solitaire platinum pendant%'");
-            jdbcTemplate.update("UPDATE products SET price = 9353.57, stock = 3, sku = 'SKU-137' WHERE LOWER(name) LIKE '%start motif platinum bracelet%'");
-            jdbcTemplate.update("UPDATE products SET price = 8124.86, stock = 3, sku = 'SKU-138' WHERE LOWER(name) LIKE '%floral two-tone%'");
-            jdbcTemplate.update("UPDATE products SET price = 9353.86, stock = 4, sku = 'SKU-139' WHERE LOWER(name) LIKE '%start- motif platinum bangles%'");
-            jdbcTemplate.update("UPDATE products SET price = 7807.86, stock = 5, sku = 'SKU-140' WHERE LOWER(name) LIKE '%eternity platinum%'");
-            jdbcTemplate.update("UPDATE products SET price = 6666.40, stock = 8, sku = 'SKU-141' WHERE LOWER(name) LIKE '%meris textured%'");
-            jdbcTemplate.update("UPDATE products SET price = 4542.40, stock = 8, sku = 'SKU-142' WHERE LOWER(name) LIKE '%butterfly ring%'");
-            jdbcTemplate.update("UPDATE products SET price = 4917.80, stock = 9, sku = 'SKU-143' WHERE LOWER(name) LIKE '%dangler earrings%'");
-            jdbcTemplate.update("UPDATE products SET price = 5517.20, stock = 9, sku = 'SKU-144' WHERE LOWER(name) LIKE '%ossum earrings%'");
-            jdbcTemplate.update("UPDATE products SET price = 9164.20, stock = 4, sku = 'SKU-145' WHERE LOWER(name) LIKE '%wisdom sterling%'");
-            jdbcTemplate.update("UPDATE products SET price = 9305.00, stock = 4, sku = 'SKU-146' WHERE LOWER(name) LIKE '%gargistone%'");
-            jdbcTemplate.update("UPDATE products SET price = 7936.29, stock = 3, sku = 'SKU-147' WHERE LOWER(name) LIKE '%flexi bracelet%'");
-            jdbcTemplate.update("UPDATE products SET price = 7048.20, stock = 3, sku = 'SKU-148' WHERE LOWER(name) LIKE '%chain bracelet%'");
-            jdbcTemplate.update("UPDATE products SET price = 8503.20, stock = 4, sku = 'SKU-149' WHERE LOWER(name) LIKE '%rewa bangles%'");
-            jdbcTemplate.update("UPDATE products SET price = 7912.80, stock = 4, sku = 'SKU-150' WHERE LOWER(name) LIKE '%sterling bangles%'");
-            jdbcTemplate.update("UPDATE products SET price = 12000.00, stock = 3, sku = 'SKU-151' WHERE LOWER(name) LIKE '%royal diamond choker%'");
-            jdbcTemplate.update("UPDATE products SET price = 7886.00, stock = 10, sku = 'SKU-155' WHERE LOWER(name) LIKE '%neckpice necklace%'");
-            jdbcTemplate.update("UPDATE products SET price = 7896.00, stock = 9, sku = 'SKU-156' WHERE LOWER(name) LIKE '%long necklace%'");
-            jdbcTemplate.update("UPDATE products SET price = 5632.00, stock = 10, sku = 'SKU-157' WHERE LOWER(name) LIKE '%antique jumkas%'");
-            jdbcTemplate.update("UPDATE products SET price = 7986.00, stock = 10, sku = 'SKU-158' WHERE LOWER(name) LIKE '%kemp-green lakshmi%'");
-            jdbcTemplate.update("UPDATE products SET price = 9889.00, stock = 10, sku = 'SKU-159' WHERE LOWER(name) LIKE '%stoned diamond necklace%'");
-            jdbcTemplate.update("UPDATE products SET price = 9563.00, stock = 10, sku = 'SKU-160' WHERE LOWER(name) LIKE '%stoned ring%'");
-            jdbcTemplate.update("UPDATE products SET price = 6548.00, stock = 10, sku = 'SKU-161' WHERE LOWER(name) LIKE '%rose gold paltinum%'");
-            jdbcTemplate.update("UPDATE products SET price = 6541.00, stock = 10, sku = 'SKU-162' WHERE LOWER(name) LIKE '%square piece%'");
-            jdbcTemplate.update("UPDATE products SET price = 5469.00, stock = 10, sku = 'SKU-163' WHERE LOWER(name) LIKE '%ghungroo%'");
-            jdbcTemplate.update("UPDATE products SET price = 4589.00, stock = 10, sku = 'SKU-164' WHERE LOWER(name) LIKE '%navaratri%'");
+            jdbcTemplate.update("UPDATE products SET price = 55400.00, stock = 5, sku = 'SKU-111' WHERE LOWER(name) LIKE '%nury chevron%'");
+            jdbcTemplate.update("UPDATE products SET price = 67500.00, stock = 5, sku = 'SKU-112' WHERE LOWER(name) LIKE '%trina ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 54203.00, stock = 7, sku = 'SKU-113' WHERE LOWER(name) LIKE '%ozo stud%'");
+            jdbcTemplate.update("UPDATE products SET price = 65009.00, stock = 7, sku = 'SKU-114' WHERE LOWER(name) LIKE '%nuray earings%'");
+            jdbcTemplate.update("UPDATE products SET price = 89500.00, stock = 6, sku = 'SKU-115' WHERE LOWER(name) LIKE '%mazikeen necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 99999.00, stock = 6, sku = 'SKU-116' WHERE LOWER(name) LIKE '%ryck princess%'");
+            jdbcTemplate.update("UPDATE products SET price = 45000.00, stock = 8, sku = 'SKU-117' WHERE LOWER(name) LIKE '%aelric bracelet%' OR LOWER(name) LIKE '%bracelite%'");
+            jdbcTemplate.update("UPDATE products SET price = 46000.00, stock = 8, sku = 'SKU-118' WHERE LOWER(name) LIKE '%resilient bracelet%' OR LOWER(name) LIKE '%resilent bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 67000.00, stock = 4, sku = 'SKU-119' WHERE LOWER(name) LIKE '%line bangles%'");
+            jdbcTemplate.update("UPDATE products SET price = 70000.00, stock = 4, sku = 'SKU-120' WHERE LOWER(name) LIKE '%set bangles%'");
+
+            jdbcTemplate.update("UPDATE products SET price = 45000.00, stock = 6, sku = 'SKU-121' WHERE LOWER(name) LIKE '%spiral ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 33000.00, stock = 6, sku = 'SKU-122' WHERE LOWER(name) LIKE '%leaf design ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 44000.00, stock = 4, sku = 'SKU-123' WHERE LOWER(name) LIKE '%stud earrings%'");
+            jdbcTemplate.update("UPDATE products SET price = 36411.00, stock = 4, sku = 'SKU-124' WHERE LOWER(name) LIKE '%jhumka earrings%' OR LOWER(name) LIKE '%mahroosh%'");
+            jdbcTemplate.update("UPDATE products SET price = 77777.00, stock = 3, sku = 'SKU-125' WHERE LOWER(name) LIKE '%lakshmi temple necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 88888.00, stock = 3, sku = 'SKU-126' WHERE LOWER(name) LIKE '%lakshmi gold necklace%'");
+            jdbcTemplate.update("UPDATE products SET price = 45812.00, stock = 2, sku = 'SKU-127' WHERE LOWER(name) LIKE '%beaded bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 38562.00, stock = 8, sku = 'SKU-128' WHERE LOWER(name) LIKE '%textured gold bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 65481.00, stock = 5, sku = 'SKU-129' WHERE LOWER(name) LIKE '%floral bangle set%'");
+            jdbcTemplate.update("UPDATE products SET price = 65874.00, stock = 5, sku = 'SKU-130' WHERE LOWER(name) LIKE '%designer gold bangles%'");
+
+            jdbcTemplate.update("UPDATE products SET price = 45021.00, stock = 8, sku = 'SKU-131' WHERE LOWER(name) LIKE '%vidh platinum%'");
+            jdbcTemplate.update("UPDATE products SET price = 65741.00, stock = 8, sku = 'SKU-132' WHERE LOWER(name) LIKE '%elegant floral ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 33254.00, stock = 7, sku = 'SKU-133' WHERE LOWER(name) LIKE '%swirl stud%'");
+            jdbcTemplate.update("UPDATE products SET price = 32546.00, stock = 7, sku = 'SKU-134' WHERE LOWER(name) LIKE '%floral stud%'");
+            jdbcTemplate.update("UPDATE products SET price = 89899.00, stock = 1, sku = 'SKU-135' WHERE LOWER(name) LIKE '%emerald drop%'");
+            jdbcTemplate.update("UPDATE products SET price = 87898.00, stock = 1, sku = 'SKU-136' WHERE LOWER(name) LIKE '%solitaire platinum pendant%'");
+            jdbcTemplate.update("UPDATE products SET price = 65475.00, stock = 3, sku = 'SKU-137' WHERE LOWER(name) LIKE '%star motif platinum bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 56874.00, stock = 3, sku = 'SKU-138' WHERE LOWER(name) LIKE '%floral two-tone%'");
+            jdbcTemplate.update("UPDATE products SET price = 65477.00, stock = 4, sku = 'SKU-139' WHERE LOWER(name) LIKE '%star motif platinum bangles%'");
+            jdbcTemplate.update("UPDATE products SET price = 54655.00, stock = 5, sku = 'SKU-140' WHERE LOWER(name) LIKE '%eternity platinum%'");
+
+            jdbcTemplate.update("UPDATE products SET price = 33332.00, stock = 8, sku = 'SKU-141' WHERE LOWER(name) LIKE '%meris textured%'");
+            jdbcTemplate.update("UPDATE products SET price = 22712.00, stock = 8, sku = 'SKU-142' WHERE LOWER(name) LIKE '%butterfly ring%'");
+            jdbcTemplate.update("UPDATE products SET price = 24589.00, stock = 9, sku = 'SKU-143' WHERE LOWER(name) LIKE '%dangler earrings%'");
+            jdbcTemplate.update("UPDATE products SET price = 27586.00, stock = 9, sku = 'SKU-144' WHERE LOWER(name) LIKE '%ossum earrings%'");
+            jdbcTemplate.update("UPDATE products SET price = 45821.00, stock = 4, sku = 'SKU-145' WHERE LOWER(name) LIKE '%wisdom sterling%'");
+            jdbcTemplate.update("UPDATE products SET price = 46525.00, stock = 4, sku = 'SKU-146' WHERE LOWER(name) LIKE '%gargi stone%' OR LOWER(name) LIKE '%gargistone%'");
+            jdbcTemplate.update("UPDATE products SET price = 55554.00, stock = 3, sku = 'SKU-147' WHERE LOWER(name) LIKE '%flexi bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 35241.00, stock = 3, sku = 'SKU-148' WHERE LOWER(name) LIKE '%chain bracelet%'");
+            jdbcTemplate.update("UPDATE products SET price = 42516.00, stock = 7, sku = 'SKU-149' WHERE LOWER(name) LIKE '%rewa bangles%'");
+            jdbcTemplate.update("UPDATE products SET price = 39564.00, stock = 7, sku = 'SKU-150' WHERE LOWER(name) LIKE '%sterling bangles%'");
         } catch (Exception ignored) {}
 
         Integer totalProducts = 0;
