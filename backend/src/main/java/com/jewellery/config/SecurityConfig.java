@@ -106,8 +106,7 @@ public class SecurityConfig {
                     "/api/admin/**"
                 ).authenticated()
                 .anyRequest().permitAll()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.access.intercept.AuthorizationFilter.class);
+            );
 
         return http.build();
     }
