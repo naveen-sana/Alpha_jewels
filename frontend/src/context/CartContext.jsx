@@ -57,82 +57,35 @@ export const CartProvider = ({ children }) => {
       throw new Error(msg);
     }
 
-    // 1. Persist to Backend MySQL API
-    let apiSuccess = false;
+    // 1. Instant Optimistic Local Cart State Update (0ms UI lag)
+    setCartItems(prev => {
+      const existingIdx = prev.findIndex(item => Number(item.productId || item.product_id || item.id) === Number(productId));
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        const existingItem = updated[existingIdx];
+        updated[existingIdx] = {
+          ...existingItem,
+          quantity: (existingItem.quantity || 1) + quantity
+        };
+        return updated;
+      }
+      return [...prev, { id: productId, productId, quantity }];
+    });
+
+    if (showToast) showToast('Product added to cart!', 'success');
+
+    // 2. Background API Sync
     try {
       await apiClient.post('/api/cart/add', { productId, quantity });
-      apiSuccess = true;
+      const response = await apiClient.get('/api/cart/items');
+      const data = response.data;
+      let fresh = [];
+      if (data && data.cart && Array.isArray(data.cart.products)) fresh = data.cart.products;
+      else if (Array.isArray(data)) fresh = data;
+      else if (data && Array.isArray(data.items)) fresh = data.items;
+      if (fresh.length > 0) setCartItems(fresh);
     } catch (err) {
-      console.warn('Backend cart add warning, proceeding with optimistic update:', err);
-    }
-
-    // 2. Fetch updated cart from database if API call succeeded
-    let freshItems = [];
-    if (apiSuccess) {
-      try {
-        const response = await apiClient.get('/api/cart/items');
-        const data = response.data;
-        if (data && data.cart && Array.isArray(data.cart.products)) {
-          freshItems = data.cart.products;
-        } else if (Array.isArray(data)) {
-          freshItems = data;
-        } else if (data && Array.isArray(data.items)) {
-          freshItems = data.items;
-        }
-      } catch (err) {
-        console.error('Error refreshing cart after add:', err);
-      }
-    }
-
-    // 3. Update React Cart State
-    if (freshItems.length > 0) {
-      setCartItems(freshItems);
-    } else {
-      try {
-        const pRes = await apiClient.get('/api/products');
-        const pList = pRes.data || [];
-        const foundProduct = pList.find(p => Number(p.id || p.productId || p.product_id) === Number(productId));
-
-        setCartItems(prev => {
-          const idx = prev.findIndex(item => Number(item.productId || item.product_id || item.id) === Number(productId));
-          if (idx >= 0) {
-            const updated = [...prev];
-            updated[idx] = { ...updated[idx], quantity: (updated[idx].quantity || 1) + quantity };
-            return updated;
-          } else if (foundProduct) {
-            const newItem = {
-              id: Date.now(),
-              productId: Number(foundProduct.id || productId),
-              product_id: Number(foundProduct.id || productId),
-              name: foundProduct.name || 'Jewelry Product',
-              description: foundProduct.description || '',
-              price: Number(foundProduct.price || 0),
-              price_per_unit: Number(foundProduct.price || 0),
-              quantity: quantity,
-              imageUrl: foundProduct.imageUrl || foundProduct.image_url || '',
-              stock: foundProduct.stock || 10
-            };
-            return [...prev, newItem];
-          } else {
-            const newItem = {
-              id: Date.now(),
-              productId: Number(productId),
-              product_id: Number(productId),
-              name: 'Luxury Item #' + productId,
-              price: 50000,
-              price_per_unit: 50000,
-              quantity: quantity
-            };
-            return [...prev, newItem];
-          }
-        });
-      } catch (e) {
-        console.error('Error updating cart state:', e);
-      }
-    }
-
-    if (showToast) {
-      showToast('Product added to cart successfully!', 'cart');
+      console.warn('Background cart sync:', err);
     }
   };
 

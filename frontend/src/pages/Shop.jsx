@@ -123,10 +123,17 @@ const Shop = () => {
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = !searchQuery ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const itemCategory = (p.categoryName || p.category || '').toLowerCase();
+    const activeCat = activeCategory.toLowerCase();
+    const matchesCategory = !activeCategory || activeCat === 'all' || itemCategory === activeCat;
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="shop-container py-5">
