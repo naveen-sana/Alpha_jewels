@@ -28,7 +28,7 @@ public class UserService {
 	private static final long OTP_VALIDITY_MS = 10 * 60 * 1000;
 	private final Map<String, OtpEntry> otpStorage = new ConcurrentHashMap<>();
 	
-	@Autowired
+	@Autowired(required = false)
 	private JavaMailSender mailSender;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -129,7 +129,9 @@ public class UserService {
             message.setSubject("Alpha Jewels - Password Reset OTP");
             message.setText("Your OTP is: " + otp + "\n\nIt is valid for 10 minutes.");
 
-            mailSender.send(message);
+            if (mailSender != null) {
+                mailSender.send(message);
+            }
 
             return "OTP sent successfully";
             
