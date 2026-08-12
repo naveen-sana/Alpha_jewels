@@ -24,7 +24,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${cors.allowed-origins:https://alpha-jewels.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}")
+    @Value("${cors.allowed-origins:https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app,https://alpha-jewels.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}")
     private String allowedOriginsStr;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -72,10 +72,6 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
-
-        if (!origins.contains("https://*.vercel.app")) {
-            origins.add("https://*.vercel.app");
-        }
 
         if (origins.contains("*")) {
             configuration.addAllowedOriginPattern("*");
