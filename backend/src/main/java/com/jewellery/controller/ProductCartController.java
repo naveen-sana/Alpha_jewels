@@ -409,15 +409,6 @@ public class ProductCartController {
         }
     }
 
-    @jakarta.annotation.PostConstruct
-    public void init() {
-        new Thread(() -> {
-            try {
-                ensureProductTablesExist();
-            } catch (Exception ignored) {}
-        }).start();
-    }
-
     @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
         boolean isAll = category == null || 
