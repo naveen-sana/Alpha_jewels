@@ -78,6 +78,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
+                    "/api/users/**",
+                    "/api/health",
+                    "/health",
+                    "/api/products/**",
+                    "/api/categories/**",
+                    "/api/seed-database-now"
+                ).permitAll()
+                .requestMatchers(
                     "/api/cart/**",
                     "/api/wishlist/**",
                     "/api/orders/**",
@@ -87,7 +95,7 @@ public class SecurityConfig {
             );
 
         if (jwtAuthenticationFilter != null) {
-            http.addFilterAfter(jwtAuthenticationFilter, org.springframework.web.filter.CorsFilter.class);
+            http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.access.intercept.AuthorizationFilter.class);
         }
 
         return http.build();
