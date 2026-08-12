@@ -49,6 +49,11 @@ public class UserController {
         }
     }
 
+    @PostMapping("/login-test")
+    public ResponseEntity<?> loginTest() {
+        return ResponseEntity.ok(Map.of("status", "ok", "message", "Login Test Endpoint Ready"));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody(required = false) Object input) {
         try {
