@@ -17,8 +17,12 @@ public class RoleConverter implements AttributeConverter<Role, String> {
         if (dbData == null || dbData.trim().isEmpty()) {
             return Role.USER;
         }
+        String clean = dbData.trim().toUpperCase();
+        if (clean.startsWith("ROLE_")) {
+            clean = clean.substring(5);
+        }
         try {
-            return Role.valueOf(dbData.trim().toUpperCase());
+            return Role.valueOf(clean);
         } catch (Exception e) {
             return Role.USER;
         }
