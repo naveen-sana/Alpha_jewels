@@ -244,18 +244,25 @@ public class AdminController {
                         ")");
             } catch (Exception ignored) {}
 
-            // Seed default categories if empty
+            // Seed exact 4 categories matching database schema: 1=Diamond, 2=Gold, 3=Platinum, 4=Silver
             try {
-                Integer catCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories", Integer.class);
-                if (catCount == null || catCount == 0) {
-                    String[] defaultCats = {"Rings", "Necklaces", "Earrings", "Bracelets", "Bangles", "Chains", "Pendants", "Anklets", "Collections"};
-                    for (String cat : defaultCats) {
-                        try {
-                            jdbcTemplate.update("INSERT INTO categories (category_name, description, status) VALUES (?, ?, 'ACTIVE')",
-                                    cat, cat + " luxury jewellery collection");
-                        } catch (Exception ignored) {}
-                    }
+                jdbcTemplate.update("DELETE FROM categories WHERE (category_id > 4 OR id > 4) AND category_name NOT IN ('Diamond', 'Gold', 'Platinum', 'Silver')");
+                String[] coreCats = {"Diamond", "Gold", "Platinum", "Silver"};
+                for (int i = 0; i < coreCats.length; i++) {
+                    int cId = i + 1;
+                    String cName = coreCats[i];
+                    try {
+                        jdbcTemplate.update("UPDATE categories SET category_name = ?, name = ? WHERE category_id = ? OR id = ?", cName, cName, cId, cId);
+                    } catch (Exception ignored) {}
+                    try {
+                        jdbcTemplate.update("INSERT INTO categories (category_id, category_name, name, description, status) VALUES (?, ?, ?, ?, 'ACTIVE')", cId, cName, cName, cName + " collection");
+                    } catch (Exception ignored) {}
                 }
+            } catch (Exception ignored) {}
+
+            // Remove auto-generated test junk rows (SKU-23XX) that caused duplicate stock=10 rows and wrong categories
+            try {
+                jdbcTemplate.update("DELETE FROM products WHERE sku LIKE 'SKU-2%' OR sku LIKE 'SKU-0%'");
             } catch (Exception ignored) {}
 
             // Products table
