@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import apiClient from '../api/client';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, ImageOff } from 'lucide-react';
 import { getProductImage } from '../utils/productImages';
 
 const Shop = () => {
@@ -19,436 +19,58 @@ const Shop = () => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const [addingId, setAddingId] = useState(null);
 
-  const DEFAULT_CATALOGUE = {
-  "Diamond": [
-    {
-      "id": 111,
-      "name": "Nury Chevron Ring",
-      "description": "Nury Chevron Ring",
-      "price": 7914.29,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 112,
-      "name": "The trina ring",
-      "description": "beautifuly designed Trina",
-      "price": 9642.86,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 113,
-      "name": "Ozo stud earing",
-      "description": "Handmade Ozo earrings for women",
-      "price": 7743.29,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 114,
-      "name": "Nuray earings",
-      "description": "N-shaped Rings with pure gold",
-      "price": 9287,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 115,
-      "name": "Mazikeen Necklace",
-      "description": "Mazi-Queen Royal look Necklace",
-      "price": 12785.71,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 116,
-      "name": "ryck princess",
-      "description": "The ryck Princess Necklace",
-      "price": 14285.57,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 117,
-      "name": "Bracelite",
-      "description": "The Aelric Bracelet",
-      "price": 9000,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 118,
-      "name": "resilent Bracelet",
-      "description": "The Chain-typed Bracelet",
-      "price": 9200,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 119,
-      "name": "Line Bangles",
-      "description": "Royal elegent Bangles for women",
-      "price": 9571.43,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 120,
-      "name": "Set Bangles",
-      "description": "The Bazel-Set Bangles",
-      "price": 10000,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 159,
-      "name": "Stoned Diamond Necklace",
-      "description": "Beautiful stoned Necklace for women",
-      "price": 9889,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    },
-    {
-      "id": 160,
-      "name": "Stoned Ring",
-      "description": "A Beautiful Diamond Ring Stands in a Store Window. Stock Photo - Image of anniversary, bride",
-      "price": 9563,
-      "categoryName": "Diamond",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476"
-    }
-  ],
-  "Gold": [
-    {
-      "id": 121,
-      "name": "Spiral Ring",
-      "description": "Classic Spiral Gold Ring",
-      "price": 9000,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 122,
-      "name": "leaf design Ring",
-      "description": "Elegant Leaf Design Gold Ring",
-      "price": 6600,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 123,
-      "name": "Stud Earrings",
-      "description": "Temple Gold Stud Earrings",
-      "price": 8800,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 124,
-      "name": "Mahroosh Diamond Necklace",
-      "description": "Indriya Necklace by Aditya Birla",
-      "price": 9285.71,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 125,
-      "name": "Lakshmi Temple Necklace",
-      "description": "Beautifully designed Necklace",
-      "price": 11111,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 126,
-      "name": "Lakshmi Gold Necklace",
-      "description": "Wonderfully designed Necklace",
-      "price": 12698.29,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 127,
-      "name": "Gold Beaded Bracelet",
-      "description": "Handicrafted Bracelet for Women",
-      "price": 9162.4,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 128,
-      "name": "Textured Gold Bracelet",
-      "description": "Men Stylish and elogant look Bracelet",
-      "price": 7712.4,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 155,
-      "name": "Neckpice Necklace",
-      "description": "Beautifully crafted necklace for women",
-      "price": 7886,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 156,
-      "name": "Long Necklace",
-      "description": "Antique Gold Necklace for women",
-      "price": 7896,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 157,
-      "name": "Antique Jumkas",
-      "description": "Gold Plated One Gram Gold Antique Jhumkas",
-      "price": 5632,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    },
-    {
-      "id": 158,
-      "name": "Kemp-green Lakshmi Vankii",
-      "description": "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii",
-      "price": 7986,
-      "categoryName": "Gold",
-      "imageUrl": "https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg"
-    }
-  ],
-  "Platinum": [
-    {
-      "id": 131,
-      "name": "Vidh Platinum Solitire",
-      "description": "Best Ring for men",
-      "price": 9004.2,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 132,
-      "name": "Elegant floral Ring",
-      "description": "Elegant floral Platinum Ring",
-      "price": 9391.57,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 133,
-      "name": "Swirl Stud Earrings",
-      "description": "Circular Earrings",
-      "price": 6650.8,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 134,
-      "name": "Floral Stud Earrings",
-      "description": "Flower Stud Earrings",
-      "price": 6509.2,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 135,
-      "name": "Emerald Drop Platinum Necklece",
-      "description": "Wonderfully Crafted Necklace for Women",
-      "price": 12842.71,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 136,
-      "name": "Solitaire Platinum Pendant Necklace",
-      "description": "Looking Gorgeous",
-      "price": 12556.86,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 137,
-      "name": "Start Motif Platinum Bracelet",
-      "description": "Start Bracelet",
-      "price": 9353.57,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 138,
-      "name": "Floral Two-Tone Platinum Bracelet",
-      "description": "Floral Two-Tone Platinum Bracelet",
-      "price": 8124.86,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 139,
-      "name": "Start- Motif Platinum Bangles",
-      "description": "Floral Two-Tone Platinum Bracelet",
-      "price": 9353.86,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 140,
-      "name": "Eternity Platinum Bangle",
-      "description": "Premium Bangles",
-      "price": 7807.86,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 161,
-      "name": "Rose Gold paltinum Necklace",
-      "description": "Rose Gold paltinum Necklace",
-      "price": 6548,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    },
-    {
-      "id": 162,
-      "name": "Square Piece-Set Neckalce",
-      "description": "Square Piece Step Necklace",
-      "price": 6541,
-      "categoryName": "Platinum",
-      "imageUrl": "https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp"
-    }
-  ],
-  "Silver": [
-    {
-      "id": 141,
-      "name": "Meris Textured Band Ring",
-      "description": "Wonderful Silverplated Ring",
-      "price": 6666.4,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 142,
-      "name": "Butterfly Ring",
-      "description": "Adjustable silver Butterfly Ring",
-      "price": 4542.4,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 143,
-      "name": "Dangler Earrings",
-      "description": "Silver Flower Dangler Earrings",
-      "price": 4917.8,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 144,
-      "name": "Ossum Earrings",
-      "description": "Beautiful Eearings for Women",
-      "price": 5517.2,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 145,
-      "name": "Wisdom Sterling Silver Necklace",
-      "description": "Infinite Wisdom Sterling Silver Necklace",
-      "price": 9164.2,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 146,
-      "name": "GargiStone Necklace",
-      "description": "Beautifully Crafted Stone Necklace",
-      "price": 9305,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 147,
-      "name": "Flexi Bracelet",
-      "description": "Fleur Flexi Bracelet in Silver",
-      "price": 7936.29,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 148,
-      "name": "Chain Bracelet",
-      "description": "Clara Womens Evil Eye Bracelet",
-      "price": 7048.2,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 149,
-      "name": "Rewa Bangles",
-      "description": "Beautiful Rewa Bangles",
-      "price": 8503.2,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 150,
-      "name": "Sterling Bangles",
-      "description": "Beautiful Sterling Bangles",
-      "price": 7912.8,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 151,
-      "name": "Royal Diamond Choker",
-      "description": "Exquisite Royal Choker",
-      "price": 12000,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 163,
-      "name": "Ghungroo Jwellery Set",
-      "description": "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set",
-      "price": 5469,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    },
-    {
-      "id": 164,
-      "name": "Navaratri Jewellery",
-      "description": "Silver Necklace, Navratri Jewellery",
-      "price": 4589,
-      "categoryName": "Silver",
-      "imageUrl": "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"
-    }
-  ]
-};
-
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProducts = async () => {
       setLoading(true);
       setError('');
+      // 1. Clear previous category state immediately on category switch
+      setProducts([]);
+
       try {
         const response = await apiClient.get('/api/products', {
           params: { category: activeCategory }
         });
+
+        if (!isMounted) return;
+
         const resData = response.data || [];
-        if (resData.length > 0) {
-          setProducts(resData);
-        } else {
-          setProducts(DEFAULT_CATALOGUE[activeCategory] || DEFAULT_CATALOGUE.Diamond);
+        
+        // 2. Deduplicate returned products by unique Product ID
+        const uniqueProducts = [];
+        const seenIds = new Set();
+
+        for (const item of resData) {
+          const pId = item.id || item.productId || item.product_id;
+          if (pId && !seenIds.has(pId)) {
+            seenIds.add(pId);
+            uniqueProducts.push(item);
+          }
         }
+
+        setProducts(uniqueProducts);
       } catch (err) {
-        console.error('Error fetching products from API, loading catalogue:', err);
-        setProducts(DEFAULT_CATALOGUE[activeCategory] || DEFAULT_CATALOGUE.Diamond);
+        if (!isMounted) return;
+        console.error('Error fetching products from API:', err);
+        setError('Unable to load products from database server.');
+        setProducts([]);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, [activeCategory]);
 
   const handleAddToCart = async (product) => {
-    const pId = typeof product === 'object' ? (product.id || product.productId) : product;
+    const pId = typeof product === 'object' ? (product.id || product.productId || product.product_id) : product;
     setAddingId(pId);
     setError('');
     try {
@@ -467,9 +89,11 @@ const Shop = () => {
   };
 
   const filteredProducts = products.filter(p => {
+    const pName = (p.name || '').toLowerCase();
+    const pDesc = (p.description || '').toLowerCase();
     const matchesSearch = !searchQuery ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      pName.includes(searchQuery.toLowerCase()) ||
+      pDesc.includes(searchQuery.toLowerCase());
 
     const itemCategory = (p.categoryName || p.category || '').toLowerCase();
     const activeCat = activeCategory.toLowerCase();
@@ -483,7 +107,7 @@ const Shop = () => {
       <div className="container">
         {loading && (
           <div className="text-center py-5">
-            <LoadingSpinner size="lg" label={`Loading our finest ${activeCategory} collection...`} />
+            <LoadingSpinner size="lg" label={`Loading ${activeCategory} collection...`} />
           </div>
         )}
 
@@ -507,22 +131,35 @@ const Shop = () => {
         {!loading && filteredProducts.length > 0 && (
           <div className="row g-4 justify-content-center">
             {filteredProducts.map((product) => {
-              const isWishlisted = isInWishlist(product.id);
-              const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+              const productId = product.id || product.productId || product.product_id;
+              const isWishlisted = isInWishlist(productId);
+              const stockVal = product.stock !== undefined ? product.stock : product.stock_quantity;
+              const isOutOfStock = stockVal !== undefined && stockVal <= 0;
+              const imgSrc = getProductImage(product);
 
               return (
-                <div className="col-sm-6 col-md-4 col-lg-3" key={product.id}>
+                <div className="col-sm-6 col-md-4 col-lg-3" key={productId}>
                   <div className="product-luxury-card">
-                    <div className="product-image-wrapper">
-                      <img
-                        src={getProductImage(product)}
-                        alt={product.name}
-                        className="product-display-image"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://images.unsplash.com/photo-1611591475874-9f79f2e307e5?auto=format&fit=crop&w=300&q=80';
-                        }}
-                      />
+                    <div className="product-image-wrapper position-relative">
+                      {imgSrc ? (
+                        <img
+                          src={imgSrc}
+                          alt={product.name}
+                          className="product-display-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            const fallbackBadge = e.target.parentElement.querySelector('.img-unavailable-badge');
+                            if (fallbackBadge) fallbackBadge.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="img-unavailable-badge d-flex flex-column align-items-center justify-content-center text-muted"
+                        style={{ display: imgSrc ? 'none' : 'flex', height: '220px', backgroundColor: '#1a1a1a', borderRadius: '8px' }}
+                      >
+                        <ImageOff size={28} className="mb-2 text-gold opacity-75" />
+                        <span className="small text-gold-light opacity-75">Image Unavailable</span>
+                      </div>
                       <button 
                         onClick={() => toggleWishlist(product)}
                         className={`wishlist-btn-badge ${isWishlisted ? 'active' : ''}`} 
@@ -540,15 +177,15 @@ const Shop = () => {
                       <p className="product-desc-text">{product.description || 'Exclusive luxury craftsmanship'}</p>
                       <div className="product-footer-row">
                         <span className="product-price-tag">
-                          ₹{Number(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ₹{Number(product.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                         <button
-                          className={`add-to-cart-action-btn ${addingId === product.id ? 'added' : ''}`}
+                          className={`add-to-cart-action-btn ${addingId === productId ? 'added' : ''}`}
                           onClick={() => handleAddToCart(product)}
-                          disabled={addingId === product.id || isOutOfStock}
+                          disabled={addingId === productId || isOutOfStock}
                         >
                           <ShoppingCart size={14} className="me-1" />
-                          {isOutOfStock ? 'Out of Stock' : addingId === product.id ? 'Added!' : 'Add to Cart'}
+                          {isOutOfStock ? 'Out of Stock' : addingId === productId ? 'Added!' : 'Add to Cart'}
                         </button>
                       </div>
                     </div>
