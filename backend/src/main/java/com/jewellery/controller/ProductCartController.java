@@ -163,6 +163,13 @@ public class ProductCartController {
     }
 
     private void ensureProductTablesExist() {
+        try {
+            Integer prodCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Integer.class);
+            if (prodCount != null && prodCount > 0) {
+                return;
+            }
+        } catch (Exception ignored) {}
+
         executeQuietly("CREATE TABLE IF NOT EXISTS categories (" +
                 "category_id SERIAL PRIMARY KEY, " +
                 "category_name VARCHAR(100) NOT NULL UNIQUE, " +
