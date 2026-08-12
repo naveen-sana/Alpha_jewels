@@ -66,6 +66,13 @@ public class DatabaseConfig {
                     formattedUrl = formattedUrl.replaceAll("(?i)sslmode=", "sslMode=")
                                                .replaceAll("(?i)ssl-mode=", "sslMode=");
 
+                    if (!formattedUrl.contains("trustServerCertificate=")) {
+                        formattedUrl += (formattedUrl.contains("?") ? "&" : "?") + "trustServerCertificate=true";
+                    }
+                    if (!formattedUrl.contains("allowPublicKeyRetrieval=")) {
+                        formattedUrl += "&allowPublicKeyRetrieval=true";
+                    }
+
                     log.info("Successfully parsed Aiven MySQL URL for user: {}", parsedUser);
                     return DataSourceBuilder.create()
                             .driverClassName("com.mysql.cj.jdbc.Driver")
