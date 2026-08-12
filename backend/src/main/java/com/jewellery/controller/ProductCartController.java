@@ -117,6 +117,12 @@ public class ProductCartController {
         executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 10");
         executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ACTIVE'");
 
+        try {
+            jdbcTemplate.update("DELETE FROM productimages WHERE product_id < 100");
+            jdbcTemplate.update("DELETE FROM product_images WHERE product_id < 100");
+            jdbcTemplate.update("DELETE FROM products WHERE id < 100 OR product_id < 100");
+        } catch (Exception ignored) {}
+
         seedAllProducts();
     }
 

@@ -478,6 +478,16 @@ const Shop = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const uniqueProducts = [];
+  const seenNames = new Set();
+  filteredProducts.forEach(p => {
+    const key = (p.name || '').trim().toLowerCase();
+    if (!seenNames.has(key)) {
+      seenNames.add(key);
+      uniqueProducts.push(p);
+    }
+  });
+
   return (
     <div className="shop-container py-5">
       <div className="container">
@@ -493,7 +503,7 @@ const Shop = () => {
           </div>
         )}
 
-        {!loading && !filteredProducts.length && (
+        {!loading && !uniqueProducts.length && (
           <div className="text-center py-5 empty-shop-state">
             <h3>No Products Found</h3>
             <p className="text-muted">
@@ -504,9 +514,9 @@ const Shop = () => {
           </div>
         )}
 
-        {!loading && filteredProducts.length > 0 && (
+        {!loading && uniqueProducts.length > 0 && (
           <div className="row g-4 justify-content-center">
-            {filteredProducts.map((product) => {
+            {uniqueProducts.map((product) => {
               const isWishlisted = isInWishlist(product.id);
               const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
