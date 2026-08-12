@@ -52,12 +52,18 @@ public class DatabaseConfig {
             cleanUrl = cleanUrl.replaceAll("(?i)sslmode=", "sslMode=")
                                .replaceAll("(?i)ssl-mode=", "sslMode=");
 
-            return DataSourceBuilder.create()
+            var builder = DataSourceBuilder.create()
                     .driverClassName("com.mysql.cj.jdbc.Driver")
-                    .url(cleanUrl)
-                    .username(username)
-                    .password(password)
-                    .build();
+                    .url(cleanUrl);
+
+            if (username != null && !username.trim().isEmpty() && !"root".equalsIgnoreCase(username.trim())) {
+                builder.username(username);
+            }
+            if (password != null && !password.trim().isEmpty()) {
+                builder.password(password);
+            }
+
+            return builder.build();
         }
 
         // Local MySQL Server 8.0 DataSource configuration
