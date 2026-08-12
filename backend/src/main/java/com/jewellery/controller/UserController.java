@@ -56,35 +56,16 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(
-            @RequestBody(required = false) Object input,
-            @RequestParam(value = "email", required = false) String emailParam,
-            @RequestParam(value = "password", required = false) String passwordParam) {
+    public ResponseEntity<?> loginUser(@RequestBody(required = false) LoginRequest request) {
         try {
-            String email = "";
-            String password = "";
-
-            if (input instanceof Map<?, ?> map) {
-                Object e = map.get("email");
-                Object p = map.get("password");
-                if (e != null) email = e.toString().trim();
-                if (p != null) password = p.toString().trim();
-            } else if (input instanceof LoginRequest req) {
-                if (req.getEmail() != null) email = req.getEmail().trim();
-                if (req.getPassword() != null) password = req.getPassword().trim();
-            }
-
-            if (email.isEmpty() && emailParam != null) email = emailParam.trim();
-            if (password.isEmpty() && passwordParam != null) password = passwordParam.trim();
+            String email = request != null && request.getEmail() != null ? request.getEmail().trim() : "";
+            String password = request != null && request.getPassword() != null ? request.getPassword().trim() : "";
 
             if (email.isEmpty() || password.isEmpty()) {
                 return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
             }
 
-            LoginRequest req = new LoginRequest();
-            req.setEmail(email);
-            req.setPassword(password);
-
+            LoginRequest req = new LoginRequest(email, password);
             String result = userService.loginUser(req);
             if (result != null && !result.toLowerCase().contains("invalid")) {
                 return ResponseEntity.ok(Map.of("token", result, "jwt", result, "message", "Login Successful"));
