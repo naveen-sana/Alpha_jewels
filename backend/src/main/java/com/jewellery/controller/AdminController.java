@@ -887,8 +887,11 @@ public class AdminController {
             String phone = (String) body.get("phone");
             String role = (String) body.get("role");
 
-            jdbcTemplate.update("UPDATE user SET full_name=?, email=?, phone=?, role=? WHERE id=?",
-                    name, email, phone, role, id);
+            try {
+                jdbcTemplate.update("UPDATE \"user\" SET full_name=?, email=?, phone=?, role=? WHERE id=?", name, email, phone, role, id);
+            } catch (Exception e) {
+                jdbcTemplate.update("UPDATE users SET full_name=?, email=?, phone=?, role=? WHERE id=?", name, email, phone, role, id);
+            }
             return ResponseEntity.ok(Map.of("message", "User updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating user: " + e.getMessage());
@@ -899,7 +902,11 @@ public class AdminController {
     public ResponseEntity<?> updateUserRole(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         try {
             String role = (String) body.get("role");
-            jdbcTemplate.update("UPDATE user SET role=? WHERE id=?", role, id);
+            try {
+                jdbcTemplate.update("UPDATE \"user\" SET role=? WHERE id=?", role, id);
+            } catch (Exception e) {
+                jdbcTemplate.update("UPDATE users SET role=? WHERE id=?", role, id);
+            }
             return ResponseEntity.ok(Map.of("message", "User role updated to " + role));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error updating user role: " + e.getMessage());
@@ -911,7 +918,11 @@ public class AdminController {
         try {
             String newPassword = (String) body.get("newPassword");
             String encoded = passwordEncoder != null ? passwordEncoder.encode(newPassword) : newPassword;
-            jdbcTemplate.update("UPDATE user SET password=? WHERE id=?", encoded, id);
+            try {
+                jdbcTemplate.update("UPDATE \"user\" SET password=? WHERE id=?", encoded, id);
+            } catch (Exception e) {
+                jdbcTemplate.update("UPDATE users SET password=? WHERE id=?", encoded, id);
+            }
             return ResponseEntity.ok(Map.of("message", "User password reset successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error resetting password: " + e.getMessage());
@@ -921,7 +932,11 @@ public class AdminController {
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUserAdmin(@PathVariable Long id) {
         try {
-            jdbcTemplate.update("DELETE FROM user WHERE id=?", id);
+            try {
+                jdbcTemplate.update("DELETE FROM \"user\" WHERE id=?", id);
+            } catch (Exception e) {
+                jdbcTemplate.update("DELETE FROM users WHERE id=?", id);
+            }
             return ResponseEntity.ok(Map.of("message", "User account deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error deleting user: " + e.getMessage());
@@ -970,9 +985,13 @@ public class AdminController {
                     ? body.get("status").toString()
                     : "ACTIVE";
 
-            jdbcTemplate.update("INSERT INTO coupons (code, discount_percentage, min_spend, expiry_date, status) VALUES (?, ?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE discount_percentage=VALUES(discount_percentage), min_spend=VALUES(min_spend), expiry_date=VALUES(expiry_date), status=VALUES(status)",
-                    code, discountPercentage, minSpend, expiryDate, status);
+            try {
+                jdbcTemplate.update("INSERT INTO coupons (code, discount_percentage, min_spend, expiry_date, status) VALUES (?, ?, ?, ?, ?)",
+                        code, discountPercentage, minSpend, expiryDate, status);
+            } catch (Exception e) {
+                jdbcTemplate.update("UPDATE coupons SET discount_percentage = ?, min_spend = ?, expiry_date = ?, status = ? WHERE UPPER(code) = UPPER(?)",
+                        discountPercentage, minSpend, expiryDate, status, code);
+            }
 
             return ResponseEntity.ok(Map.of("message", "Coupon created successfully"));
         } catch (Exception e) {

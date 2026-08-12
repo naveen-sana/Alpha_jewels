@@ -410,15 +410,44 @@ public class ProductCartController {
         }
     }
 
-    @RequestMapping(value = {"/products", "/products/all", "/products/list"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<List<Map<String, Object>>> getProducts(@RequestParam(name = "category", required = false) String category) {
-        boolean isAll = category == null || 
-                        category.trim().isEmpty() || 
-                        category.trim().equalsIgnoreCase("null") || 
-                        category.trim().equalsIgnoreCase("undefined") || 
-                        category.trim().equalsIgnoreCase("All") || 
-                        category.trim().equalsIgnoreCase("all");
+    @GetMapping("/products")
+    public ResponseEntity<List<Map<String, Object>>> getPublicProducts(@RequestParam(value = "category", required = false) String category) {
+        String imgTable = "productimages";
+        try {
+            List<Map<String, Object>> check = jdbcTemplate.queryForList("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME)='product_images'");
+            if (check != null && !check.isEmpty()) imgTable = "product_images";
+        } catch (Exception ignored) {}
 
+        String sql = "SELECT p.product_id as id, p.name, p.description, p.price, COALESCE(p.stock, 10) as stock, " +
+                "COALESCE(c.category_name, 'Diamond') as categoryName, COALESCE(c.category_name, 'Diamond') as category, " +
+                "pi.image_url as imageUrl " +
+                "FROM products p " +
+                "LEFT JOIN categories c ON p.category_id = c.category_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM " + imgTable + " GROUP BY product_id) pi ON p.product_id = pi.product_id " +
+                "WHERE COALESCE(p.status, 'ACTIVE') = 'ACTIVE' " +
+                "ORDER BY p.product_id DESC";
+
+        try {
+            List<Map<String, Object>> dbProducts = jdbcTemplate.queryForList(sql);
+            if (!dbProducts.isEmpty()) {
+                if (category == null || category.trim().isEmpty() || category.trim().equalsIgnoreCase("all")) {
+                    return ResponseEntity.ok(dbProducts);
+                }
+                List<Map<String, Object>> filtered = new ArrayList<>();
+                for (Map<String, Object> item : dbProducts) {
+                    String cat = (String) item.get("categoryName");
+                    if (cat != null && cat.equalsIgnoreCase(category.trim())) {
+                        filtered.add(item);
+                    }
+                }
+                return ResponseEntity.ok(filtered);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Fallback to static catalog if DB query returned nothing
+        boolean isAll = category == null || category.trim().isEmpty() || category.trim().equalsIgnoreCase("all");
         if (isAll) {
             return ResponseEntity.ok(STATIC_CATALOG);
         }
