@@ -72,6 +72,15 @@ public class DatabaseConfig {
                     if (!formattedUrl.contains("allowPublicKeyRetrieval=")) {
                         formattedUrl += "&allowPublicKeyRetrieval=true";
                     }
+                    if (!formattedUrl.contains("useSSL=")) {
+                        formattedUrl += "&useSSL=true";
+                    }
+                    if (!formattedUrl.contains("enabledTLSProtocols=")) {
+                        formattedUrl += "&enabledTLSProtocols=TLSv1.2,TLSv1.3";
+                    }
+                    if (!formattedUrl.contains("serverTimezone=")) {
+                        formattedUrl += "&serverTimezone=UTC";
+                    }
 
                     log.info("Successfully parsed Aiven MySQL URL for user: {}", parsedUser);
                     return DataSourceBuilder.create()
@@ -92,6 +101,19 @@ public class DatabaseConfig {
             cleanUrl = cleanUrl.replaceAll("(?i)sslmode=", "sslMode=")
                                .replaceAll("(?i)ssl-mode=", "sslMode=");
 
+            if (!cleanUrl.contains("trustServerCertificate=")) {
+                cleanUrl += (cleanUrl.contains("?") ? "&" : "?") + "trustServerCertificate=true";
+            }
+            if (!cleanUrl.contains("allowPublicKeyRetrieval=")) {
+                cleanUrl += "&allowPublicKeyRetrieval=true";
+            }
+            if (!cleanUrl.contains("useSSL=")) {
+                cleanUrl += "&useSSL=true";
+            }
+            if (!cleanUrl.contains("enabledTLSProtocols=")) {
+                cleanUrl += "&enabledTLSProtocols=TLSv1.2,TLSv1.3";
+            }
+
             var builder = DataSourceBuilder.create()
                     .driverClassName("com.mysql.cj.jdbc.Driver")
                     .url(cleanUrl);
@@ -104,6 +126,18 @@ public class DatabaseConfig {
             }
 
             return builder.build();
+        }
+
+        // If individual DB_HOST environment variable is configured for remote MySQL/Aiven
+        if (dbHost != null && !dbHost.trim().isEmpty() && !"localhost".equalsIgnoreCase(dbHost.trim()) && !"127.0.0.1".equals(dbHost.trim())) {
+            log.info("Configuring remote MySQL DataSource for host: {} on port {}", dbHost, dbPort);
+            String remoteUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName + "?useSSL=true&sslMode=REQUIRED&trustServerCertificate=true&allowPublicKeyRetrieval=true&enabledTLSProtocols=TLSv1.2,TLSv1.3&serverTimezone=UTC";
+            return DataSourceBuilder.create()
+                    .driverClassName("com.mysql.cj.jdbc.Driver")
+                    .url(remoteUrl)
+                    .username(username)
+                    .password(password)
+                    .build();
         }
 
         // Local MySQL Server 8.0 DataSource configuration
