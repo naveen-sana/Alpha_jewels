@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jewellery.dto.ChangePasswordRequest;
 import com.jewellery.dto.ForgotPasswordRequest;
+import com.jewellery.dto.LoginRequest;
 import com.jewellery.dto.ResetPasswordRequest;
 import com.jewellery.entity.Role;
 import com.jewellery.entity.User;
@@ -49,69 +50,16 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody(required = false) com.jewellery.dto.LoginRequest request) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
         try {
-            String email = (request != null && request.getEmail() != null) ? request.getEmail().trim() : "";
-            String password = (request != null && request.getPassword() != null) ? request.getPassword().trim() : "";
-
-            if (email.isEmpty() || password.isEmpty()) {
-                return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
+            String result = userService.loginUser(request);
+            if (result != null && !result.toLowerCase().contains("invalid")) {
+                return ResponseEntity.ok(Map.of("token", result, "message", "Login Successful"));
             }
-
-            String cleanEmail = email.toLowerCase();
-
-            List<Map<String, Object>> users = new ArrayList<>();
-            try {
-                users = jdbcTemplate.queryForList(
-                    "SELECT email, full_name, password, role FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
-                    cleanEmail
-                );
-            } catch (Throwable ignored) {}
-
-            if (!users.isEmpty()) {
-                Map<String, Object> u = users.get(0);
-                String dbEmail = u.get("email") != null ? u.get("email").toString() : cleanEmail;
-                String dbName = u.get("full_name") != null ? u.get("full_name").toString() : "User";
-                String dbRole = u.get("role") != null ? u.get("role").toString() : "USER";
-                String dbPass = u.get("password") != null ? u.get("password").toString() : "";
-
-                boolean match = false;
-                if (dbPass.equals(password)) {
-                    match = true;
-                } else if (passwordEncoder != null && (dbPass.startsWith("$2a$") || dbPass.startsWith("$2b$") || dbPass.startsWith("$2y$"))) {
-                    try { match = passwordEncoder.matches(password, dbPass); } catch (Throwable ignored) {}
-                }
-
-                if (match) {
-                    Role r = "ADMIN".equalsIgnoreCase(dbRole) ? Role.ADMIN : Role.USER;
-                    String token = getJwtService().generateToken(dbEmail, r, dbName);
-                    return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
-                }
-            }
-
-            if ("admin@gmail.com".equalsIgnoreCase(cleanEmail) && "admin".equals(password)) {
-                String token = getJwtService().generateToken("admin@gmail.com", Role.ADMIN, "System Admin");
-                return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
-            }
-            if ("naveensana66028@gmail.com".equalsIgnoreCase(cleanEmail) && ("Naveen@0987".equals(password) || "Admin@123456".equals(password))) {
-                String token = getJwtService().generateToken("naveensana66028@gmail.com", Role.ADMIN, "Naveen Sana");
-                return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
-            }
-
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         } catch (Throwable e) {
-            if (request != null && request.getEmail() != null) {
-                String email = request.getEmail().trim();
-                String token = getJwtService().generateToken(email, Role.USER, "User");
-                return ResponseEntity.ok(Map.of("token", token, "message", "Login Successful"));
-            }
             return ResponseEntity.status(401).body(Map.of("error", "Invalid Email or Password", "message", "Invalid Email or Password"));
         }
-    }
-
-    private JwtService getJwtService() {
-        if (jwtService != null) return jwtService;
-        return new JwtService("change-this-development-secret-key-to-a-long-random-value-123456789", "86400000");
     }
 
     @PostMapping("/register")
