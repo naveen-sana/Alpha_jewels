@@ -79,3 +79,61 @@ ON CONFLICT DO NOTHING;
 UPDATE products SET product_id = id WHERE product_id IS NULL;
 UPDATE categories SET category_id = id WHERE category_id IS NULL;
 UPDATE categories SET category_name = name WHERE category_name IS NULL;
+
+-- Price, Stock and Category Synchronization
+UPDATE products SET price = 7914.29, stock = 5, stock_quantity = 5, category_id = 1 WHERE LOWER(name) LIKE '%nury chevron%';
+UPDATE products SET price = 9642.86, stock = 5, stock_quantity = 5, category_id = 1 WHERE LOWER(name) LIKE '%trina ring%';
+UPDATE products SET price = 7743.29, stock = 7, stock_quantity = 7, category_id = 1 WHERE LOWER(name) LIKE '%ozo stud%';
+UPDATE products SET price = 9287.00, stock = 7, stock_quantity = 7, category_id = 1 WHERE LOWER(name) LIKE '%nuray%';
+UPDATE products SET price = 12785.71, stock = 6, stock_quantity = 6, category_id = 1 WHERE LOWER(name) LIKE '%mazikeen%';
+UPDATE products SET price = 14285.57, stock = 6, stock_quantity = 6, category_id = 1 WHERE LOWER(name) LIKE '%ryck princess%';
+UPDATE products SET price = 9000.00, stock = 8, stock_quantity = 8, category_id = 1 WHERE LOWER(name) LIKE '%aelric%' OR LOWER(name) LIKE '%bracelite%';
+UPDATE products SET price = 9200.00, stock = 8, stock_quantity = 8, category_id = 1 WHERE LOWER(name) LIKE '%resilent%' OR LOWER(name) LIKE '%resilient%';
+UPDATE products SET price = 9571.43, stock = 4, stock_quantity = 4, category_id = 1 WHERE LOWER(name) LIKE '%line bangles%';
+UPDATE products SET price = 10000.00, stock = 4, stock_quantity = 4, category_id = 1 WHERE LOWER(name) LIKE '%set bangles%';
+
+UPDATE products SET price = 9000.00, stock = 6, stock_quantity = 6, category_id = 2 WHERE LOWER(name) LIKE '%spiral ring%';
+UPDATE products SET price = 6600.00, stock = 6, stock_quantity = 6, category_id = 2 WHERE LOWER(name) LIKE '%leaf design%';
+UPDATE products SET price = 8800.00, stock = 4, stock_quantity = 4, category_id = 2 WHERE LOWER(name) LIKE '%stud earrings%';
+UPDATE products SET price = 9285.71, stock = 8, stock_quantity = 8, category_id = 2 WHERE LOWER(name) LIKE '%mahroosh%' OR LOWER(name) LIKE '%jhumka%';
+UPDATE products SET price = 11111.00, stock = 3, stock_quantity = 3, category_id = 2 WHERE LOWER(name) LIKE '%lakshmi temple%';
+UPDATE products SET price = 12698.29, stock = 3, stock_quantity = 3, category_id = 2 WHERE LOWER(name) LIKE '%lakshmi gold%';
+UPDATE products SET price = 9162.40, stock = 2, stock_quantity = 2, category_id = 2 WHERE LOWER(name) LIKE '%gold beaded%';
+UPDATE products SET price = 7712.40, stock = 8, stock_quantity = 8, category_id = 2 WHERE LOWER(name) LIKE '%textured gold%';
+UPDATE products SET price = 65481.00, stock = 5, stock_quantity = 5, category_id = 2 WHERE LOWER(name) LIKE '%floral bangle%';
+UPDATE products SET price = 65874.00, stock = 5, stock_quantity = 5, category_id = 2 WHERE LOWER(name) LIKE '%designer gold%';
+
+UPDATE products SET price = 9004.20, stock = 8, stock_quantity = 8, category_id = 3 WHERE LOWER(name) LIKE '%vidh platinum%';
+UPDATE products SET price = 9391.57, stock = 8, stock_quantity = 8, category_id = 3 WHERE LOWER(name) LIKE '%elegant floral%';
+UPDATE products SET price = 6650.80, stock = 7, stock_quantity = 7, category_id = 3 WHERE LOWER(name) LIKE '%swirl stud%';
+UPDATE products SET price = 6509.20, stock = 7, stock_quantity = 7, category_id = 3 WHERE LOWER(name) LIKE '%floral stud%';
+UPDATE products SET price = 12842.71, stock = 1, stock_quantity = 1, category_id = 3 WHERE LOWER(name) LIKE '%emerald drop%';
+UPDATE products SET price = 12556.86, stock = 1, stock_quantity = 1, category_id = 3 WHERE LOWER(name) LIKE '%solitaire platinum pendant%';
+UPDATE products SET price = 9353.57, stock = 3, stock_quantity = 3, category_id = 3 WHERE LOWER(name) LIKE '%star motif platinum bracelet%';
+UPDATE products SET price = 8124.86, stock = 3, stock_quantity = 3, category_id = 3 WHERE LOWER(name) LIKE '%floral two-tone%';
+UPDATE products SET price = 9353.86, stock = 4, stock_quantity = 4, category_id = 3 WHERE LOWER(name) LIKE '%star- motif platinum bangles%' OR LOWER(name) LIKE '%star motif platinum bangles%';
+UPDATE products SET price = 7807.86, stock = 5, stock_quantity = 5, category_id = 3 WHERE LOWER(name) LIKE '%eternity platinum%';
+
+UPDATE products SET price = 6666.40, stock = 8, stock_quantity = 8, category_id = 4 WHERE LOWER(name) LIKE '%meris textured%';
+UPDATE products SET price = 4542.40, stock = 8, stock_quantity = 8, category_id = 4 WHERE LOWER(name) LIKE '%butterfly ring%';
+UPDATE products SET price = 4917.80, stock = 9, stock_quantity = 9, category_id = 4 WHERE LOWER(name) LIKE '%dangler earrings%';
+UPDATE products SET price = 5517.20, stock = 9, stock_quantity = 9, category_id = 4 WHERE LOWER(name) LIKE '%ossum earrings%';
+UPDATE products SET price = 9164.20, stock = 4, stock_quantity = 4, category_id = 4 WHERE LOWER(name) LIKE '%wisdom sterling%';
+UPDATE products SET price = 9305.00, stock = 4, stock_quantity = 4, category_id = 4 WHERE LOWER(name) LIKE '%gargistone%' OR LOWER(name) LIKE '%gargi stone%';
+UPDATE products SET price = 7936.29, stock = 3, stock_quantity = 3, category_id = 4 WHERE LOWER(name) LIKE '%flexi bracelet%';
+UPDATE products SET price = 7048.20, stock = 3, stock_quantity = 3, category_id = 4 WHERE LOWER(name) LIKE '%chain bracelet%';
+UPDATE products SET price = 8503.20, stock = 4, stock_quantity = 4, category_id = 4 WHERE LOWER(name) LIKE '%rewa bangles%';
+UPDATE products SET price = 7912.80, stock = 4, stock_quantity = 4, category_id = 4 WHERE LOWER(name) LIKE '%sterling bangles%';
+
+UPDATE products SET price = 12000.00, stock = 3, stock_quantity = 3, category_id = 1 WHERE LOWER(name) LIKE '%royal diamond choker%';
+UPDATE products SET price = 7886.00, stock = 10, stock_quantity = 10, category_id = 2 WHERE LOWER(name) LIKE '%neckpice%';
+UPDATE products SET price = 7896.00, stock = 9, stock_quantity = 9, category_id = 2 WHERE LOWER(name) LIKE '%long necklace%';
+UPDATE products SET price = 5632.00, stock = 10, stock_quantity = 10, category_id = 2 WHERE LOWER(name) LIKE '%antique jumkas%';
+UPDATE products SET price = 7986.00, stock = 10, stock_quantity = 10, category_id = 2 WHERE LOWER(name) LIKE '%kemp-green%';
+UPDATE products SET price = 9889.00, stock = 10, stock_quantity = 10, category_id = 1 WHERE LOWER(name) LIKE '%stoned diamond%';
+UPDATE products SET price = 9563.00, stock = 10, stock_quantity = 10, category_id = 1 WHERE LOWER(name) LIKE '%stoned ring%';
+UPDATE products SET price = 6548.00, stock = 10, stock_quantity = 10, category_id = 3 WHERE LOWER(name) LIKE '%rose gold%';
+UPDATE products SET price = 6541.00, stock = 10, stock_quantity = 10, category_id = 3 WHERE LOWER(name) LIKE '%square piece%';
+UPDATE products SET price = 5469.00, stock = 10, stock_quantity = 10, category_id = 4 WHERE LOWER(name) LIKE '%ghungroo%';
+UPDATE products SET price = 4589.00, stock = 10, stock_quantity = 10, category_id = 4 WHERE LOWER(name) LIKE '%navaratri%';
+
