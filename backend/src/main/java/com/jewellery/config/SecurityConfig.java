@@ -68,19 +68,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        List<String> patterns = new ArrayList<>();
-        if (allowedOriginsStr != null) {
-            for (String s : allowedOriginsStr.split(",")) {
-                String trimmed = s.trim();
-                if (!trimmed.isEmpty()) patterns.add(trimmed);
-            }
-        }
-        patterns.add("https://*.vercel.app");
-        patterns.add("http://localhost:*");
-        patterns.add("http://127.0.0.1:*");
-
-        configuration.setAllowedOriginPatterns(patterns);
-
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
