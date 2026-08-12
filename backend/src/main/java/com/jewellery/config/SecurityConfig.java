@@ -24,12 +24,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomCorsFilter customCorsFilter;
 
-    @Value("${cors.allowed-origins:https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app,https://alpha-jewels.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}")
-    private String allowedOriginsStr;
-
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, CustomCorsFilter customCorsFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.customCorsFilter = customCorsFilter;
     }
 
     @Bean
@@ -53,8 +52,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+            .addFilterBefore(customCorsFilter, org.springframework.security.web.access.channel.ChannelProcessingFilter.class)
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .formLogin(form -> form.disable())
