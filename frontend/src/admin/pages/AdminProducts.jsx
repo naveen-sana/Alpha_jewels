@@ -70,26 +70,41 @@ const AdminProducts = () => {
 
   // Fetch Products & Categories from Backend REST API
   const fetchProducts = async () => {
-    if (products.length === 0) {
-      setLoading(true)
-    }
+    setLoading(true)
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     
+    let prodList = []
+    let catList = []
+
     try {
-      const [resProd, resCat] = await Promise.all([
-        adminApi.get('/api/admin/products', config),
-        adminApi.get('/api/admin/categories', config),
-      ])
-      const prodList = Array.isArray(resProd.data) ? resProd.data : []
-      const catList = Array.isArray(resCat.data) ? resCat.data : []
-      setProducts(prodList)
-      setCategories(catList)
+      const resProd = await adminApi.get('/api/admin/products', config)
+      if (Array.isArray(resProd.data) && resProd.data.length > 0) {
+        prodList = resProd.data
+      }
     } catch (err) {
-      console.error('Error fetching inventory from database:', err)
-    } finally {
-      setLoading(false)
+      console.error('Admin API get products failed:', err)
     }
+
+    if (prodList.length === 0) {
+      try {
+        const resPublic = await adminApi.get('/api/products')
+        if (Array.isArray(resPublic.data) && resPublic.data.length > 0) {
+          prodList = resPublic.data
+        }
+      } catch (err) {
+        console.error('Public API get products failed:', err)
+      }
+    }
+
+    try {
+      const resCat = await adminApi.get('/api/admin/categories', config)
+      if (Array.isArray(resCat.data)) catList = resCat.data
+    } catch (ignored) {}
+
+    setProducts(prodList)
+    setCategories(catList)
+    setLoading(false)
   }
 
   useEffect(() => {
