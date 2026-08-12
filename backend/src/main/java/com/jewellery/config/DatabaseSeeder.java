@@ -220,8 +220,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                     );
                 } else {
                     jdbcTemplate.update(
-                            "UPDATE products SET category_id = ?, description = ?, price = ?, stock = ? WHERE LOWER(name) = LOWER(?)",
-                            catId, desc, price, stock, name
+                            "UPDATE products SET category_id = ?, description = ?, price = ?, stock = ? WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) OR LOWER(name) LIKE LOWER(?)",
+                            catId, desc, price, stock, name, "%" + name + "%"
                     );
                 }
 
