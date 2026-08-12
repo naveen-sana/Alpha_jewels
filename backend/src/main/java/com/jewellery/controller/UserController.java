@@ -18,34 +18,61 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
-        return userService.registerUser(user);
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            User registered = userService.registerUser(user);
+            return ResponseEntity.ok(registered);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.Map.of("error", "Registration failed: " + e.getMessage()));
+        }
     }
     
     @PostMapping("/login")
-    public String loginUser(@RequestBody LoginRequest request) {
-        return userService.loginUser(request);
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequest request) {
+        try {
+            String result = userService.loginUser(request);
+            if ("Invalid Email or Password".equalsIgnoreCase(result)) {
+                return ResponseEntity.status(401).body(result);
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Login error: " + e.getMessage());
+        }
     }
 
     @PostMapping("/change-password")
-    public String changePassword(@RequestBody ChangePasswordRequest request) {
-        return userService.changePassword(request);
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            return ResponseEntity.ok(userService.changePassword(request));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Password change failed: " + e.getMessage());
+        }
     }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        System.out.println("========== FORGOT PASSWORD API CALLED ==========");
-        return ResponseEntity.ok(userService.forgotPassword(request));
+        try {
+            System.out.println("========== FORGOT PASSWORD API CALLED ==========");
+            return ResponseEntity.ok(userService.forgotPassword(request));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Forgot password failed: " + e.getMessage());
+        }
     }
     
-
     @PostMapping("/reset-password")
-    public String resetPassword(@RequestBody ResetPasswordRequest request) {
-        return userService.resetPassword(request);
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            return ResponseEntity.ok(userService.resetPassword(request));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Reset password failed: " + e.getMessage());
+        }
     }
 
     @PostMapping("/logout")
-    public String logout() {
-        return "Logout Successful";
+    public ResponseEntity<String> logout() {
+        return ResponseEntity.ok("Logout Successful");
     }
 
 }
