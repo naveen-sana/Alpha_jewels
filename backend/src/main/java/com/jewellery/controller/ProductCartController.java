@@ -79,7 +79,7 @@ public class ProductCartController {
                     "(3, 'Platinum', 'Platinum', 'ACTIVE'), " +
                     "(4, 'Silver', 'Silver', 'ACTIVE') " +
                     "ON CONFLICT DO NOTHING");
-            jdbcTemplate.update("DELETE FROM products WHERE sku LIKE 'SKU-2%' OR sku LIKE 'SKU-0%'");
+            jdbcTemplate.update("DELETE FROM products WHERE sku LIKE 'SKU-2%' OR sku LIKE 'SKU-0%' OR product_id > 200");
             logs.add("Categories seeded and test junk rows purged");
         } catch (Exception e) { logs.add("Categories seed error: " + e.getMessage()); }
 

@@ -526,6 +526,11 @@ public class AdminController {
     }
 
     private List<Map<String, Object>> getProductsListInternal(int limit) {
+        // Purge test junk rows (SKU-23XX, SKU-0XX, or product_id > 200) that caused wrong categories and duplicate stock=10 rows
+        try {
+            jdbcTemplate.update("DELETE FROM products WHERE sku LIKE 'SKU-2%' OR sku LIKE 'SKU-0%' OR product_id > 200");
+        } catch (Exception ignored) {}
+
         String sql = "SELECT p.product_id as id, p.name, p.category_id as categoryId, COALESCE(c.category_name, 'Jewellery') as category, " +
                 "p.description, p.price, COALESCE(p.discount, 0.00) as discount, COALESCE(p.stock, 0) as stock, " +
                 "COALESCE(p.weight, '10g') as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
@@ -536,7 +541,7 @@ public class AdminController {
                 "FROM products p " +
                 "LEFT JOIN categories c ON p.category_id = c.category_id " +
                 "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pi ON p.product_id = pi.product_id " +
-                "ORDER BY p.product_id DESC LIMIT " + limit;
+                "ORDER BY p.product_id ASC LIMIT " + limit;
         try {
             return jdbcTemplate.queryForList(sql);
         } catch (Exception e) {
