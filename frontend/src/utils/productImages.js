@@ -8,7 +8,7 @@ const DEFAULT_IMAGES = {
 };
 
 const PRODUCT_SPECIFIC_IMAGES = {
-  // Diamond Collection (111 - 120)
+  // Diamond Collection
   111: 'https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476',
   112: 'https://ik.imagekit.io/StringstackNaveen/ring4-the%20trina%20ring(m).webp?updatedAt=1785154301792',
   113: 'https://ik.imagekit.io/StringstackNaveen/earring1.webp?updatedAt=1785154351435',
@@ -20,7 +20,7 @@ const PRODUCT_SPECIFIC_IMAGES = {
   119: 'https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553',
   120: 'https://ik.imagekit.io/StringstackNaveen/bangle%202.webp?updatedAt=1785155972034',
 
-  // Gold Collection (121 - 130)
+  // Gold Collection
   121: 'https://ik.imagekit.io/StringstackNaveen/gold%20ring2.jpg',
   122: 'https://ik.imagekit.io/StringstackNaveen/gold%20ring1.jpg',
   123: 'https://ik.imagekit.io/StringstackNaveen/earrings.jpg',
@@ -29,45 +29,42 @@ const PRODUCT_SPECIFIC_IMAGES = {
   126: 'https://ik.imagekit.io/StringstackNaveen/necklace2.jpg',
   127: 'https://ik.imagekit.io/StringstackNaveen/bracelite1.webp',
   128: 'https://ik.imagekit.io/StringstackNaveen/gold%20bracelet2.avif',
-  129: 'https://ik.imagekit.io/StringstackNaveen/bangles-1.webp',
-  130: 'https://ik.imagekit.io/StringstackNaveen/bangle2.jpg',
 
-  // Platinum Collection (131 - 140)
+  // Platinum Collection
   131: 'https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp',
   132: 'https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%202.webp',
   133: 'https://ik.imagekit.io/StringstackSanjana/Platinum/ear%201.jpeg',
   134: 'https://ik.imagekit.io/StringstackSanjana/Platinum/ear%202.webp',
   135: 'https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%202.webp',
-  136: 'https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%201.webp',
-  137: 'https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%201.webp',
+  136: 'https://ik.imagekit.io/StringstackNaveen/necklace1.jpeg',
+  137: 'https://ik.imagekit.io/StringstackNaveen/bracelet.jpg',
   138: 'https://ik.imagekit.io/StringstackNaveen/WhatsApp%20Image%202026-07-28%20at%2010.02.17%20AM.jpeg',
   139: 'https://ik.imagekit.io/StringstackSanjana/Platinum/braclet%201.webp',
-  140: 'https://ik.imagekit.io/StringstackSanjana/Platinum/BANG%203.webp',
+  140: 'https://ik.imagekit.io/StringstackNaveen/platinum%20bangle.jpg',
 
-  // Silver Collection (141 - 150)
+  // Silver Collection
   141: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp',
   142: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image2.webp',
   143: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image3.webp',
   144: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image4.webp',
   145: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image5.webp',
-  146: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image6.webp',
-  147: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image7.webp',
-  148: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image8.webp',
-  149: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image9.webp',
-  150: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image10.webp',
+  146: 'https://ik.imagekit.io/StringstackNaveen/silver%20necklace.webp',
+  147: 'https://ik.imagekit.io/StringstackNaveen/silver%20bracelet.jpg',
+  148: 'https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg',
+  149: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvNTouHpMaDkVQE0EBj9ACaFYTpdnjHseaPqkPxpqLQ&s=10',
 
-  // Extra MySQL Workbench items (151 - 164)
-  151: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
-  155: 'https://ik.imagekit.io/StringstackNaveen/necklace2.jpg',
-  156: 'https://ik.imagekit.io/StringstackNaveen/Lakshmi%20necklace-gold.avif',
-  157: 'https://ik.imagekit.io/StringstackNaveen/earings2.jpg',
-  158: 'https://ik.imagekit.io/StringstackNaveen/Lakshmi%20necklace-gold.avif',
-  159: 'https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171',
-  160: 'https://ik.imagekit.io/StringstackNaveen/ring2-the%20nury%20Chevron%20Ring.webp?updatedAt=1785154185476',
-  161: 'https://ik.imagekit.io/StringstackSanjana/Platinum/Ring%201.webp',
-  162: 'https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%202.webp',
-  163: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image5.webp',
-  164: 'https://ik.imagekit.io/StringStackSavitri/SilverImages/image6.webp',
+  // Extra MySQL Workbench items
+  151: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f',
+  155: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10',
+  156: 'https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg',
+  157: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUGXcUrPc96aQ0Bkex6Iz88U2rtbIhTsRHaKhuIvqvBgfiiWOgJ680coY&s=10',
+  158: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10',
+  159: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeg4gTnQNB8QwFa2NabGCY6GIyuk-O5YgHPh0lWk89FQ&s=10',
+  160: 'https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg',
+  161: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsGuP29OiLm3h8E4bWxCr_6IkP3o_Pn86YyBk_3tqsAw&s=10',
+  162: 'https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg',
+  163: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtETkKAxYb9cdrBBVOBDlQMWvWmvMdaWGq2OvoOOXWbtVwR4zmQVLEPh8b&s=10',
+  164: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_jhWvKIVjAe9n7QaDN6uMFMb_IPmbINqHvMHp7p9A9z2K_GiGMpDIiz8&s=10',
 };
 
 export const getProductImage = (product) => {
