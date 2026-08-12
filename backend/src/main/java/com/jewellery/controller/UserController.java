@@ -24,7 +24,7 @@ public class UserController {
             return ResponseEntity.ok(registered);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return ResponseEntity.status(500).body(java.util.Map.of("error", "Registration failed: " + e.getMessage()));
         }
     }
@@ -37,7 +37,7 @@ public class UserController {
                 return ResponseEntity.status(401).body(java.util.Map.of("error", result, "message", result));
             }
             return ResponseEntity.ok(java.util.Map.of("token", result, "message", "Login Successful"));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return ResponseEntity.status(500).body(java.util.Map.of("error", "Login error: " + e.getMessage()));
         }
     }
