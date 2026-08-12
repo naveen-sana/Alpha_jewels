@@ -109,7 +109,7 @@ public class SecurityConfig {
             );
 
         if (jwtAuthenticationFilter != null) {
-            http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class);
         }
 
         return http.build();
