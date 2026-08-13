@@ -65,7 +65,7 @@ public class SecurityConfig {
 
         if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
             for (String raw : allowedOriginsStr.split(",")) {
-                String o = raw.trim();
+                String o = raw.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "").replaceAll("\r|\n", "");
                 if (o.endsWith("/")) {
                     o = o.substring(0, o.length() - 1);
                 }
@@ -74,6 +74,8 @@ public class SecurityConfig {
                 }
             }
         }
+
+        System.out.println(">>> REGISTERED CORS ORIGINS: " + origins);
 
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
