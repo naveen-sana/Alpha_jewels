@@ -57,25 +57,37 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*");
-        configuration.setAllowedOrigins(List.of(
-            "https://alpha-jewels-personal.vercel.app",
-            "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
-            "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
-            "https://alpha-jewels.vercel.app",
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "http://127.0.0.1:5173"
-        ));
+
+        List<String> origins = new java.util.ArrayList<>();
+        origins.add("https://alpha-jewels-personal.vercel.app");
+        origins.add("https://frontend-omega-pearl-7cy9ijnsyi.vercel.app");
+        origins.add("https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app");
+        origins.add("https://alpha-jewels.vercel.app");
+        origins.add("http://localhost:5173");
+        origins.add("http://localhost:3000");
+        origins.add("http://127.0.0.1:5173");
+
+        if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
+            for (String raw : allowedOriginsStr.split(",")) {
+                String o = raw.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "").replaceAll("\r|\n", "");
+                if (o.endsWith("/")) {
+                    o = o.substring(0, o.length() - 1);
+                }
+                if (!o.isEmpty() && !origins.contains(o)) {
+                    origins.add(o);
+                }
+            }
+        }
+
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
 
