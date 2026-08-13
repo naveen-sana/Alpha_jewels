@@ -22,13 +22,17 @@ public class JwtService {
     private final long expirationMs;
 
     public JwtService() {
-        this("change-this-development-secret-key-to-a-long-random-value-123456789", "86400000");
+        this(System.getenv("JWT_SECRET"), System.getenv("JWT_EXPIRATION_MS"));
     }
 
-    public JwtService(@Value("${app.jwt.secret:change-this-development-secret-key-to-a-long-random-value-123456789}") String secret,
+    public JwtService(@Value("${app.jwt.secret:${JWT_SECRET:AlphaJewelsProductionJwtSecretKey2026SecureKey32BytesLong!}}") String secret,
                       @Value("${app.jwt.expiration-ms:86400000}") String expirationMsStr) {
-        String safeSecret = (secret != null && !secret.trim().isEmpty()) ? secret.trim() : "change-this-development-secret-key-to-a-long-random-value-123456789";
-        byte[] keyBytes = safeSecret.getBytes(StandardCharsets.UTF_8);
+        String envSecret = System.getenv("JWT_SECRET");
+        String effectiveSecret = (envSecret != null && !envSecret.trim().isEmpty()) ? envSecret.trim() : secret;
+        if (effectiveSecret == null || effectiveSecret.trim().isEmpty()) {
+            effectiveSecret = "AlphaJewelsProductionJwtSecretKey2026SecureKey32BytesLong!";
+        }
+        byte[] keyBytes = effectiveSecret.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
             try {
                 MessageDigest md = MessageDigest.getInstance("SHA-256");

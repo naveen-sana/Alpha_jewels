@@ -15,20 +15,11 @@ public class CustomErrorController implements ErrorController {
     @RequestMapping("/error")
     public ResponseEntity<Map<String, Object>> handleError(HttpServletRequest request) {
         Map<String, Object> body = new HashMap<>();
-        Object status = request.getAttribute("jakarta.servlet.error.status_code");
-        Object message = request.getAttribute("jakarta.servlet.error.message");
-        Object exception = request.getAttribute("jakarta.servlet.error.exception");
+        Object statusObj = request.getAttribute("jakarta.servlet.error.status_code");
+        int status = statusObj instanceof Integer i ? i : 500;
 
-        body.put("status", status != null ? status : 500);
-        body.put("message", message != null ? message.toString() : "Error occurred");
-        if (exception instanceof Throwable t) {
-            body.put("exceptionClass", t.getClass().getName());
-            body.put("exceptionMessage", t.getMessage());
-            if (t.getCause() != null) {
-                body.put("causeClass", t.getCause().getClass().getName());
-                body.put("causeMessage", t.getCause().getMessage());
-            }
-        }
-        return ResponseEntity.status(status != null ? (Integer) status : 500).body(body);
+        body.put("status", status);
+        body.put("message", status == 404 ? "Resource Not Found" : (status == 401 ? "Unauthorized Access" : (status == 403 ? "Access Denied" : "An internal server error occurred")));
+        return ResponseEntity.status(status).body(body);
     }
 }
