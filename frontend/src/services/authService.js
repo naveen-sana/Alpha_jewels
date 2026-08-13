@@ -20,8 +20,20 @@ export const registerUser = async ({ fullName, email, phone, password }) => {
 export const loginUser = async ({ email, password }) => {
   const cleanEmail = (email || '').trim()
   const cleanPassword = (password || '').trim()
-  const { data } = await apiClient.post('/api/users/login', { email: cleanEmail, password: cleanPassword })
+  let response
 
+  try {
+    response = await apiClient.post('/api/users/login', { email: cleanEmail, password: cleanPassword })
+  } catch (err) {
+    if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+      await new Promise((res) => setTimeout(res, 1000))
+      response = await apiClient.post('/api/users/login', { email: cleanEmail, password: cleanPassword })
+    } else {
+      throw err
+    }
+  }
+
+  const data = response?.data
   const token = typeof data === 'string' ? data : (data?.token || data?.jwt)
 
   if (typeof token === 'string' && !isJwtToken(token)) {
@@ -79,6 +91,9 @@ export const changePassword = async ({ email, oldPassword, newPassword }) => {
 }
 
 export const extractErrorMessage = (error) => {
+  if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+    return 'Connecting to live server. Please click SIGN IN again in 3 seconds.'
+  }
   if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
     return 'Server connection warming up. Please click SIGN IN again.'
   }
