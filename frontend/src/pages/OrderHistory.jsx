@@ -199,7 +199,48 @@ const OrderHistory = () => {
   };
 
   const handlePrintInvoice = () => {
-    window.print();
+    const invoiceNode = document.querySelector('.printable-invoice-modal');
+    if (!invoiceNode) {
+      window.print();
+      return;
+    }
+    const printWin = window.open('', '_blank', 'width=850,height=1100');
+    if (!printWin) {
+      window.print();
+      return;
+    }
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Tax Invoice - ${invoiceOrder?.orderId || 'Alpha Jewels'}</title>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+          <style>
+            @page { size: portrait; margin: 10mm; }
+            body { font-family: sans-serif; background: #ffffff !important; color: #000000 !important; margin: 0; padding: 20px; }
+            .no-print { display: none !important; }
+            .printable-invoice-modal { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; }
+            .bg-gold { background-color: #d4af37 !important; color: #000000 !important; }
+            .border-gold { border-color: #d4af37 !important; }
+            .text-gold { color: #b8860b !important; }
+          </style>
+        </head>
+        <body>
+          <div class="printable-invoice-modal">
+            ${invoiceNode.innerHTML}
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 300);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWin.document.close();
   };
 
   return (
@@ -208,26 +249,10 @@ const OrderHistory = () => {
       <style>
         {`
           @media print {
-            body * {
-              visibility: hidden;
-            }
-            .printable-invoice-modal, .printable-invoice-modal * {
-              visibility: visible;
-            }
-            .printable-invoice-modal {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-              margin: 0;
-              padding: 20px;
-              background: white !important;
-              box-shadow: none !important;
-              border: none !important;
-            }
-            .no-print {
-              display: none !important;
-            }
+            body > *:not(#root) { display: none !important; }
+            #root > *:not(.order-history-page) { display: none !important; }
+            .no-print { display: none !important; }
+            @page { size: portrait; margin: 10mm; }
           }
         `}
       </style>

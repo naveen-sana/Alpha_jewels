@@ -230,17 +230,18 @@ const AdminProducts = () => {
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
     setIsDeleting(true)
+    const targetId = deleteTarget.product_id || deleteTarget.id
     const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
     const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {}
     try {
-      await adminApi.delete(`/api/admin/products/${deleteTarget.id}`, config)
+      await adminApi.delete(`/api/admin/products/${targetId}`, config)
       addToast(`Jewellery "${deleteTarget.name}" deleted successfully from database`, 'success')
-      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id))
+      setProducts((prev) => prev.filter((p) => (p.product_id || p.id) !== targetId))
       setDeleteTarget(null)
       fetchProducts()
     } catch (err) {
       console.error('Backend delete request failed:', err)
-      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id))
+      setProducts((prev) => prev.filter((p) => (p.product_id || p.id) !== targetId))
       addToast(`Jewellery "${deleteTarget.name}" deleted successfully`, 'success')
       setDeleteTarget(null)
     } finally {

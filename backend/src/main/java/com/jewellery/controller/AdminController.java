@@ -351,7 +351,7 @@ public class AdminController {
             // Coupons table
             try {
                 jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS coupons (" +
-                        "coupon_id SERIAL PRIMARY KEY, " +
+                        "coupon_id INT AUTO_INCREMENT PRIMARY KEY, " +
                         "code VARCHAR(50) NOT NULL UNIQUE, " +
                         "discount_percentage DECIMAL(5, 2) NOT NULL, " +
                         "min_spend DECIMAL(12, 2) DEFAULT 0.00, " +
@@ -530,14 +530,15 @@ public class AdminController {
                 "p.category_id as categoryId, COALESCE(c.name, c.category_name, 'Jewellery') as category, " +
                 "p.description, p.price, COALESCE(p.discount, 0.00) as discount, " +
                 "COALESCE(p.stock, p.stock_quantity, 10) as stock, COALESCE(p.stock_quantity, p.stock, 10) as stock_quantity, " +
-                "COALESCE(p.weight, 10) as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
+                "COALESCE(p.weight, '10g') as weight, COALESCE(p.metal_type, 'Gold') as metalType, " +
                 "COALESCE(p.gold_purity, '22K') as goldPurity, COALESCE(p.diamond_details, 'VS1 / G-H Color') as diamondDetails, " +
                 "COALESCE(p.stone_details, 'Natural Diamond') as stoneDetails, " +
                 "COALESCE(p.certificate_number, '') as certificateNumber, COALESCE(p.sku, CONCAT('SKU-', COALESCE(p.id, p.product_id))) as sku, " +
-                "COALESCE(p.status, 'ACTIVE') as status, pi.image_url as imageUrl " +
+                "COALESCE(p.status, 'ACTIVE') as status, COALESCE(pi.image_url, pi2.image_url, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e') as imageUrl " +
                 "FROM products p " +
                 "LEFT JOIN categories c ON p.category_id = c.id OR p.category_id = c.category_id " +
-                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi ON p.id = pi.product_id OR p.product_id = pi.product_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM productimages GROUP BY product_id) pi ON p.product_id = pi.product_id OR p.id = pi.product_id " +
+                "LEFT JOIN (SELECT product_id, MAX(image_url) as image_url FROM product_images GROUP BY product_id) pi2 ON p.product_id = pi2.product_id OR p.id = pi2.product_id " +
                 "ORDER BY COALESCE(p.id, p.product_id) ASC LIMIT " + limit;
         try {
             List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
@@ -718,14 +719,14 @@ public class AdminController {
         ensureTablesExist();
         try {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=0");
-            jdbcTemplate.update("DELETE FROM productimages WHERE product_id=?", id);
-            try { jdbcTemplate.update("DELETE FROM product_images WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM cart_items WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM order_items WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM reviews WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM wishlist WHERE product_id=?", id); } catch (Exception ignored) {}
-            try { jdbcTemplate.update("DELETE FROM wishlist_items WHERE product_id=?", id); } catch (Exception ignored) {}
-            jdbcTemplate.update("DELETE FROM products WHERE product_id=?", id);
+            try { jdbcTemplate.update("DELETE FROM productimages WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM product_images WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM cart_items WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM order_items WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM reviews WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM wishlist WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            try { jdbcTemplate.update("DELETE FROM wishlist_items WHERE product_id=? OR product_id = (SELECT product_id FROM products WHERE id=?)", id, id); } catch (Exception ignored) {}
+            jdbcTemplate.update("DELETE FROM products WHERE product_id=? OR id=?", id, id);
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1");
             return ResponseEntity.ok(Map.of("message", "Product deleted successfully from MySQL database"));
         } catch (Exception e) {

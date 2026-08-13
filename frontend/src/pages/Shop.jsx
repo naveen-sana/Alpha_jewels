@@ -136,30 +136,22 @@ const Shop = () => {
               const stockVal = product.stock !== undefined ? product.stock : product.stock_quantity;
               const isOutOfStock = stockVal !== undefined && stockVal <= 0;
               const imgSrc = getProductImage(product);
+              const defaultFallbackImg = 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80';
+              const displaySrc = imgSrc || defaultFallbackImg;
 
               return (
-                <div className="col-sm-6 col-md-4 col-lg-3" key={productId}>
+                <div className="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3" key={productId}>
                   <div className="product-luxury-card">
                     <div className="product-image-wrapper position-relative">
-                      {imgSrc ? (
-                        <img
-                          src={imgSrc}
-                          alt={product.name}
-                          className="product-display-image"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            const fallbackBadge = e.target.parentElement.querySelector('.img-unavailable-badge');
-                            if (fallbackBadge) fallbackBadge.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className="img-unavailable-badge d-flex flex-column align-items-center justify-content-center text-muted"
-                        style={{ display: imgSrc ? 'none' : 'flex', height: '220px', backgroundColor: '#1a1a1a', borderRadius: '8px' }}
-                      >
-                        <ImageOff size={28} className="mb-2 text-gold opacity-75" />
-                        <span className="small text-gold-light opacity-75">Image Unavailable</span>
-                      </div>
+                      <img
+                        src={displaySrc}
+                        alt={product.name}
+                        className="product-display-image"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultFallbackImg;
+                        }}
+                      />
                       <button 
                         onClick={() => toggleWishlist(product)}
                         className={`wishlist-btn-badge ${isWishlisted ? 'active' : ''}`} 

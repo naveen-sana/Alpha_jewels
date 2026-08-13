@@ -1,12 +1,19 @@
 import { STORAGE_KEYS } from './constants'
 
-export const getToken = () => localStorage.getItem(STORAGE_KEYS.TOKEN)
+export const getToken = () => 
+  localStorage.getItem(STORAGE_KEYS.TOKEN) || 
+  localStorage.getItem('token') || 
+  localStorage.getItem('admin_token')
 
 export const setToken = (token) => {
   if (token) {
     localStorage.setItem(STORAGE_KEYS.TOKEN, token)
+    localStorage.setItem('token', token)
+    localStorage.setItem('admin_token', token)
   } else {
     localStorage.removeItem(STORAGE_KEYS.TOKEN)
+    localStorage.removeItem('token')
+    localStorage.removeItem('admin_token')
   }
 }
 
@@ -48,5 +55,7 @@ export const setRememberedEmail = (email) => {
 
 export const clearAuthStorage = () => {
   localStorage.removeItem(STORAGE_KEYS.TOKEN)
+  localStorage.removeItem('token')
+  localStorage.removeItem('admin_token')
   localStorage.removeItem(STORAGE_KEYS.USER)
 }

@@ -50,52 +50,59 @@ public class UserService {
         String encodedPassword = passwordEncoder != null ? passwordEncoder.encode(rawPassword) : rawPassword;
         String name = user.getFullName() != null ? user.getFullName().trim() : "User";
 
+        // 1. Check if email already registered
         if (jdbcTemplate != null) {
             try {
                 List<Map<String, Object>> existing = jdbcTemplate.queryForList("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", cleanEmail);
-                if (existing.isEmpty()) {
-                    existing = jdbcTemplate.queryForList("SELECT id FROM user WHERE LOWER(email) = LOWER(?)", cleanEmail);
-                }
-                if (!existing.isEmpty()) {
+                if (existing != null && !existing.isEmpty()) {
                     throw new IllegalArgumentException("Email is already registered");
-                }
-
-                boolean inserted = false;
-                String[] queries = new String[] {
-                    "INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'USER')",
-                    "INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, 'USER')",
-                    "INSERT INTO users (email, password, full_name) VALUES (?, ?, ?)",
-                    "INSERT INTO user (email, password, full_name, role) VALUES (?, ?, ?, 'USER')",
-                    "INSERT INTO user (email, password, name, role) VALUES (?, ?, ?, 'USER')",
-                    "INSERT INTO user (email, password, full_name) VALUES (?, ?, ?)"
-                };
-
-                for (String q : queries) {
-                    try {
-                        jdbcTemplate.update(q, cleanEmail, encodedPassword, name);
-                        inserted = true;
-                        break;
-                    } catch (Exception ignored) {}
-                }
-
-                if (inserted) {
-                    User savedUser = new User();
-                    savedUser.setEmail(cleanEmail);
-                    savedUser.setFullName(name);
-                    savedUser.setRole(Role.USER);
-                    return savedUser;
                 }
             } catch (IllegalArgumentException e) {
                 throw e;
-            } catch (Throwable e) {
-                System.err.println("JdbcTemplate register error: " + e.getMessage());
+            } catch (Exception ignored) {}
+        }
+
+        if (userRepository != null) {
+            try {
+                Optional<User> existingUser = userRepository.findByEmail(cleanEmail);
+                if (existingUser.isPresent()) {
+                    throw new IllegalArgumentException("Email is already registered");
+                }
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Exception ignored) {}
+        }
+
+        // 2. Primary registration via JPA UserRepository
+        if (userRepository != null) {
+            try {
+                User newUser = new User();
+                newUser.setEmail(cleanEmail);
+                newUser.setPassword(encodedPassword);
+                newUser.setFullName(name);
+                newUser.setRole(Role.USER);
+                return userRepository.save(newUser);
+            } catch (Exception e) {
+                System.err.println("JPA register failed, falling back to JdbcTemplate: " + e.getMessage());
             }
         }
 
-        user.setEmail(cleanEmail);
-        user.setRole(Role.USER);
-        user.setPassword(encodedPassword);
-        return userRepository.save(user);
+        // 3. Fallback registration via JdbcTemplate
+        if (jdbcTemplate != null) {
+            try {
+                jdbcTemplate.update("INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, 'USER')",
+                        cleanEmail, encodedPassword, name);
+                User savedUser = new User();
+                savedUser.setEmail(cleanEmail);
+                savedUser.setFullName(name);
+                savedUser.setRole(Role.USER);
+                return savedUser;
+            } catch (Exception e) {
+                throw new RuntimeException("Registration failed: " + e.getMessage());
+            }
+        }
+
+        throw new RuntimeException("Database error: Registration unavailable");
     }
 
     public String loginUser(LoginRequest request) {
@@ -177,42 +184,91 @@ public class UserService {
 
     public String forgotPassword(ForgotPasswordRequest request) {
         if (request == null || request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return "Email is required";
+            throw new IllegalArgumentException("Email is required");
         }
         String email = request.getEmail().trim().toLowerCase();
+
+        // 1. Verify email exists in MySQL database
+        boolean userExists = false;
+        if (jdbcTemplate != null) {
+            try {
+                Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users WHERE LOWER(email) = LOWER(?)", Integer.class, email);
+                if (count != null && count > 0) userExists = true;
+            } catch (Exception ignored) {}
+        }
+        if (!userExists && userRepository != null) {
+            try {
+                userExists = userRepository.findByEmail(email).isPresent();
+            } catch (Exception ignored) {}
+        }
+
+        if (!userExists) {
+            throw new IllegalArgumentException("Email address not found in our records");
+        }
+
+        // 2. Generate 6-digit OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         otpStorage.put(email, new OtpEntry(otp, System.currentTimeMillis() + OTP_VALIDITY_MS));
 
-        if (mailSender != null) {
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(email);
-                message.setSubject("Alpha Jewels - Password Reset OTP");
-                message.setText("Your OTP is: " + otp + "\n\nIt is valid for 10 minutes.");
-                mailSender.send(message);
-            } catch (Throwable e) {
-                System.err.println("Mail send warning: " + e.getMessage() + ". OTP for " + email + " is " + otp);
-            }
+        // 3. Check MailSender configuration
+        if (mailSender == null) {
+            System.err.println("MailSender is null. OTP for " + email + " is generated.");
+            throw new IllegalStateException("Email service is not configured. Please configure MAIL_USERNAME and MAIL_PASSWORD.");
         }
-        return "OTP sent successfully";
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Alpha Jewels - Password Reset OTP");
+            message.setText("Dear Customer,\n\nYour 6-digit OTP for resetting your Alpha Jewels password is: " + otp + "\n\nThis OTP is valid for 10 minutes. If you did not request a password reset, please ignore this email.\n\nWarm regards,\nAlpha Jewels Team");
+            mailSender.send(message);
+            return "OTP sent successfully";
+        } catch (Throwable e) {
+            System.err.println("Mail send failure for " + email + ": " + e.getMessage());
+            throw new RuntimeException("Failed to send OTP email: " + e.getMessage());
+        }
     }
 
-        public String resetPassword(ResetPasswordRequest request) {
-            OtpEntry entry = otpStorage.get(request.getEmail());
-            if (entry == null || entry.expiresAt() < System.currentTimeMillis() || !entry.otp().equals(request.getOtp())) {
-                return "Invalid or expired OTP";
-            }
-
-            Optional<User> user = userRepository.findByEmail(request.getEmail());
-            if (user.isEmpty()) {
-                return "Email not found";
-            }
-
-            user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
-            userRepository.save(user.get());
-            otpStorage.remove(request.getEmail());
-            return "Password reset successfully";
+    public String resetPassword(ResetPasswordRequest request) {
+        if (request == null || request.getEmail() == null || request.getOtp() == null || request.getNewPassword() == null) {
+            throw new IllegalArgumentException("Invalid password reset request");
         }
+
+        String email = request.getEmail().trim().toLowerCase();
+        OtpEntry entry = otpStorage.get(email);
+        if (entry == null || entry.expiresAt() < System.currentTimeMillis() || !entry.otp().equals(request.getOtp().trim())) {
+            throw new IllegalArgumentException("Invalid or expired OTP");
+        }
+
+        String newPassword = request.getNewPassword().trim();
+        String encodedPassword = passwordEncoder != null ? passwordEncoder.encode(newPassword) : newPassword;
+
+        boolean updated = false;
+        if (jdbcTemplate != null) {
+            try {
+                int rows = jdbcTemplate.update("UPDATE users SET password = ? WHERE LOWER(email) = LOWER(?)", encodedPassword, email);
+                if (rows > 0) updated = true;
+            } catch (Exception ignored) {}
+        }
+
+        if (!updated && userRepository != null) {
+            try {
+                Optional<User> user = userRepository.findByEmail(email);
+                if (user.isPresent()) {
+                    user.get().setPassword(encodedPassword);
+                    userRepository.save(user.get());
+                    updated = true;
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (!updated) {
+            throw new IllegalArgumentException("User account not found");
+        }
+
+        otpStorage.remove(email);
+        return "Password reset successfully";
+    }
 
         public List<UserSummary> getAllUsers() {
             return userRepository.findAll().stream()

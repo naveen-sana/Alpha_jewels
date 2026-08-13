@@ -73,14 +73,14 @@ public class ProductCartController {
         } catch (Exception ignored) {}
 
         executeQuietly("CREATE TABLE IF NOT EXISTS categories (" +
-                "category_id SERIAL PRIMARY KEY, " +
+                "category_id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "category_name VARCHAR(100) NOT NULL UNIQUE, " +
                 "description TEXT, " +
                 "image_url VARCHAR(500), " +
                 "status VARCHAR(20) DEFAULT 'ACTIVE')");
 
         executeQuietly("CREATE TABLE IF NOT EXISTS products (" +
-                "product_id SERIAL PRIMARY KEY, " +
+                "product_id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "name VARCHAR(255) NOT NULL, " +
                 "category_id INT, " +
                 "description TEXT, " +
@@ -97,40 +97,26 @@ public class ProductCartController {
                 "status VARCHAR(20) DEFAULT 'ACTIVE')");
 
         executeQuietly("CREATE TABLE IF NOT EXISTS productimages (" +
-                "image_id SERIAL PRIMARY KEY, " +
+                "image_id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "product_id INT NOT NULL, " +
                 "image_url TEXT NOT NULL, " +
                 "is_thumbnail BOOLEAN DEFAULT TRUE)");
 
         executeQuietly("CREATE TABLE IF NOT EXISTS product_images (" +
-                "id SERIAL PRIMARY KEY, " +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "product_id INT NOT NULL, " +
                 "image_url TEXT NOT NULL, " +
                 "is_primary INT DEFAULT 1)");
 
-        executeQuietly("ALTER TABLE categories ADD COLUMN IF NOT EXISTS category_name VARCHAR(100)");
-        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS category_id INT");
-        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT");
-        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS price DECIMAL(12, 2) DEFAULT 0.00");
-        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS discount DECIMAL(5, 2) DEFAULT 0.00");
-        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 10");
-        executeQuietly("ALTER TABLE products ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ACTIVE'");
-
-        try {
-            jdbcTemplate.update("DELETE FROM productimages WHERE product_id < 100");
-            jdbcTemplate.update("DELETE FROM product_images WHERE product_id < 100");
-            jdbcTemplate.update("DELETE FROM products WHERE id < 100 OR product_id < 100");
-        } catch (Exception ignored) {}
-
         seedAllProducts();
     }
 
-        private void seedAllProducts() {
+    private void seedAllProducts() {
         // Ensure Categories exist
         for (int i = 1; i <= 10; i++) {
             String catName = i == 1 ? "Diamond" : i == 2 ? "Gold" : i == 3 ? "Platinum" : i == 4 ? "Silver" : "Collection " + i;
             try {
-                jdbcTemplate.update("INSERT INTO categories (category_id, category_name, name, description, status) VALUES (?, ?, ?, ?, 'ACTIVE') ON CONFLICT DO NOTHING", i, catName, catName, catName + " Collection");
+                jdbcTemplate.update("INSERT IGNORE INTO categories (category_id, category_name, description, status) VALUES (?, ?, ?, 'ACTIVE')", i, catName, catName + " Collection");
             } catch (Exception ignored) {}
         }
 
@@ -171,9 +157,9 @@ public class ProductCartController {
             {"GargiStone Necklace", 4, "Beautifully Crafted Stone Necklace", 9305.00, 4, "https://ik.imagekit.io/StringstackNaveen/silver%20necklace.webp"},
             {"Flexi Bracelet", 4, "Fleur Flexi Bracelet in Silver", 7936.29, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet.jpg"},
             {"Chain Bracelet", 4, "Clara Womens Evil Eye Bracelet", 7048.20, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg"},
-            {"Rewa Bangles", 4, "Beautiful Rewa Bangles", 8503.20, 4, "https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553"},
+            {"Rewa Bangles", 4, "Beautiful Rewa Bangles", 8503.20, 4, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9YMAAiAP8Uiwp_GbwO9XgT9wWc24H6BSgivkQi0-68Q&s=10"},
             {"Sterling Bangles", 4, "Beautiful Sterling Bangles", 7912.80, 4, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"},
-            {"Royal Diamond Choker", 4, "Exquisite Royal Choker", 12000.00, 3, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"},
+            {"Royal Diamond Choker", 4, "Exquisite Royal Choker", 12000.00, 3, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
             {"Neckpice Necklace", 2, "Beautifully crafted necklace for women", 7886.00, 10, "https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171"},
             {"Long Necklace", 2, "Antique Gold Necklace for women", 7896.00, 9, "https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg"},
             {"Antique Jumkas", 2, "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://ik.imagekit.io/StringstackNaveen/earrings.jpg"},
@@ -286,19 +272,19 @@ public class ProductCartController {
             {146, "GargiStone Necklace", "Silver", "Beautifully Crafted Stone Necklace", 9305.00, 4, "https://ik.imagekit.io/StringstackNaveen/silver%20necklace.webp"},
             {147, "Flexi Bracelet", "Silver", "Fleur Flexi Bracelet in Silver", 7936.29, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet.jpg"},
             {148, "Chain Bracelet", "Silver", "Clara Womens Evil Eye Bracelet", 7048.20, 3, "https://ik.imagekit.io/StringstackNaveen/silver%20bracelet2.jpg"},
-            {149, "Rewa Bangles", "Silver", "Beautiful Rewa Bangles", 8503.20, 4, "https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553"},
-            {150, "Sterling Bangles", "Silver", "Beautiful Sterling Bangles", 7912.80, 4, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image1.webp"},
-            {151, "Royal Diamond Choker", "Silver", "Exquisite Royal Choker", 12000.00, 3, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f"},
-            {155, "Neckpice Necklace", "Gold", "Beautifully crafted necklace for women", 7886.00, 10, "https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171"},
+            {149, "Rewa Bangles", "Silver", "Beautiful Rewa Bangles", 8503.20, 4, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9YMAAiAP8Uiwp_GbwO9XgT9wWc24H6BSgivkQi0-68Q&s=10"},
+            {150, "Sterling Bangles", "Silver", "Beautiful Sterling Bangles", 7912.80, 4, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShdMQkjEY7G9wrlmOl3__dJt9t-inszs1zqJUOBfRdbw&s=10"},
+            {151, "Royal Diamond Choker", "Silver", "Exquisite Royal Choker", 12000.00, 3, "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80"},
+            {155, "Neckpice Necklace", "Gold", "Beautifully crafted necklace for women", 7886.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFjFl-t7B2tgiTFxwu0DjLM06_sGl06qvLn9_ZQj29gg&s=10"},
             {156, "Long Necklace", "Gold", "Antique Gold Necklace for women", 7896.00, 9, "https://cpimg.tistatic.com/07549410/b/4/Antique-Gold-Long-Necklace.jpg"},
-            {157, "Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://ik.imagekit.io/StringstackNaveen/earrings.jpg"},
-            {158, "Kemp-green Lakshmi Vankii", "Gold", "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii", 7986.00, 10, "https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553"},
-            {159, "Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://ik.imagekit.io/StringstackNaveen/necklace1-the%20mazikeen%20necklace.webp?updatedAt=1785154535171"},
+            {157, "Antique Jumkas", "Gold", "Gold Plated One Gram Gold Antique Jhumkas", 5632.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdiBUpbrYocMfqi1w24arPLNCCBYo40aIoSL1188DgDg&s=10"},
+            {158, "Kemp-green Lakshmi Vankii", "Gold", "Antique gold tone kemp-green lakshmi peacock elephant nakshi 1 vankii", 7986.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsSouth25K9Qof9iRlt-NmhGjWBoWjbnY4NX8fYX1ElA&s=10"},
+            {159, "Stoned Diamond Necklace", "Diamond", "Beautiful stoned Necklace for women", 9889.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQr6d0N4u3iGzboB1LFphrbsfB_5MefYDLT7dlfYm5DsQ&s=10"},
             {160, "Stoned Ring", "Diamond", "A Beautiful Diamond Ring Stands in a Store Window. Stock Photo - Image of anniversary, bride", 9563.00, 10, "https://thumbs.dreamstime.com/b/beautiful-diamond-ring-stands-store-window-306068234.jpg"},
-            {161, "Rose Gold paltinum Necklace", "Platinum", "Rose Gold paltinum Necklace", 6548.00, 10, "https://ik.imagekit.io/StringstackSanjana/Platinum/necklace%202.webp"},
+            {161, "Rose Gold paltinum Necklace", "Platinum", "Rose Gold paltinum Necklace", 6548.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQX6xc0k7rmQDM1AvOkFy4_khegDZGnR2hwdB_Ggxdn7Q&s=10"},
             {162, "Square Piece-Set Neckalce", "Platinum", "Square Piece Step Necklace", 6541.00, 10, "https://5.imimg.com/data5/SELLER/Default/2025/12/566237565/GW/XI/IP/103582308/platinum-jewelry-500x500.jpg"},
-            {163, "Ghungroo Jwellery Set", "Silver", "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set", 5469.00, 10, "https://ik.imagekit.io/StringStackSavitri/SilverImages/image5.webp"},
-            {164, "Navaratri Jewellery", "Silver", "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://ik.imagekit.io/StringstackNaveen/bangle-1.webp?updatedAt=1785155940553"}
+            {163, "Ghungroo Jwellery Set", "Silver", "Ghungroo Studded Filigree Work Silver Plated Antique Jewellery Set", 5469.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2bAPHTgkvRdef7qg-qdlIUXhMG-pjIty0vlpr9_Crmg&s=10"},
+            {164, "Navaratri Jewellery", "Silver", "Silver Necklace, Navratri Jewellery", 4589.00, 10, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZu21IJaJTklggWAzm5Q_NAb-w5tDP7MO40NVeccKUZw&s=10"}
         };
 
         for (Object[] p : products) {
@@ -328,17 +314,17 @@ public class ProductCartController {
 
     @GetMapping("/products")
     public ResponseEntity<List<Map<String, Object>>> getPublicProducts(@RequestParam(value = "category", required = false) String category) {
-        String sql = "SELECT COALESCE(p.product_id, p.id) as id, COALESCE(p.product_id, p.id) as product_id, p.name, p.description, p.price, " +
-                "COALESCE(p.stock, p.stock_quantity, 10) as stock, COALESCE(p.stock_quantity, p.stock, 10) as stock_quantity, " +
-                "COALESCE(c.category_name, c.name, 'Diamond') as categoryName, COALESCE(c.category_name, c.name, 'Diamond') as category, " +
+        String sql = "SELECT p.product_id as id, p.product_id, p.name, p.description, p.price, " +
+                "COALESCE(p.stock, 10) as stock, COALESCE(p.stock, 10) as stock_quantity, " +
+                "COALESCE(c.category_name, 'Diamond') as categoryName, COALESCE(c.category_name, 'Diamond') as category, " +
                 "COALESCE(" +
-                "  (SELECT pi.image_url FROM productimages pi WHERE pi.product_id = COALESCE(p.product_id, p.id) LIMIT 1), " +
-                "  (SELECT img.image_url FROM product_images img WHERE img.product_id = COALESCE(p.product_id, p.id) LIMIT 1) " +
+                "  (SELECT pi.image_url FROM productimages pi WHERE pi.product_id = p.product_id LIMIT 1), " +
+                "  (SELECT img.image_url FROM product_images img WHERE img.product_id = p.product_id LIMIT 1) " +
                 ") as imageUrl " +
                 "FROM products p " +
-                "LEFT JOIN categories c ON p.category_id = c.category_id OR p.category_id = c.id " +
+                "LEFT JOIN categories c ON p.category_id = c.category_id " +
                 "WHERE COALESCE(p.status, 'ACTIVE') = 'ACTIVE' " +
-                "ORDER BY COALESCE(p.product_id, p.id) ASC";
+                "ORDER BY p.product_id ASC";
 
         List<Map<String, Object>> resultList = new ArrayList<>();
         try {
@@ -362,18 +348,18 @@ public class ProductCartController {
                 }
             }
             return ResponseEntity.ok()
-                    .header("Cache-Control", "public, max-age=300, s-maxage=600")
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
                     .body(filtered);
         }
 
         return ResponseEntity.ok()
-                .header("Cache-Control", "public, max-age=300, s-maxage=600")
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
                 .body(resultList);
     }
 
     private void ensureCartTableExists() {
         executeQuietly("CREATE TABLE IF NOT EXISTS cart_items (" +
-                "id SERIAL PRIMARY KEY, " +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "user_id BIGINT NOT NULL, " +
                 "product_id BIGINT NOT NULL, " +
                 "quantity INT NOT NULL DEFAULT 1)");

@@ -73,8 +73,7 @@ const AlphaYouTubeCommercial = () => {
           pointer-events: none !important;
           user-select: none !important;
           -webkit-user-select: none !important;
-          touch-action: none !important;
-          transform: scale(1.08) !important;
+          transform: none !important;
         }
       `}</style>
 

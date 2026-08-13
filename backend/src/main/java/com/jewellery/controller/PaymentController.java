@@ -123,7 +123,8 @@ public class PaymentController {
             try {
                 RazorpayClient razorpayClient = new RazorpayClient(keyId, keySecret);
                 JSONObject orderRequest = new JSONObject();
-                orderRequest.put("amount", amountInPaise);
+                long testCappedAmount = (keyId.startsWith("rzp_test_") && amountInPaise > 999900L) ? 999900L : amountInPaise;
+                orderRequest.put("amount", testCappedAmount);
                 orderRequest.put("currency", "INR");
                 orderRequest.put("receipt", "order_rcpt_" + userId + "_" + System.currentTimeMillis());
                 Order razorpayOrder = razorpayClient.orders.create(orderRequest);
