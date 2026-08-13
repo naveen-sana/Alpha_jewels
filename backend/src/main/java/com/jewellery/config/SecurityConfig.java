@@ -24,10 +24,30 @@ import com.jewellery.service.JwtService;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
 
     @Value("${cors.allowed-origins:https://alpha-jewels-personal.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}")
     private String allowedOriginsStr;
+
+    @Override
+    public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("https://*.vercel.app", "http://localhost:*", "http://127.0.0.1:*")
+                .allowedOrigins(
+                    "https://alpha-jewels-personal.vercel.app",
+                    "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
+                    "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
+                    "https://alpha-jewels.vercel.app",
+                    "http://localhost:5173",
+                    "http://localhost:3000",
+                    "http://127.0.0.1:5173"
+                )
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .exposedHeaders("Authorization", "Content-Type")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService) {
@@ -52,22 +72,33 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(
-            "https://alpha-jewels-personal.vercel.app",
-            "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
-            "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
-            "https://alpha-jewels.vercel.app",
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "http://127.0.0.1:5173"
-        ));
+        List<String> origins = new java.util.ArrayList<>();
+        origins.add("https://alpha-jewels-personal.vercel.app");
+        origins.add("https://frontend-omega-pearl-7cy9ijnsyi.vercel.app");
+        origins.add("https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app");
+        origins.add("https://alpha-jewels.vercel.app");
+        origins.add("http://localhost:5173");
+        origins.add("http://localhost:3000");
+        origins.add("http://127.0.0.1:5173");
 
+        if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
+            for (String raw : allowedOriginsStr.split(",")) {
+                String o = raw.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "").replaceAll("\r|\n", "");
+                if (o.endsWith("/")) {
+                    o = o.substring(0, o.length() - 1);
+                }
+                if (!o.isEmpty() && !origins.contains(o)) {
+                    origins.add(o);
+                }
+            }
+        }
+
+        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOriginPatterns(List.of("https://*.vercel.app", "http://localhost:*", "http://127.0.0.1:*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
