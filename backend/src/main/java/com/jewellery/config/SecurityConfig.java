@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import com.jewellery.service.JwtService;
 
@@ -73,32 +74,50 @@ public class SecurityConfig implements org.springframework.web.servlet.config.an
     }
 
     @Bean
+    public org.springframework.boot.web.servlet.FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        List<String> origins = List.of(
+            "https://alpha-jewels-personal.vercel.app",
+            "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
+            "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
+            "https://alpha-jewels.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173"
+        );
+
+        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        org.springframework.boot.web.servlet.FilterRegistrationBean<CorsFilter> bean =
+                new org.springframework.boot.web.servlet.FilterRegistrationBean<>(new CorsFilter(source));
+        bean.setOrder(org.springframework.core.Ordered.HIGHEST_PRECEDENCE);
+        return bean;
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        List<String> origins = new java.util.ArrayList<>();
-        origins.add("https://alpha-jewels-personal.vercel.app");
-        origins.add("https://frontend-omega-pearl-7cy9ijnsyi.vercel.app");
-        origins.add("https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app");
-        origins.add("https://alpha-jewels.vercel.app");
-        origins.add("http://localhost:5173");
-        origins.add("http://localhost:3000");
-        origins.add("http://127.0.0.1:5173");
-
-        if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
-            for (String raw : allowedOriginsStr.split(",")) {
-                String o = raw.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "").replaceAll("\r|\n", "");
-                if (o.endsWith("/")) {
-                    o = o.substring(0, o.length() - 1);
-                }
-                if (!o.isEmpty() && !origins.contains(o)) {
-                    origins.add(o);
-                }
-            }
-        }
+        List<String> origins = List.of(
+            "https://alpha-jewels-personal.vercel.app",
+            "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
+            "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
+            "https://alpha-jewels.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173"
+        );
 
         configuration.setAllowedOrigins(origins);
-        configuration.setAllowedOriginPatterns(List.of("https://*.vercel.app", "http://localhost:*", "http://127.0.0.1:*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
