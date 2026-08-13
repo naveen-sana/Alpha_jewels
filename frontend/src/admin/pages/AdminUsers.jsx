@@ -5,6 +5,8 @@ import { adminApi } from '../services/adminApi'
 import LuxuryToast from '../components/LuxuryToast'
 import DeleteModal from '../components/DeleteModal'
 
+import { getToken } from '../../utils/storage'
+
 const AdminUsers = () => {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -25,8 +27,8 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     setLoading(true)
-    const token = localStorage.getItem('admin_token') || localStorage.getItem('token')
-    const config = { headers: { Authorization: token ? `Bearer ${token}` : '' } }
+    const token = getToken()
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {}
     try {
       const response = await adminApi.get('/api/admin/users', config)
       const userList = response.data || []

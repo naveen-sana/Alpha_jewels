@@ -23,7 +23,9 @@ apiClient.interceptors.request.use(
     ]
 
     if (token && !publicUrls.includes(config.url)) {
-      config.headers.Authorization = `Bearer ${token}`
+      if (!config.headers.Authorization || config.headers.Authorization.trim() === '' || config.headers.Authorization === 'Bearer ') {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
 
     return config
