@@ -56,26 +56,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.addAllowedOriginPattern("https://alpha-jewels-personal.vercel.app");
-        configuration.addAllowedOriginPattern("https://*.vercel.app");
-        configuration.addAllowedOriginPattern("http://localhost:*");
-        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
-
-        if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
-            for (String raw : allowedOriginsStr.split(",")) {
-                String o = raw.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "").replaceAll("\r|\n", "");
-                if (o.endsWith("/")) {
-                    o = o.substring(0, o.length() - 1);
-                }
-                if (!o.isEmpty()) {
-                    configuration.addAllowedOriginPattern(o);
-                }
-            }
-        }
-
+        configuration.addAllowedOriginPattern("*");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
