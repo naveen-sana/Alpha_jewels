@@ -57,11 +57,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        List<String> origins = new java.util.ArrayList<>();
-        origins.add("https://alpha-jewels-personal.vercel.app");
-        origins.add("http://localhost:5173");
-        origins.add("http://localhost:3000");
-        origins.add("http://127.0.0.1:5173");
+        configuration.addAllowedOriginPattern("https://alpha-jewels-personal.vercel.app");
+        configuration.addAllowedOriginPattern("https://*.vercel.app");
+        configuration.addAllowedOriginPattern("http://localhost:*");
+        configuration.addAllowedOriginPattern("http://127.0.0.1:*");
 
         if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
             for (String raw : allowedOriginsStr.split(",")) {
@@ -69,15 +68,12 @@ public class SecurityConfig {
                 if (o.endsWith("/")) {
                     o = o.substring(0, o.length() - 1);
                 }
-                if (!o.isEmpty() && !origins.contains(o)) {
-                    origins.add(o);
+                if (!o.isEmpty()) {
+                    configuration.addAllowedOriginPattern(o);
                 }
             }
         }
 
-        System.out.println(">>> REGISTERED CORS ORIGINS: " + origins);
-
-        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
