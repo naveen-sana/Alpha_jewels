@@ -56,26 +56,27 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            String origin = request.getHeader("Origin");
-            if (origin != null && !origin.trim().isEmpty()) {
-                config.setAllowedOrigins(List.of(origin));
-            } else {
-                config.setAllowedOrigins(List.of(
-                    "https://alpha-jewels-personal.vercel.app",
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "http://127.0.0.1:5173"
-                ));
-            }
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-            config.setExposedHeaders(List.of("Authorization", "Content-Type"));
-            config.setAllowCredentials(true);
-            config.setMaxAge(3600L);
-            return config;
-        };
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOriginPattern("*");
+        configuration.setAllowedOrigins(List.of(
+            "https://alpha-jewels-personal.vercel.app",
+            "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
+            "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
+            "https://alpha-jewels.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/**", configuration);
+        return source;
     }
 
     @Bean
