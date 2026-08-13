@@ -56,36 +56,26 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        List<String> origins = new java.util.ArrayList<>();
-        origins.add("https://alpha-jewels-personal.vercel.app");
-        origins.add("https://*.vercel.app");
-        origins.add("http://localhost:*");
-        origins.add("http://127.0.0.1:*");
-
-        if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
-            for (String raw : allowedOriginsStr.split(",")) {
-                String o = raw.trim().replaceAll("^\"|\"$", "").replaceAll("^'|'$", "").replaceAll("\r|\n", "");
-                if (o.endsWith("/")) {
-                    o = o.substring(0, o.length() - 1);
-                }
-                if (!o.isEmpty() && !origins.contains(o)) {
-                    origins.add(o);
-                }
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            String origin = request.getHeader("Origin");
+            if (origin != null && !origin.trim().isEmpty()) {
+                config.setAllowedOrigins(List.of(origin));
+            } else {
+                config.setAllowedOrigins(List.of(
+                    "https://alpha-jewels-personal.vercel.app",
+                    "http://localhost:5173",
+                    "http://localhost:3000",
+                    "http://127.0.0.1:5173"
+                ));
             }
-        }
-
-        configuration.setAllowedOriginPatterns(origins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+            config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+            config.setExposedHeaders(List.of("Authorization", "Content-Type"));
+            config.setAllowCredentials(true);
+            config.setMaxAge(3600L);
+            return config;
+        };
     }
 
     @Bean
