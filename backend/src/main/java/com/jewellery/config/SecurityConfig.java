@@ -58,9 +58,9 @@ public class SecurityConfig {
 
         List<String> origins = new java.util.ArrayList<>();
         origins.add("https://alpha-jewels-personal.vercel.app");
-        origins.add("http://localhost:5173");
-        origins.add("http://localhost:3000");
-        origins.add("http://127.0.0.1:5173");
+        origins.add("https://*.vercel.app");
+        origins.add("http://localhost:*");
+        origins.add("http://127.0.0.1:*");
 
         if (allowedOriginsStr != null && !allowedOriginsStr.trim().isEmpty()) {
             for (String o : allowedOriginsStr.split(",")) {
@@ -71,7 +71,7 @@ public class SecurityConfig {
             }
         }
 
-        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
