@@ -58,7 +58,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOriginPattern("*");
+        configuration.setAllowedOriginPatterns(List.of(
+            "https://alpha-jewels-personal.vercel.app",
+            "https://frontend-omega-pearl-7cy9ijnsyi.vercel.app",
+            "https://alpha-jewels-personal-hfw0ly46e-naveens-projects-0a253ad7.vercel.app",
+            "https://alpha-jewels.vercel.app",
+            "https://*.vercel.app",
+            "http://localhost:*",
+            "http://127.0.0.1:*"
+        ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
@@ -98,7 +107,7 @@ public class SecurityConfig {
             );
 
         if (jwtAuthenticationFilter != null) {
-            http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.access.intercept.AuthorizationFilter.class);
+            http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         }
 
         return http.build();
